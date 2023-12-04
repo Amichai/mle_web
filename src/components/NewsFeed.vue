@@ -66,6 +66,7 @@ const emits = defineEmits([])
   flex-direction: column;
   width: 97%;
   overflow-y: auto;
+  border: 1px solid black;
 }
 
 .site-selector {

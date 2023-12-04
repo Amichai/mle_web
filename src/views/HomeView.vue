@@ -1,6 +1,7 @@
 <script setup>
 import HeaderBar from '../components/HeaderBar.vue';
 import NewsFeed from '../components/NewsFeed.vue';
+import TabComponent from '../components/TabComponent.vue';
 </script>
 
 <template>
@@ -9,8 +10,7 @@ import NewsFeed from '../components/NewsFeed.vue';
     <div class="root">
       <div class="root-table">
         <div class="column-1">
-          <NewsFeed />
-          test
+          <TabComponent />
         </div>
         <div class="column-2">
           <NewsFeed />

@@ -10,6 +10,10 @@ const props = defineProps({
   isOpen: {
     type: Boolean,
     required: true
+  },
+  pingCounter: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -18,6 +22,18 @@ const isOpenLocal = ref(props.isOpen)
 
 watch(() => props.isOpen, (newVal) => {
   isOpenLocal.value = newVal;
+})
+
+watch(() => props.pingCounter, (newVal) => {
+  console.log('ping counter changed to: ', newVal)
+
+  var cube = document.querySelector(".ping-dot");
+    cube.classList.add("animate-cube");
+
+    // Optional: Remove the class after the animation ends
+    cube.addEventListener('animationend', function() {
+        cube.classList.remove("animate-cube");
+    });
 })
 
 
@@ -39,7 +55,10 @@ const selectedSite = ref('1')
       <button class="collapse-button" @click="closePanel">
         <img :src="collapse" alt="collapse" height="20">
       </button>
-      <p>News Feed</p>
+      <div class="dot-and-title">
+        <div class="ping-dot"></div>
+        <p>News Feed</p>
+      </div>
       <div class="site-selector">
         <input type="radio" id="option1" name="option" value="1" v-model="selectedSite">
         <label for="option1"><img :src="fdlogo" alt="fanduel" height="20"></label>
@@ -103,5 +122,34 @@ const selectedSite = ref('1')
   border: 1px solid black;
   cursor: pointer;
   border-radius: 0.5rem;
+}
+
+.ping-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: #007bff;
+  border-radius: 0.2rem;
+  margin-right: 0.1rem;
+  visibility: hidden;
+
+}
+
+.dot-and-title {
+  display: flex;
+  align-items: center;
+}
+
+@keyframes rotateCube {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(90deg);
+    }
+}
+
+.animate-cube {
+    animation: rotateCube 2s ease-in-out;
+    visibility: visible !important;
 }
 </style>

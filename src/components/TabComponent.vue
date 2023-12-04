@@ -12,7 +12,7 @@ const props = defineProps({
   isOpen: {
     type: Boolean,
     required: true
-  }
+  },
 })
 
 const isOpenLocal = ref(props.isOpen)

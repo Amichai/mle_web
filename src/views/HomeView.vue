@@ -4,6 +4,11 @@ import NewsFeed from '../components/NewsFeed.vue';
 import TabComponent from '../components/TabComponent.vue';
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 
+const pingCounter = ref(0)
+
+onMounted(() => {
+  startPingingAPI()
+})
 
 const gridColumns = ref('2.5fr 1rem 1fr')
 const isPanelOpen = ref(true)
@@ -20,6 +25,21 @@ const openPanel = () => {
   }, 490)
 }
 
+let intervalId = null;
+
+const pingApi = () => {
+  console.log('pinging API...')
+  pingCounter.value += 1
+}
+
+const startPingingAPI = () => {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+  }
+
+  // Set up the interval to ping the API every 10 seconds (10000 milliseconds)
+  intervalId = setInterval(pingApi, 10000);
+}
 
 </script>
 
@@ -33,7 +53,7 @@ const openPanel = () => {
         </div>
         <div></div>
         <div class="column-2">
-          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen"/>
+          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen" :pingCounter="pingCounter"/>
         </div>
       </div>
     </div>

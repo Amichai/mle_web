@@ -36,6 +36,7 @@ const startPingingAPI = () => {
   if (intervalId !== null) {
     clearInterval(intervalId);
   }
+  pingApi()
 
   // Set up the interval to ping the API every 10 seconds (10000 milliseconds)
   intervalId = setInterval(pingApi, 10000);

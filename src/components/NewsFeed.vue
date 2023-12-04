@@ -4,6 +4,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import dklogo from '@/assets/draftkings.png'
 import fdlogo from '@/assets/fanduel.png'
 import collapse from '@/assets/collapse.png'
+import sync from '@/assets/sync.png'
   
 
 const props = defineProps({
@@ -56,7 +57,10 @@ const selectedSite = ref('1')
         <img :src="collapse" alt="collapse" height="20">
       </button>
       <div class="dot-and-title">
-        <div class="ping-dot"></div>
+        <div class="ping-dot">
+          <img :src="sync" alt="sync">
+
+        </div>
         <p>News Feed</p>
       </div>
       <div class="site-selector">
@@ -127,7 +131,6 @@ const selectedSite = ref('1')
 .ping-dot {
   width: 0.7rem;
   height: 0.7rem;
-  background-color: #007bff;
   border-radius: 0.2rem;
   margin-right: 0.1rem;
   visibility: hidden;

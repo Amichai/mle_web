@@ -17,7 +17,7 @@ const openPanel = () => {
   gridColumns.value = '2.5fr 1rem 1fr'
   setTimeout(() => {
     isPanelOpen.value = true
-  }, 700)
+  }, 490)
 }
 
 
@@ -52,7 +52,7 @@ const openPanel = () => {
   margin: 1rem;
   display: grid;
   width: clamp(300px, 100%, 77rem);
-  transition: grid-template-columns 0.8s;
+  transition: grid-template-columns 0.5s linear;
 }
 
 .column-2 {

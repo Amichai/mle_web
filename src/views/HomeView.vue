@@ -2,18 +2,38 @@
 import HeaderBar from '../components/HeaderBar.vue';
 import NewsFeed from '../components/NewsFeed.vue';
 import TabComponent from '../components/TabComponent.vue';
+import { ref, onMounted, computed, nextTick, watch } from 'vue'
+
+
+const gridColumns = ref('2.5fr 1rem 1fr')
+const isPanelOpen = ref(true)
+
+const closePanel = () => {
+  gridColumns.value = '10fr 0fr 0fr'
+  isPanelOpen.value = false
+}
+
+const openPanel = () => {
+  gridColumns.value = '2.5fr 1rem 1fr'
+  setTimeout(() => {
+    isPanelOpen.value = true
+  }, 700)
+}
+
+
 </script>
 
 <template>
   <main>
     <HeaderBar />
-    <div class="root">
-      <div class="root-table">
+    <div class="home-view">
+      <div class="root-table" :style="{ gridTemplateColumns: gridColumns }">
         <div class="column-1">
-          <TabComponent />
+          <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"/>
         </div>
+        <div></div>
         <div class="column-2">
-          <NewsFeed />
+          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen"/>
         </div>
       </div>
     </div>
@@ -22,7 +42,7 @@ import TabComponent from '../components/TabComponent.vue';
 
 
 <style scoped>
-.root {
+.home-view {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,11 +51,10 @@ import TabComponent from '../components/TabComponent.vue';
 .root-table {
   margin: 1rem;
   display: grid;
-  gap: 1.2rem;
-  grid-template-columns: 2.5fr 1fr;
   width: clamp(300px, 100%, 77rem);
+  transition: grid-template-columns 0.8s;
 }
 
-.column-1 {
+.column-2 {
 }
 </style>

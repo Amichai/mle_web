@@ -3,29 +3,50 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 
 import dklogo from '@/assets/draftkings.png'
 import fdlogo from '@/assets/fanduel.png'
+import collapse from '@/assets/collapse.png'
   
+
 const props = defineProps({
-  msg: {
-    type: String,
+  isOpen: {
+    type: Boolean,
     required: true
   }
 })
 
-const emits = defineEmits([])
+const emits = defineEmits(['closePanel'])
+const isOpenLocal = ref(props.isOpen)
+
+watch(() => props.isOpen, (newVal) => {
+  isOpenLocal.value = newVal;
+})
+
+
+const closePanel = () => {
+  emits('closePanel');
+}
+
+const selectedSite = ref('1')
+
 </script>
 
 <template>
-  <div class="news-feed">
-    <!-- At some point we'll seen a sport selector... -->
+  <div class="news-feed" v-if="isOpenLocal">
+  <!-- At some point we'll seen a sport selector... -->
     <!-- blinking light indicator -->
     <!-- Poll the API every 10 seconds -->
-    <div class="title">News Feed
+    
+    <div class="title">
+      <button class="collapse-button" @click="closePanel">
+        <img :src="collapse" alt="collapse" height="20">
+      </button>
+      <p>News Feed</p>
       <div class="site-selector">
-        <input type="radio" id="option1" name="option" value="1">
+        <input type="radio" id="option1" name="option" value="1" v-model="selectedSite">
         <label for="option1"><img :src="fdlogo" alt="fanduel" height="20"></label>
-        <input type="radio" id="option2" name="option" value="2">
+        <input type="radio" id="option2" name="option" value="2" v-model="selectedSite">
         <label for="option2"><img :src="dklogo" alt="draftkings" height="20"></label>
       </div>
+
     </div>
     <div class="feed">
       <p>test1</p>
@@ -75,5 +96,12 @@ const emits = defineEmits([])
   justify-content: flex-end;
   gap: 0.5rem;
   font-size: 1rem;
+}
+
+.collapse-button {
+  background-color: transparent;
+  border: 1px solid black;
+  cursor: pointer;
+  border-radius: 0.5rem;
 }
 </style>

@@ -29,12 +29,14 @@ watch(() => props.pingCounter, (newVal) => {
   console.log('ping counter changed to: ', newVal)
 
   var cube = document.querySelector(".ping-dot");
-    cube.classList.add("animate-cube");
+  if (cube) {
+      cube.classList.add("animate-cube");
 
-    // Optional: Remove the class after the animation ends
-    cube.addEventListener('animationend', function() {
-        cube.classList.remove("animate-cube");
-    });
+      // Optional: Remove the class after the animation ends
+      cube.addEventListener('animationend', function() {
+          cube.classList.remove("animate-cube");
+      });
+    }
 })
 
 

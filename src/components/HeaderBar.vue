@@ -16,7 +16,7 @@ const emits = defineEmits([])
   </div>
 </template>
 
-<style>
+<style scoped>
 
 .header {
   background-color: maroon;
@@ -30,7 +30,7 @@ const emits = defineEmits([])
   color: #040000;
   text-align: center;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  font-family: Inter;
+  /* font-family: Inter; */
   font-size: 25px;
   font-style: normal;
   font-weight: 400;

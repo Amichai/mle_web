@@ -91,6 +91,7 @@ const selectedSite = ref('1')
   width: 100%;
   justify-content: space-between;
   font-style: italic;
+  user-select: none;
 }
 .news-feed {
   background-color: lightgray;

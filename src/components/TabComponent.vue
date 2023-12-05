@@ -90,6 +90,7 @@ watch(() => props.isOpen, (newVal) => {
   display: flex;
   justify-content: space-between;
   width: 100%;
+  user-select: none;
 }
 
 .open-button {

@@ -5,6 +5,71 @@ import TabComponent from '../components/TabComponent.vue';
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 
 const pingCounter = ref(0)
+let dataVersion = 0;
+
+let intervalId = null;
+
+const queryData = () => {
+  const url = 'https://amichai-dfs-data.s3.amazonaws.com/Caesars_NBA_current.txt';
+
+  // Fetch the CSV file
+  fetch(url)
+    .then(response => {
+      // Check if the request is successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(data => {
+      // Process the CSV data
+      const rows = data.split('\n');
+      const result = [];
+
+      // Assuming the first row contains headers
+      const headers = rows[0].split(',');
+
+      // Loop through the rows and create objects
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i]) continue; // Skip empty rows
+        const cells = rows[i].split(',');
+        const obj = {};
+        for (let j = 0; j < cells.length; j++) {
+          obj[headers[j]] = cells[j];
+        }
+        result.push(obj);
+      }
+
+      // Use the parsed data
+      console.log(result);
+    })
+    .catch(error => {
+      console.error('Error fetching the CSV file:', error);
+    });
+}
+
+const pingApi = () => {
+  console.log('pinging API...')
+
+  const url = 'https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/data?key=v'
+  fetch(url).then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    }).then(data => {
+      const newDataVersion = data.Items[0].ct.S
+      if(newDataVersion !== dataVersion) {
+        console.log('new data version detected: ', newDataVersion)
+        dataVersion = newDataVersion
+      }
+
+    }).catch(error => {
+      console.error('Error fetching the API:', error);
+    });
+
+  pingCounter.value += 1
+}
 
 onMounted(() => {
   startPingingAPI()
@@ -23,13 +88,6 @@ const openPanel = () => {
   setTimeout(() => {
     isPanelOpen.value = true
   }, 490)
-}
-
-let intervalId = null;
-
-const pingApi = () => {
-  console.log('pinging API...')
-  pingCounter.value += 1
 }
 
 const startPingingAPI = () => {
@@ -67,12 +125,13 @@ const startPingingAPI = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: black;
 }
 
 .root-table {
   margin: 1rem;
   display: grid;
-  width: clamp(300px, 100%, 77rem);
+  width: 100%;
   transition: grid-template-columns 0.5s linear;
 }
 

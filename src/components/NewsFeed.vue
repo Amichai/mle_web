@@ -15,11 +15,22 @@ const props = defineProps({
   pingCounter: {
     type: Number,
     default: 0
+  },
+  newsRows: {
+    type: Array,
+    default: () => []
   }
+})
+
+onMounted(() => {
+  console.log('mounted')
+  console.log(props.newsRows)
+  console.log(newsRowsLocal)
 })
 
 const emits = defineEmits(['closePanel'])
 const isOpenLocal = ref(props.isOpen)
+const newsRowsLocal = ref(props.newsRows)
 
 watch(() => props.isOpen, (newVal) => {
   isOpenLocal.value = newVal;
@@ -39,6 +50,17 @@ watch(() => props.pingCounter, (newVal) => {
     }
 })
 
+watch(() => props.newsRows, (newVal) => {
+  newsRowsLocal.value = newVal;
+})
+
+const newsRowsFiltered = computed(() => {
+  const fdRows =  newsRowsLocal.value.filter((row) => !row.includes('dk:')).map((row) => row.replace('fd:', ''))
+  
+  const dkRows =  newsRowsLocal.value.filter((row) => !row.includes('fd:')).map((row) => row.replace('dk:', ''))
+
+  return selectedSite.value === '1' ? fdRows : dkRows
+})
 
 const closePanel = () => {
   emits('closePanel');
@@ -63,7 +85,7 @@ const selectedSite = ref('1')
           <img :src="sync" alt="sync">
 
         </div>
-        <p>News Feed</p>
+        <p>Breaking News</p>
       </div>
       <div class="site-selector">
         <input type="radio" id="option1" name="option" value="1" v-model="selectedSite">
@@ -74,10 +96,9 @@ const selectedSite = ref('1')
 
     </div>
     <div class="feed">
-      <p>test1</p>
-      <p>test2</p>
-      <p>test3</p>
-      <p>test1</p>
+      <p v-for="(row, idx) in newsRowsFiltered" :key="idx">
+        {{ row }}
+      </p>
     </div>
 
   </div>
@@ -150,7 +171,7 @@ const selectedSite = ref('1')
         transform: rotate(0deg);
     }
     to {
-        transform: rotate(90deg);
+        transform: rotate(180deg);
     }
 }
 

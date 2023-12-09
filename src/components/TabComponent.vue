@@ -13,6 +13,22 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
+  playerData: {
+    type: Array,
+    required: true
+  },
+  teamData: {
+    type: Array,
+    required: true
+  },
+  slateData: {
+    type: Array,
+    required: true
+  },
+  slatePlayerData: {
+    type: Array,
+    required: true
+  },
 })
 
 const isOpenLocal = ref(props.isOpen)
@@ -40,7 +56,9 @@ watch(() => props.isOpen, (newVal) => {
 
   <div class="tab-content">
     <div v-show="currentTab === 'Tab1'">
-      <ProjectionsTable />
+      <ProjectionsTable 
+      :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
+      />
     </div>
     <div v-show="currentTab === 'Tab2'">
       <LineupBuilder />
@@ -60,6 +78,7 @@ watch(() => props.isOpen, (newVal) => {
   align-items: flex-start;
   flex-direction: column;
   padding: 0.5rem;
+  overflow: auto;
 }
 
 .tabs button {

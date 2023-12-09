@@ -9,60 +9,63 @@ let dataVersion = localStorage.getItem(`data-version`) || '0';
 let breakingNews = localStorage.getItem('breaking-news') || '';
 const breakingNewsRows = ref(breakingNews.split('\n'));
 
+const playerData = ref([])
+const teamData = ref([])
+const slateData = ref([])
+const slatePlayerData = ref([])
+
 let intervalId = null;
 
-const queryData = (url, name, action) => {
+const queryData = async (url) => {
   // Fetch the CSV file
-  fetch(url)
-    .then(response => {
-      // Check if the request is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.text();
-    })
-    .then(data => {
-      // Process the CSV data
-      localStorage.setItem(name, data)
-      const rows = data.split('\n');
-      console.log(rows);
-      action(rows)
-    })
-    .catch(error => {
-      console.error('Error fetching the CSV file:', error);
-    });
+  const response = await fetch(url)
+  const data = await response.text()
+  return data
 }
 
-const pingApi = () => {
+const pingApi = async () => {
   console.log('pinging API...')
 
   // TODO: this should return n version numbers, one for each of the file downloads (one base file, and one dynamic override file)
   const url = 'https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/data?key=v'
-  fetch(url).then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    }).then(data => {
-      const newDataVersion = data.Items[0].ct.S
-      if(newDataVersion !== dataVersion) {
-        console.log('new data version detected: ', newDataVersion)
-        dataVersion = newDataVersion
-        localStorage.setItem(`data-version`, newDataVersion)
-        queryData('https://amichai-dfs-data.s3.amazonaws.com/breakingNews.txt', 'breaking-news', (rows) => breakingNewsRows.value = rows)
-      }
-
-    }).catch(error => {
-      console.error('Error fetching the API:', error);
-    });
+  const response = await fetch(url)
+  const data = await response.json()
+  const newDataVersion = data.Items[0].ct.S
+  if(newDataVersion !== dataVersion) {
+    console.log('new data version detected: ', newDataVersion)
+    dataVersion = newDataVersion
+    localStorage.setItem(`data-version`, newDataVersion)
+    const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/breakingNews.txt')
+    localStorage.setItem('breaking-news', result)
+    const rows = result.split('\n');
+    console.log(rows);
+    breakingNewsRows.value = rows
+  }
 
   pingCounter.value += 1
 }
 
-onMounted(() => {
+const splitData = (data) => {
+  return data.split('\n').filter(i => i).map((row) => row.split(','))
+}
+
+onMounted(async () => {
   startPingingAPI()
 
-  queryData('https://amichai-dfs-data.s3.amazonaws.com/player_data', 'breaking-news', (rows) => breakingNewsRows.value = rows)
+  const data1 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/player_data')
+  playerData.value = splitData(data1)
+
+
+  const data2 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/slate_data')
+  slateData.value = splitData(data2)
+  
+  const data3 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/team_data')
+  teamData.value = splitData(data3)
+  
+  const data4 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/slate_player_data')
+  slatePlayerData.value = splitData(data4)
+  
+  console.log(slatePlayerData.value)
 })
 
 const gridColumns = ref('2.5fr 1rem 1fr')
@@ -98,7 +101,9 @@ const startPingingAPI = () => {
     <div class="home-view">
       <div class="root-table" :style="{ gridTemplateColumns: gridColumns }">
         <div class="column-1">
-          <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"/>
+          <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
+            :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
+          />
         </div>
         <div></div>
         <div class="column-2">

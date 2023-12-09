@@ -13,6 +13,7 @@ const playerData = ref([])
 const teamData = ref([])
 const slateData = ref([])
 const slatePlayerData = ref([])
+const pingPeriod = ref('')
 
 let intervalId = null;
 
@@ -31,6 +32,7 @@ const pingApi = async () => {
   const response = await fetch(url)
   const data = await response.json()
   const newDataVersion = data.Items[0].ct.S
+  pingPeriod.value = data.Items[0].period.S
   if(newDataVersion !== dataVersion) {
     console.log('new data version detected: ', newDataVersion)
     dataVersion = newDataVersion
@@ -43,6 +45,8 @@ const pingApi = async () => {
   }
 
   pingCounter.value += 1
+
+  intervalId = setTimeout(pingApi, pingPeriod.value * 1000)
 }
 
 const splitData = (data) => {
@@ -88,9 +92,6 @@ const startPingingAPI = () => {
     clearInterval(intervalId);
   }
   pingApi()
-
-  // Set up the interval to ping the API every 10 seconds (10000 milliseconds)
-  intervalId = setInterval(pingApi, 10000);
 }
 
 </script>

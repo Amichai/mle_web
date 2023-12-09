@@ -68,7 +68,7 @@ watch(() => props.isOpen, (newVal) => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .tab-component {
   background-color: lightgray;
   color: black;
@@ -95,10 +95,6 @@ watch(() => props.isOpen, (newVal) => {
 .tabs button.active {
   background-color: #007bff;
   color: white;
-}
-
-.tab-content div {
-  border: 1px solid black;
 }
 
 .tab-content div h2 {

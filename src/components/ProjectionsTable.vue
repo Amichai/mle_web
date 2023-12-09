@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { nameMapper } from './../nameMapper.js'
+import dklogo from '@/assets/draftkings.png'
+import fdlogo from '@/assets/fanduel.png'
 
 const emits = defineEmits([])
 
@@ -97,9 +99,11 @@ watch(() => props.playerData, (newVal) => {
 </script>
 
 <template>
-  <div>
-    slate: 
-    <select v-model="selectedSlate">
+  <div class="slate-selector">
+    <img :src="dklogo" alt="dk logo" height="20" v-show="selectedSlate.includes('DK')">
+    <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate.includes('FD')">
+
+    <select v-model="selectedSlate" placeholder="slate">
       <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
         {{ slate }}
       </option>
@@ -180,5 +184,12 @@ option {
 
 .override {
   width: 4rem;
+}
+
+.slate-selector {
+  display: flex;
+  direction: row;
+  align-items: center;
+  margin-left: 1rem;
 }
 </style>

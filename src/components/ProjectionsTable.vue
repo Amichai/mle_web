@@ -82,6 +82,8 @@ watch(() => props.tableData, (newVal) => {
 table {
   width: 100%;
   border-collapse: collapse;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-weight: 300;
 }
 
 th, td {

@@ -6,7 +6,7 @@ import collapse from '@/assets/collapse.png'
 import { nameMapper } from './../nameMapper.js'
 
 
-const currentTab = ref('Tab1')
+const currentTab = ref('Tab2')
 
 const emits = defineEmits(['openPanel'])
 
@@ -135,7 +135,9 @@ watch(() => props.playerData, (newVal) => {
       />
     </div>
     <div v-show="currentTab === 'Tab2'">
-      <LineupBuilder />
+      <LineupBuilder 
+        :availableSlates="availableSlates"
+      />
     </div>
   </div>
 

@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
-// import { runOptimizer, runReoptimizer, getRosterExposures } from '../apiHelper';
 import Papa from 'papaparse';
 import SlatePicker from '../components/SlatePicker.vue';
+import ToggleButton from '../components/ToggleButton.vue';
+import hammerIcon from '@/assets/hammer.png'
+import liveIcon from '@/assets/live.png'
   
 const props = defineProps({
   id: {
@@ -179,6 +181,11 @@ const deleteSlate = () => {
       <SlatePicker 
         @selectedSlateChanged="selectedSlate = $event"
         :availableSlates="availableSlates" />
+        <div class="view-selector">
+          <img :src="hammerIcon" alt="construction view" width="26" height="26">
+          <ToggleButton></ToggleButton>
+          <img :src="liveIcon" alt="live view" width="26" height="26">
+        </div>
     </div>
     <div class="input-grid">
       <div>Contests:</div>
@@ -188,23 +195,6 @@ const deleteSlate = () => {
         <button class="btn btn-outline-danger" type="button" @click="clearFile">×</button>
       </div>
     </div>
-    <button class="button" @click="optimize">Optimize</button>
-    <button class="button" @click="showExposures">Show/Hide Exposures</button>
-    <div class="exposure-grid">
-      <div>
-      <div class="player-exposure-grid grid-header">
-        <div>idx</div>
-        <div>name</div>
-        <div>ct</div>
-      </div>
-      <div v-for="(player, index) in playerExposures" :key="index" class="player-exposure-grid">
-        <div>{{ index + 1}}</div>
-        <div>{{ player[0] }}</div>
-        <div>{{ player[1] }} / {{ rosterCount }}</div>
-      </div>
-    </div>
-    </div>
-    
   </div>
 </template>
 
@@ -213,12 +203,6 @@ const deleteSlate = () => {
   display: grid;
   grid-template-columns: 6rem 1fr 6rem 1fr;
   gap: 0.5rem
-}
-
-.player-exposure-grid {
-  font-size: 0.8rem;
-  display: grid;
-  grid-template-columns: 1fr 9rem 5rem 1fr 1fr 1fr 1fr;
 }
 
 .span-3 {
@@ -241,7 +225,6 @@ const deleteSlate = () => {
   padding: 0;
 }
 
-
 .root {
   border: 1px solid white;
   padding: 0 1rem;
@@ -252,25 +235,7 @@ const deleteSlate = () => {
   align-items: center;
   flex-direction: row;
   gap: 1rem;
-}
-
-.game-type {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.exposure-grid {
-  border-radius: 0.5rem;
-  margin: 0.5rem;
-  padding: 0.5rem;
-  background-color: lightgray;
-  color: black;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.grid-header {
-  font-weight: bold;
+  justify-content: space-between;
 }
 
 .delete-button {
@@ -285,5 +250,12 @@ const deleteSlate = () => {
 .delete-button:active {
   background-color: gray;
   box-shadow: none;
+}
+
+.view-selector {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.5rem;
 }
 </style>

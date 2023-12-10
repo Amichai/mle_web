@@ -8,14 +8,27 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  isFirstSlateAsDefault: {
+    type: Boolean,
+    default: true
+  },
+  selected: {
+    type: String,
+    default: ''
+  }
+})
+const selectedSlate = ref(props.selected)
+
+watch(() => props.selected, (newVal) => {
+  selectedSlate.value = newVal
 })
 
-const selectedSlate = ref(props.availableSlates[0])
 
 watch(() => props.availableSlates, (newVal) => {
-  selectedSlate.value = newVal[0]
+  if(props.isFirstSlateAsDefault) {
+    selectedSlate.value = newVal[0]
+  }
 })
-
 
 const selectedSlateChanged = () => {
   emits('selectedSlateChanged', selectedSlate.value)
@@ -28,6 +41,7 @@ const emits = defineEmits(['selectedSlateChanged'])
   <div class="slate-selector">
     <img :src="dklogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('DK')">
     <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('FD')">
+    <div v-show="!selectedSlate" style="width: 20px;"></div>
 
     <select v-model="selectedSlate" placeholder="slate" @change="selectedSlateChanged">
       <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">

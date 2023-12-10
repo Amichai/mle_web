@@ -46,8 +46,6 @@ const lowestAvailableId = () => {
 </script>
 
 <template>
-  <div>Lineup Builder Here</div>
-
   <div v-for="(slateId, index) in slateIds" :key="slateId">
       <SlateBuilder
         :index="index"

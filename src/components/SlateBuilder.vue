@@ -32,7 +32,6 @@ const emits = defineEmits(['delete'])
 const reader = new FileReader();
 
 const contests = ref('')
-const slateName = ref('')
 const site = ref('fd')
 const startTime = ref(0)
 
@@ -43,21 +42,24 @@ const startTimeExposures = ref({})
 const resetVals = () => {
   console.log('Resetting', props.id)
   contests.value = ''
-  slateName.value = ''
 }
 
 onMounted(() => {
   console.log('Mounted', props.id)
   contests.value = localStorage.getItem(`contests_${props.id}`)
-  slateName.value = localStorage.getItem(`slateName_${props.id}`)
+  selectedSlate.value = localStorage.getItem(`selectedSlate_${props.id}`)
 })
+
+const slateSelected = (newVal) => {
+  selectedSlate.value = newVal
+}
 
 watch(() => contests.value, (newVal) => {
   localStorage.setItem(`contests_${props.id}`, newVal)
 })
 
-watch(() => slateName.value, (newVal) => {
-  localStorage.setItem(`slateName_${props.id}`, newVal)
+watch(() => selectedSlate.value, (newVal) => {
+  localStorage.setItem(`selectedSlate_${props.id}`, newVal)
 })
 
 const constructOutputFile = (rosters, filename) => {
@@ -179,8 +181,11 @@ const deleteSlate = () => {
       <button class="button delete-button" @click="deleteSlate">×</button>
       {{ myIndex }}
       <SlatePicker 
-        @selectedSlateChanged="selectedSlate = $event"
-        :availableSlates="availableSlates" />
+        @selectedSlateChanged="slateSelected"
+        :availableSlates="availableSlates" 
+        :isFirstSlateAsDefault="false"
+        :selected="selectedSlate"
+        />
         <div class="view-selector">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
           <ToggleButton></ToggleButton>
@@ -192,7 +197,6 @@ const deleteSlate = () => {
       <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea>
       <div class="input-file-row">
         <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
-        <button class="btn btn-outline-danger" type="button" @click="clearFile">×</button>
       </div>
     </div>
   </div>

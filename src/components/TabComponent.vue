@@ -157,6 +157,10 @@ watch(() => props.playerData, (newVal) => {
   overflow: auto;
 }
 
+.tab-content {
+  width: 100%;
+}
+
 .tabs button {
   padding: 10px;
   border: none;

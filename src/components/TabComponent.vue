@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import ProjectionsTable from '../components/ProjectionsTable.vue';
-import LineupBuilder from '../components/LineupBuilder.vue';
+import LineupBuilderTab from '../components/LineupBuilderTab.vue';
 import collapse from '@/assets/collapse.png'
 import { nameMapper } from './../nameMapper.js'
 
@@ -135,7 +135,7 @@ watch(() => props.playerData, (newVal) => {
       />
     </div>
     <div v-show="currentTab === 'Tab2'">
-      <LineupBuilder 
+      <LineupBuilderTab 
         :availableSlates="availableSlates"
       />
     </div>

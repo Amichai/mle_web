@@ -1,19 +1,63 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+import dklogo from '@/assets/draftkings.png'
+import fdlogo from '@/assets/fanduel.png'
   
 const props = defineProps({
-  msg: {
-    type: String,
+  availableSlates: {
+    type: Array,
     required: true
-  }
+  },
 })
 
-const emits = defineEmits([])
+const selectedSlate = ref(props.availableSlates[0])
+
+watch(() => props.availableSlates, (newVal) => {
+  selectedSlate.value = newVal[0]
+})
+
+
+const selectedSlateChanged = () => {
+  emits('selectedSlateChanged', selectedSlate.value)
+}
+
+const emits = defineEmits(['selectedSlateChanged'])
 </script>
 
 <template>
-  <div></div>
+  <div class="slate-selector">
+    <img :src="dklogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('DK')">
+    <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('FD')">
+
+    <select v-model="selectedSlate" placeholder="slate" @change="selectedSlateChanged">
+      <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
+        {{ slate }}
+      </option>
+    </select>
+  </div>
 </template>
 
 <style scoped>
+select {
+  width: 200px;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-family: Arial, sans-serif;
+}
+
+option {
+  padding: 5px;
+  font-family: Arial, sans-serif;
+}
+
+.slate-selector {
+  display: flex;
+  direction: row;
+  align-items: center;
+  margin-left: 1rem;
+}
+
 </style>

@@ -68,8 +68,6 @@ onMounted(async () => {
   
   const data4 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/slate_player_data')
   slatePlayerData.value = splitData(data4)
-  
-  console.log(slatePlayerData.value)
 })
 
 const gridColumns = ref('2.5fr 1rem 1fr')

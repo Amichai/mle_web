@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
-import dklogo from '@/assets/draftkings.png'
-import fdlogo from '@/assets/fanduel.png'
+import SlatePicker from '../components/SlatePicker.vue';
 
 const emits = defineEmits([])
 
@@ -28,7 +27,7 @@ watch(() => props.availableSlates, (newVal) => {
 })
 
 watch(()  => selectedSlate.value, (newVal) => {
-  slateData.value = props.tableData[selectedSlate.value]
+  console.log('selected slate changed: ', newVal)
   console.log('slate data: ', slateData.value)
 })
 
@@ -38,16 +37,9 @@ watch(() => props.tableData, (newVal) => {
 </script>
 
 <template>
-  <div class="slate-selector">
-    <img :src="dklogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('DK')">
-    <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('FD')">
-
-    <select v-model="selectedSlate" placeholder="slate">
-      <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
-        {{ slate }}
-      </option>
-    </select>
-  </div>
+  <SlatePicker 
+  @selectedSlateChanged="selectedSlate = $event"
+  :availableSlates="availableSlates" />
   <table>
     <thead>
       <tr>
@@ -107,30 +99,7 @@ thead {
   /* background-color: #f2f2f2; */
 }
 
-select {
-  width: 200px; /* Width of the combobox */
-  padding: 10px; /* Padding inside the combobox */
-  margin: 10px; /* Margin around the combobox */
-  border: 1px solid #ccc; /* Border color and width */
-  border-radius: 4px; /* Rounded corners */
-  background-color: white; /* Background color */
-  font-family: Arial, sans-serif; /* Font styling */
-}
-
-/* Optional: Styling the options */
-option {
-  padding: 5px; /* Padding inside each option */
-  font-family: Arial, sans-serif; /* Font styling */
-}
-
 .override {
   width: 4rem;
-}
-
-.slate-selector {
-  display: flex;
-  direction: row;
-  align-items: center;
-  margin-left: 1rem;
 }
 </style>

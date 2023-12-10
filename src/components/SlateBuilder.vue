@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 // import { runOptimizer, runReoptimizer, getRosterExposures } from '../apiHelper';
 import Papa from 'papaparse';
+import SlatePicker from '../components/SlatePicker.vue';
   
 const props = defineProps({
   id: {
@@ -175,11 +176,9 @@ const deleteSlate = () => {
       
       <button class="button delete-button" @click="deleteSlate">×</button>
       {{ myIndex }}
-      <select v-model="selectedSlate" placeholder="slate">
-      <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
-        {{ slate }}
-      </option>
-    </select>
+      <SlatePicker 
+        @selectedSlateChanged="selectedSlate = $event"
+        :availableSlates="availableSlates" />
     </div>
     <div class="input-grid">
       <div>Contests:</div>
@@ -245,12 +244,14 @@ const deleteSlate = () => {
 
 .root {
   border: 1px solid white;
-  padding: 1rem;
+  padding: 0 1rem;
 }
 
 .header {
   display: flex;
+  align-items: center;
   flex-direction: row;
+  gap: 1rem;
 }
 
 .game-type {
@@ -273,7 +274,6 @@ const deleteSlate = () => {
 }
 
 .delete-button {
-  /* width: 3rem; */
   border-radius: 50%;
   width: 1.6rem;
   height: 1.6rem;

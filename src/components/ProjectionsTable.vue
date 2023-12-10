@@ -1,107 +1,46 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
-import { nameMapper } from './../nameMapper.js'
 import dklogo from '@/assets/draftkings.png'
 import fdlogo from '@/assets/fanduel.png'
 
 const emits = defineEmits([])
 
 const props = defineProps({
-  playerData: {
+  availableSlates: {
     type: Array,
     required: true
   },
-  teamData: {
-    type: Array,
-    required: true
-  },
-  slateData: {
-    type: Array,
-    required: true
-  },
-  slatePlayerData: {
-    type: Array,
+  tableData: {
+    type: Object,
     required: true
   },
 })
 
-const availableSlates = ref([])
 const selectedSlate = ref('')
-const tableData = ref([])
-const nameToPlayerData = ref({})
+const slateData = ref([])
 
 onMounted(() => {
-  availableSlates.value = props.slateData.map((row) => row[0])
+  selectedSlate.value = props.availableSlates[0]
 })
 
-
-watch(() => props.slateData, (newVal) => {
-  availableSlates.value = newVal.map((row) => row[0])
-  selectedSlate.value = availableSlates.value[0]
+watch(() => props.availableSlates, (newVal) => {
+  selectedSlate.value = newVal[0]
 })
-
-
-const loadTableData = (slate) => {
-  if(!nameToPlayerData.value) {
-    return
-  }
-
-  const slatePlayerData = props.slatePlayerData.filter((row) => row[0] === selectedSlate.value)
-  console.log('slatePlayerData: ', slatePlayerData)
-  tableData.value = slatePlayerData.map((row) => {
-
-    let name = row[2]
-    if(name in nameMapper) {
-      name = nameMapper[name]
-    } 
-    const playerData = nameToPlayerData.value[name]
-    if (!playerData) {
-      debugger
-    } 
-    row.push(playerData[1])
-    const projection = playerData[2]
-    
-    const status = playerData[3]
-    if (status === 'O') {
-      row.push('0.0')
-    } else {
-      row.push(projection)
-    }
-    row.push(status)
-    const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
-    return {
-      name: row[2],
-      position: row[3],
-      salary: row[4],
-      team: row[5],
-      projection: projectionRounded,
-      override: projectionRounded,
-      status: row[7]
-    }
-  })
-}
 
 watch(()  => selectedSlate.value, (newVal) => {
-  loadTableData(newVal)
+  slateData.value = props.tableData[selectedSlate.value]
+  console.log('slate data: ', slateData.value)
 })
 
-watch(() => props.slatePlayerData, (newVal) => {
-  loadTableData(selectedSlate.value)
-})
-
-watch(() => props.playerData, (newVal) => {
-  for(const row of newVal) {
-    nameToPlayerData.value[row[0]] = row
-  }
-
-  loadTableData(selectedSlate.value)
+watch(() => props.tableData, (newVal) => {
+  slateData.value = props.tableData[selectedSlate.value]
 })
 </script>
 
 <template>
   <div class="slate-selector">
-    <img :src="dklogo" alt="dk logo" height="20" v-show="selectedSlate.includes('DK')">
-    <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate.includes('FD')">
+    <img :src="dklogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('DK')">
+    <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('FD')">
 
     <select v-model="selectedSlate" placeholder="slate">
       <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
@@ -123,7 +62,7 @@ watch(() => props.playerData, (newVal) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(playerRow, index) in tableData" :key="index">
+      <tr v-for="(playerRow, index) in slateData" :key="index">
       <td>{{ index + 1 }}</td>
       <td>{{ playerRow['name'] }}</td>
       <td>{{ playerRow['position'] }}</td>

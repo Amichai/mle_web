@@ -3,6 +3,8 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import ProjectionsTable from '../components/ProjectionsTable.vue';
 import LineupBuilder from '../components/LineupBuilder.vue';
 import collapse from '@/assets/collapse.png'
+import { nameMapper } from './../nameMapper.js'
+
 
 const currentTab = ref('Tab1')
 
@@ -33,8 +35,79 @@ const props = defineProps({
 
 const isOpenLocal = ref(props.isOpen)
 
+const availableSlates = ref([])
+const tableData = ref([])
+const nameToPlayerData = ref({})
+
 watch(() => props.isOpen, (newVal) => {
   isOpenLocal.value = newVal;
+})
+
+onMounted(() => {
+  availableSlates.value = props.slateData.map((row) => row[0])
+})
+
+
+watch(() => props.slateData, (newVal) => {
+  availableSlates.value = newVal.map((row) => row[0])
+})
+
+
+const loadTableData = () => {
+  if(!nameToPlayerData.value) {
+    return
+  }
+  
+  const bySlate = availableSlates.value.reduce((acc, slate) => {
+    acc[slate] = props.slatePlayerData
+    .filter((row) => row[0] === slate)
+    .map((row) => {
+
+        let name = row[2]
+        if(name in nameMapper) {
+          name = nameMapper[name]
+        } 
+        const playerData = nameToPlayerData.value[name]
+        if (!playerData) {
+          debugger
+        } 
+        row.push(playerData[1])
+        const projection = playerData[2]
+        
+        const status = playerData[3]
+        if (status === 'O') {
+          row.push('0.0')
+        } else {
+          row.push(projection)
+        }
+        row.push(status)
+        const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
+        return {
+          name: row[2],
+          position: row[3],
+          salary: row[4],
+          team: row[5],
+          projection: projectionRounded,
+          override: projectionRounded,
+          status: row[7]
+        }
+      })
+    return acc
+  }, {})
+
+  tableData.value = bySlate
+}
+
+watch(() => props.slatePlayerData, (newVal) => {
+  loadTableData()
+})
+
+watch(() => props.playerData, (newVal) => {
+  for(const row of newVal) {
+    nameToPlayerData.value[row[0]] = row
+  }
+
+  loadTableData()
 })
 
 
@@ -57,7 +130,8 @@ watch(() => props.isOpen, (newVal) => {
   <div class="tab-content">
     <div v-show="currentTab === 'Tab1'">
       <ProjectionsTable 
-      :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
+      :tableData="tableData"
+      :availableSlates="availableSlates"
       />
     </div>
     <div v-show="currentTab === 'Tab2'">

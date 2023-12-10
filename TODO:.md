@@ -9,3 +9,5 @@ Upload distinct fd v dk projections
 table sort
 show the games at the top of the table (filtering)
 lineup builder
+
+force to zero any projection less than 10?

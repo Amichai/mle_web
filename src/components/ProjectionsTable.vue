@@ -55,7 +55,7 @@ watch(() => props.tableData, (newVal) => {
     </thead>
     <tbody>
       <tr v-for="(playerRow, index) in slateData" :key="index">
-      <td>{{ index + 1 }}</td>
+      <td><b>{{ index + 1 }}</b></td>
       <td>{{ playerRow['name'] }}</td>
       <td>{{ playerRow['position'] }}</td>
       <td>{{ playerRow['salary'] }}</td>

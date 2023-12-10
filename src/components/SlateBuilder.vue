@@ -3,6 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import Papa from 'papaparse';
 import SlatePicker from '../components/SlatePicker.vue';
 import ToggleButton from '../components/ToggleButton.vue';
+import TableComponent from '../components/TableComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
   
@@ -32,22 +33,32 @@ const emits = defineEmits(['delete'])
 const reader = new FileReader();
 
 const contests = ref('')
+
+const tableColumns = ref([])
+const tableRows = ref([])
+
 const site = ref('fd')
 const startTime = ref(0)
-
-const slatePlayers = ref([])
-const playerExposures = ref({})
-const startTimeExposures = ref({})
 
 const resetVals = () => {
   console.log('Resetting', props.id)
   contests.value = ''
+  tableColumns.value = []
+  tableRows.value = []
 }
 
 onMounted(() => {
   console.log('Mounted', props.id)
   contests.value = localStorage.getItem(`contests_${props.id}`)
   selectedSlate.value = localStorage.getItem(`selectedSlate_${props.id}`)
+  const columns = localStorage.getItem(`tableColumns_${props.id}`)
+
+  tableColumns.value = columns === 'null' || columns === null ? [] : JSON.parse(columns)
+  
+
+  const rows = localStorage.getItem(`tableRows_${props.id}`)
+  tableRows.value = rows === 'null' || rows === null ? [] : JSON.parse(rows)
+
 })
 
 const slateSelected = (newVal) => {
@@ -60,6 +71,14 @@ watch(() => contests.value, (newVal) => {
 
 watch(() => selectedSlate.value, (newVal) => {
   localStorage.setItem(`selectedSlate_${props.id}`, newVal)
+})
+
+watch(() => tableColumns.value, (newVal) => {
+  localStorage.setItem(`tableColumns_${props.id}`, JSON.stringify(newVal))
+})
+
+watch(() => tableRows.value, (newVal) => {
+  localStorage.setItem(`tableRows_${props.id}`, JSON.stringify(newVal))
 })
 
 const constructOutputFile = (rosters, filename) => {
@@ -151,8 +170,11 @@ const uploadSlateFile = (evt) => {
       const content = e.target.result
       const result = Papa.parse(content)
       const filteredRows = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
+      tableColumns.value = filteredRows[0]
+      tableRows.value = filteredRows.slice(1)
       
       contests.value = Papa.unparse(filteredRows)
+
     };
   })();
 
@@ -179,7 +201,9 @@ const deleteSlate = () => {
     <div class="header">
       
       <button class="button delete-button" @click="deleteSlate">×</button>
-      {{ myIndex }}
+      <div class="slate-number">
+        {{ myIndex }}
+      </div>
       <SlatePicker 
         @selectedSlateChanged="slateSelected"
         :availableSlates="availableSlates" 
@@ -193,8 +217,11 @@ const deleteSlate = () => {
         </div>
     </div>
     <div class="input-grid">
-      <div>Contests:</div>
-      <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea>
+      <!-- <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea> -->
+      <TableComponent 
+      :columns="tableColumns"
+      :rows="tableRows"
+      ></TableComponent>
       <div class="input-file-row">
         <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
       </div>
@@ -204,9 +231,7 @@ const deleteSlate = () => {
 
 <style scoped>
 .input-grid {
-  display: grid;
-  grid-template-columns: 6rem 1fr 6rem 1fr;
-  gap: 0.5rem
+  
 }
 
 .span-3 {
@@ -224,8 +249,8 @@ const deleteSlate = () => {
 
 #formFile {
   width: 100%;
-  color: white;
-  font-size: 0.9em;
+  color: black;
+  font-size: 0.8em;
   padding: 0;
 }
 
@@ -261,5 +286,13 @@ const deleteSlate = () => {
   align-items: center;
   align-self: center;
   gap: 0.5rem;
+}
+
+.slate-number {
+  font-size: 1rem;
+  font-weight: bold;
+  color: black;
+  border-radius: 50%;
+  padding: 0 0.5rem;
 }
 </style>

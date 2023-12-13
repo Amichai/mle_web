@@ -10,6 +10,10 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  tableData: {
+    type: Object,
+    required: true
+  },
 })
 
 const slateIds = ref([])

@@ -6,6 +6,7 @@ import ToggleButton from '../components/ToggleButton.vue';
 import TableComponent from '../components/TableComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
+import { useOptimizer } from '../composables/optimizer.js'
   
 const props = defineProps({
   id: {
@@ -24,6 +25,8 @@ const props = defineProps({
 
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
+
+const { optimize, reoptimize } = useOptimizer()
 
 watch(() => props.index, (newVal) => {
   myIndex.value = newVal + 1
@@ -142,9 +145,10 @@ const showExposures = async () => {
 }
 
 
-const optimize = async () => {
+const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
   if (currentTime > startTime.value) {
+    reoptimize()
     // alert('Slate has already started')
     // return
 
@@ -153,7 +157,7 @@ const optimize = async () => {
     // gameType.value, slateId.value, rosterCount.value, iterCount.value, contests.value, excludedPlayers.value)
     // constructOutputFile(result, `${site.value}_${slateName.value}_${slateId.value}_reopto.csv`)
   } else {
-
+    optimize()
     // const result = await runOptimizer(sport.value, site.value, 
     // gameType.value, slateId.value, rosterCount.value, iterCount.value, excludedPlayers.value)
     // constructOutputFile(result, `${site.value}_${slateName.value}_${slateId.value}.csv`)
@@ -181,7 +185,7 @@ const uploadSlateFile = (evt) => {
   reader.readAsText(f);
 }
 
-const reoptimize = async  (sport, site, type) => {
+const reoptimizeHandler = async  (sport, site, type) => {
   // const result = await runReoptimizer(sport, site, type, slateId.value, rosterCount.value, iterCount.value, contests.value, excludedPlayers.value)
   // console.log(result)
   // constructOutputFile(result, `${site}_reoptimize.csv`)
@@ -210,6 +214,7 @@ const deleteSlate = () => {
         :isFirstSlateAsDefault="false"
         :selected="selectedSlate"
         />
+        <button class="button" @click="optimizeHandler">Optimize</button>
         <div class="view-selector">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
           <ToggleButton></ToggleButton>

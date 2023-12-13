@@ -130,13 +130,14 @@ watch(() => props.playerData, (newVal) => {
   <div class="tab-content">
     <div v-show="currentTab === 'Tab1'">
       <ProjectionsTable 
-      :tableData="tableData"
-      :availableSlates="availableSlates"
+        :tableData="tableData"
+        :availableSlates="availableSlates"
       />
     </div>
     <div v-show="currentTab === 'Tab2'">
       <LineupBuilderTab 
         :availableSlates="availableSlates"
+        :tableData="tableData"
       />
     </div>
   </div>

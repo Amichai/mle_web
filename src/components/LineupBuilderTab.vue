@@ -55,6 +55,7 @@ const lowestAvailableId = () => {
         :index="index"
         :id="slateId"
         :availableSlates="availableSlates"
+        :tableData="tableData"
         @delete="() => removeSlate(index)"
         />
     </div>

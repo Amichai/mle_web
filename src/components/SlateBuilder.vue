@@ -7,6 +7,7 @@ import TableComponent from '../components/TableComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/optimizer.js'
+import playIcon from '@/assets/play.png'
   
 const props = defineProps({
   id: {
@@ -21,12 +22,22 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  tableData: {
+    type: Object,
+    required: true
+  },
 })
 
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
 
-const { optimize, reoptimize } = useOptimizer()
+
+const rostersUpdatedCallback = (rosters) => { 
+
+  console.log('Rosters updated')
+}
+
+const { startStopGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
 
 watch(() => props.index, (newVal) => {
   myIndex.value = newVal + 1
@@ -147,8 +158,25 @@ const showExposures = async () => {
 
 const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
+  const slateData = props.tableData[selectedSlate.value]
+  const byPosition = slateData.reduce((acc, curr) => {
+    const positions = curr.position.split('/')
+    positions.forEach((position) => {
+      if (acc[position] === undefined) {
+        acc[position] = []
+      }
+
+      curr.cost = parseInt(curr.salary)
+      acc[position].push(curr)
+    })
+    
+    return acc
+  }, {})
+
+  startStopGeneratingRosters(byPosition, [])
   if (currentTime > startTime.value) {
-    reoptimize()
+    // reoptimize()
+    // optimize(selectedSlate.value)
     // alert('Slate has already started')
     // return
 
@@ -157,7 +185,7 @@ const optimizeHandler = async () => {
     // gameType.value, slateId.value, rosterCount.value, iterCount.value, contests.value, excludedPlayers.value)
     // constructOutputFile(result, `${site.value}_${slateName.value}_${slateId.value}_reopto.csv`)
   } else {
-    optimize()
+    // optimize(selectedSlate.value)
     // const result = await runOptimizer(sport.value, site.value, 
     // gameType.value, slateId.value, rosterCount.value, iterCount.value, excludedPlayers.value)
     // constructOutputFile(result, `${site.value}_${slateName.value}_${slateId.value}.csv`)
@@ -214,7 +242,9 @@ const deleteSlate = () => {
         :isFirstSlateAsDefault="false"
         :selected="selectedSlate"
         />
-        <button class="button" @click="optimizeHandler">Optimize</button>
+        <button class="button play-button" @click="optimizeHandler">
+          <img :src="playIcon" alt="optimize" width="30">
+        </button>
         <div class="view-selector">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
           <ToggleButton></ToggleButton>
@@ -227,16 +257,16 @@ const deleteSlate = () => {
       :columns="tableColumns"
       :rows="tableRows"
       ></TableComponent>
-      <div class="input-file-row">
-        <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
-      </div>
+    </div>
+    <div class="input-file-row">
+      <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
     </div>
   </div>
 </template>
 
 <style scoped>
 .input-grid {
-  
+  overflow: auto;
 }
 
 .span-3 {
@@ -272,16 +302,26 @@ const deleteSlate = () => {
   justify-content: space-between;
 }
 
-.delete-button {
+.delete-button, .play-button {
   border-radius: 50%;
-  width: 1.6rem;
-  height: 1.6rem;
   border: none;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
 
-.delete-button:active {
+.delete-button { 
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.play-button{
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+
+
+.delete-button:active, .play-button:active {
   background-color: gray;
   box-shadow: none;
 }

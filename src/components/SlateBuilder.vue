@@ -8,6 +8,8 @@ import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/optimizer.js'
 import playIcon from '@/assets/play.png'
+import stopIcon from '@/assets/stop.png'
+import trashIcon from '@/assets/trash.png'
   
 const props = defineProps({
   id: {
@@ -31,13 +33,44 @@ const props = defineProps({
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
 
+const rosterSet = ref([])
 
-const rostersUpdatedCallback = (rosters) => { 
+const constructRosterTable = () => {
+  const rows = filteredRows.value.slice(1).map((row) => {
+    return [row[2], '', '', '', '', '', '', '', '', '', '', '']
+  })
 
-  console.log('Rosters updated')
+  rows.forEach((row, index) => {
+    const roster = rosterSet.value[index]
+    if(!roster) {
+      return
+    }
+
+    row[10] = roster[1]
+    // row[10] = roster.value
+  })
+
+  
+  return rows
 }
 
-const { startStopGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
+
+watch(() => rosterSet.value, (rosterSet) => {
+  tableRows.value = constructRosterTable()
+  // tableRows.value.forEach((row, index) => {
+  //   row.map((element, index2) => {
+  //     row[index2 + 3] = rosterSet[index][0][index2]?.name
+  //   })
+  //   row.push('test')
+  // })
+})
+
+const rostersUpdatedCallback = (rosters) => { 
+  rosterSet.value = rosters
+  console.log('Rosters updated', rosters)
+}
+
+const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
 
 watch(() => props.index, (newVal) => {
   myIndex.value = newVal + 1
@@ -155,7 +188,6 @@ const showExposures = async () => {
   // console.log(startTimeExposures.value)
 }
 
-
 const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
@@ -192,6 +224,8 @@ const optimizeHandler = async () => {
   }
 }
 
+const filteredRows = ref([])
+
 const uploadSlateFile = (evt) => {
   const files = evt.target.files; // FileList object
   const f = files[0];
@@ -201,9 +235,11 @@ const uploadSlateFile = (evt) => {
     return function (e) {
       const content = e.target.result
       const result = Papa.parse(content)
-      const filteredRows = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
-      tableColumns.value = filteredRows[0]
-      tableRows.value = filteredRows.slice(1)
+      filteredRows.value = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
+      tableColumns.value = ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value']
+
+      
+      tableRows.value = constructRosterTable()
       
       contests.value = Papa.unparse(filteredRows)
 
@@ -231,8 +267,9 @@ const deleteSlate = () => {
 <template>
   <div class="root">
     <div class="header">
-      
-      <button class="button delete-button" @click="deleteSlate">×</button>
+      <button class="button delete-button" @click="deleteSlate">
+        <img :src="trashIcon" alt="delete slate" width="30">
+      </button>
       <div class="slate-number">
         {{ myIndex }}
       </div>
@@ -242,8 +279,11 @@ const deleteSlate = () => {
         :isFirstSlateAsDefault="false"
         :selected="selectedSlate"
         />
-        <button class="button play-button" @click="optimizeHandler">
+        <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
           <img :src="playIcon" alt="optimize" width="30">
+        </button>
+        <button class="button play-button" @click="optimizeHandler" v-show="isGeneratingRosters">
+          <img :src="stopIcon" alt="optimize" width="30">
         </button>
         <div class="view-selector">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
@@ -307,19 +347,9 @@ const deleteSlate = () => {
   border: none;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   cursor: pointer;
-}
-
-.delete-button { 
-  width: 1.6rem;
-  height: 1.6rem;
-}
-
-.play-button{
   width: 1.9rem;
   height: 1.9rem;
 }
-
-
 
 .delete-button:active, .play-button:active {
   background-color: gray;

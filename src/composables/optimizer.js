@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
   let topRosters = []
 
-  var isGeneratingRosters = ref(false)
+  const isGeneratingRosters = ref(false)
 
   const positionsToFill = ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"]
 
@@ -213,8 +213,8 @@ export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
     }
 
     if(!isGeneratingRosters.value) {
-      intervalId = setInterval(() => generateRosters(), 1)
-      // intervalId = setTimeout(() => generateRosters(), 1)
+      // intervalId = setInterval(() => generateRosters(), 1)
+      intervalId = setTimeout(() => generateRosters(), 1)
 
       isGeneratingRosters.value = true
     } else {
@@ -346,5 +346,5 @@ export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
   }
 
 
-  return { startStopGeneratingRosters }
+  return { startStopGeneratingRosters, isGeneratingRosters }
 }

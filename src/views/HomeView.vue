@@ -19,7 +19,12 @@ let intervalId = null;
 
 const queryData = async (url) => {
   // Fetch the CSV file
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      // 'Cache-Control': 'no-cache',
+      'Cache-Control': 'max-age=600',
+    },
+  })
   const data = await response.text()
   return data
 }
@@ -58,7 +63,6 @@ onMounted(async () => {
 
   const data1 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/player_data')
   playerData.value = splitData(data1)
-
 
   const data2 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/slate_data')
   slateData.value = splitData(data2)

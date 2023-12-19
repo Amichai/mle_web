@@ -36,4 +36,6 @@ export const nameMapper = {
   'Kevin Knox II': 'Kevin Knox',
   'Reggie Bullock Jr.': 'Reggie Bullock',
   'Trey Murphy III': 'Trey Murphy',
+  'A.J. Green': 'AJ Green',
+  'David Duke Jr.': 'David Duke',
 }

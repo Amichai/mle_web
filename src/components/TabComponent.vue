@@ -6,7 +6,7 @@ import collapse from '@/assets/collapse.png'
 import { nameMapper } from './../nameMapper.js'
 
 
-const currentTab = ref('Tab2')
+const currentTab = ref('Tab1')
 
 const emits = defineEmits(['openPanel'])
 
@@ -69,18 +69,27 @@ const loadTableData = () => {
         } 
         const playerData = nameToPlayerData.value[name]
         if (!playerData) {
+          ///Are you missing a name conversion here?
           debugger
         } 
         row.push(playerData[1])
-        const projection = playerData[2]
+
+        let projection = '0.0'
+
+        if(slate.includes('DK')) {
+          projection = playerData[3]
+        } else {
+          projection = playerData[2]
+        }
         
-        const status = playerData[3]
+        const status = playerData[4]
         if (status === 'O') {
           row.push('0.0')
         } else {
           row.push(projection)
         }
         row.push(status)
+
         const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
         return {
           name: row[2],

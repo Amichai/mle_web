@@ -44,16 +44,17 @@ const constructRosterTable = () => {
   })
 
 
+  if(rosterSet.value) {
+    rows.forEach((row, index) => {
+      const roster = rosterSet.value[index]
+      if(!roster) {
+        return
+      }
 
-  rows.forEach((row, index) => {
-    const roster = rosterSet.value[index]
-    if(!roster) {
-      return
-    }
-
-    row[10] = roster[1]
-    // row[10] = roster.value
-  })
+      row[10] = roster[1]
+      // row[10] = roster.value
+    })
+  }
 
   tableRows.value = rows
 }

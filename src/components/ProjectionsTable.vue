@@ -28,6 +28,7 @@ watch(() => props.availableSlates, (newVal) => {
 
 watch(()  => selectedSlate.value, (newVal) => {
   console.log('selected slate changed: ', newVal)
+  slateData.value = props.tableData[selectedSlate.value]
   console.log('slate data: ', slateData.value)
 })
 

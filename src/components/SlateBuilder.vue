@@ -7,6 +7,7 @@ import TableComponent from '../components/TableComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/optimizer.js'
+import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
 import stopIcon from '@/assets/stop.png'
 import trashIcon from '@/assets/trash.png'
@@ -36,9 +37,13 @@ const selectedSlate = ref('')
 const rosterSet = ref([])
 
 const constructRosterTable = () => {
+
+  tableColumns.value = ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value']
   const rows = filteredRows.value.slice(1).map((row) => {
     return [row[2], '', '', '', '', '', '', '', '', '', '', '']
   })
+
+
 
   rows.forEach((row, index) => {
     const roster = rosterSet.value[index]
@@ -50,13 +55,18 @@ const constructRosterTable = () => {
     // row[10] = roster.value
   })
 
-  
-  return rows
+  tableRows.value = rows
 }
 
+const filteredRows = ref([])
 
-watch(() => rosterSet.value, (rosterSet) => {
-  tableRows.value = constructRosterTable()
+watch(() => filteredRows.value, (newFilteredRows) => {
+  constructRosterTable()
+})
+
+watch(() => rosterSet.value, (newRosterSet) => {
+  console.log('Roster set updated', newRosterSet)
+  constructRosterTable()
   // tableRows.value.forEach((row, index) => {
   //   row.map((element, index2) => {
   //     row[index2 + 3] = rosterSet[index][0][index2]?.name
@@ -66,11 +76,14 @@ watch(() => rosterSet.value, (rosterSet) => {
 })
 
 const rostersUpdatedCallback = (rosters) => { 
-  rosterSet.value = rosters
   console.log('Rosters updated', rosters)
+  rosterSet.value = rosters
+  setItem('rosterSet', rosters)
 }
 
 const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
+
+const { getItem, setItem, setId } = useLocalStorage()
 
 watch(() => props.index, (newVal) => {
   myIndex.value = newVal + 1
@@ -96,36 +109,26 @@ const resetVals = () => {
 
 onMounted(() => {
   console.log('Mounted', props.id)
-  contests.value = localStorage.getItem(`contests_${props.id}`)
-  selectedSlate.value = localStorage.getItem(`selectedSlate_${props.id}`)
-  const columns = localStorage.getItem(`tableColumns_${props.id}`)
-
-  tableColumns.value = columns === 'null' || columns === null ? [] : JSON.parse(columns)
-  
-
-  const rows = localStorage.getItem(`tableRows_${props.id}`)
-  tableRows.value = rows === 'null' || rows === null ? [] : JSON.parse(rows)
-
+  contests.value = getItem('contests')
+  selectedSlate.value = getItem('selectedSlate')
+  filteredRows.value = getItem('tableRows')
+  rosterSet.value = getItem('rosterSet')
 })
 
 const slateSelected = (newVal) => {
   selectedSlate.value = newVal
 }
 
+watch(() => props.id, (newVal) => {
+  setId(newVal)
+})
+
 watch(() => contests.value, (newVal) => {
-  localStorage.setItem(`contests_${props.id}`, newVal)
+  setItem('contests', newVal)
 })
 
 watch(() => selectedSlate.value, (newVal) => {
-  localStorage.setItem(`selectedSlate_${props.id}`, newVal)
-})
-
-watch(() => tableColumns.value, (newVal) => {
-  localStorage.setItem(`tableColumns_${props.id}`, JSON.stringify(newVal))
-})
-
-watch(() => tableRows.value, (newVal) => {
-  localStorage.setItem(`tableRows_${props.id}`, JSON.stringify(newVal))
+  setItem('selectedSlate', newVal)
 })
 
 const constructOutputFile = (rosters, filename) => {
@@ -224,8 +227,6 @@ const optimizeHandler = async () => {
   }
 }
 
-const filteredRows = ref([])
-
 const uploadSlateFile = (evt) => {
   const files = evt.target.files; // FileList object
   const f = files[0];
@@ -236,10 +237,10 @@ const uploadSlateFile = (evt) => {
       const content = e.target.result
       const result = Papa.parse(content)
       filteredRows.value = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
-      tableColumns.value = ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value']
 
+      setItem('tableRows', filteredRows.value)
       
-      tableRows.value = constructRosterTable()
+      constructRosterTable()
       
       contests.value = Papa.unparse(filteredRows)
 

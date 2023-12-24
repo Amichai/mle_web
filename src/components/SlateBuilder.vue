@@ -11,6 +11,7 @@ import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
 import stopIcon from '@/assets/stop.png'
 import trashIcon from '@/assets/trash.png'
+import collapseIcon from '@/assets/arrow.png'
   
 const props = defineProps({
   id: {
@@ -51,7 +52,17 @@ const constructRosterTable = () => {
         return
       }
 
-      row[10] = roster[1]
+      for(var i = 0; i < 9; i += 1) {
+        row[i + 1] = roster[0][i]?.name
+      }
+
+      const cost = roster[0].reduce((acc, curr) => {
+        return acc + parseInt(curr.salary)
+      }, 0)
+
+
+      row[10] = cost
+      row[11] = roster[1].toFixed(2)
       // row[10] = roster.value
     })
   }
@@ -100,6 +111,7 @@ const tableRows = ref([])
 
 const site = ref('fd')
 const startTime = ref(0)
+const isCollapsed = ref(false)
 
 const resetVals = () => {
   console.log('Resetting', props.id)
@@ -116,6 +128,10 @@ onMounted(() => {
   filteredRows.value = getItem('tableRows')
   rosterSet.value = getItem('rosterSet')
 })
+
+const toggleCollapseState = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 
 const slateSelected = (newVal) => {
   selectedSlate.value = newVal
@@ -273,9 +289,6 @@ const deleteSlate = () => {
       <button class="button delete-button" @click="deleteSlate">
         <img :src="trashIcon" alt="delete slate" width="30">
       </button>
-      <div class="slate-number">
-        {{ myIndex }}
-      </div>
       <SlatePicker 
           v-show="!selectedSlate"
           @selectedSlateChanged="slateSelected"
@@ -285,10 +298,10 @@ const deleteSlate = () => {
         />
         <div class="slate-name">
           <p>
-            {{  selectedSlate }}
+            {{ myIndex }} - {{  selectedSlate }}
           </p>
         </div>
-        <div v-show="selectedSlate">
+        <div v-show="selectedSlate" class="play-button-parent">
           <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
             <img :src="playIcon" alt="optimize" width="30">
           </button>
@@ -301,17 +314,24 @@ const deleteSlate = () => {
           <ToggleButton></ToggleButton>
           <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
+        <div v-show="selectedSlate" class="collapse-button">
+          <img :src="collapseIcon" alt="live view" width="26" height="26"
+          @click="toggleCollapseState"
+          >
+        </div>
     </div>
-    <div class="input-grid" v-show="selectedSlate">
-      <!-- <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea> -->
-      <TableComponent 
-      :columns="tableColumns"
-      :rows="tableRows"
-      ></TableComponent>
-    </div>
-    <div class="input-file-row" v-show="selectedSlate">
-      <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
-    </div>
+    <div v-show="!isCollapsed">
+      <div class="input-grid" v-show="selectedSlate">
+        <!-- <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea> -->
+        <TableComponent 
+        :columns="tableColumns"
+        :rows="tableRows"
+        ></TableComponent>
+      </div>
+      <div class="input-file-row" v-show="selectedSlate">
+        <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
+      </div>
+  </div>
   </div>
 </template>
 
@@ -347,7 +367,7 @@ const deleteSlate = () => {
 
 .header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(5, 1fr);
   align-items: center;
   gap: 1rem;
   justify-content: space-between;
@@ -374,16 +394,19 @@ const deleteSlate = () => {
   gap: 0.5rem;
 }
 
-.slate-number {
-  font-size: 1rem;
-  font-weight: bold;
-  color: black;
-  border-radius: 50%;
-  padding: 0 0.5rem;
-}
 
 .slate-name {
   font-size: 1rem;
   padding: 0.5rem;
+  font-weight: bold;
+}
+
+.collapse-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.play-button-parent {
+  text-align: center;
 }
 </style>

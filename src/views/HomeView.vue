@@ -74,7 +74,9 @@ onMounted(async () => {
   slatePlayerData.value = splitData(data4)
 })
 
-const gridColumns = ref('2.5fr 1rem 1fr')
+const openGridColumnStyle = 'minmax(50rem, 2.5fr) 1rem minmax(18rem, 1fr)'
+
+const gridColumns = ref(openGridColumnStyle)
 const isPanelOpen = ref(true)
 
 const closePanel = () => {
@@ -83,7 +85,7 @@ const closePanel = () => {
 }
 
 const openPanel = () => {
-  gridColumns.value = '2.5fr 1rem 1fr'
+  gridColumns.value = openGridColumnStyle
   setTimeout(() => {
     isPanelOpen.value = true
   }, 490)

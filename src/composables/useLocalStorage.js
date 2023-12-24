@@ -7,6 +7,7 @@ export function useLocalStorage() {
 
   const getItem = (name, defaultValue = null) => {
     try {
+      console.log('getItem', `${name}_${storageId}`);
       const item = localStorage.getItem(`${name}_${storageId}`);
       return item ? JSON.parse(item) : defaultValue;
     } catch (e) {

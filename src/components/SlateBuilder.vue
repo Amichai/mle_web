@@ -12,6 +12,7 @@ import playIcon from '@/assets/play.png'
 import stopIcon from '@/assets/stop.png'
 import trashIcon from '@/assets/trash.png'
 import collapseIcon from '@/assets/arrow.png'
+import downloadIcon from '@/assets/download.png'
   
 const props = defineProps({
   id: {
@@ -37,12 +38,30 @@ const selectedSlate = ref('')
 
 const rosterSet = ref([])
 
+const rowCount = computed(() => {
+  return filteredRows.value ? filteredRows.value.length - 1 : 0
+})
+
+const averageRosterValue = computed(() => {
+  if(rosterSet.value) {
+    const total = rosterSet.value.reduce((acc, curr) => {
+      return acc + curr[1]
+    }, 0)
+
+    return total / rosterSet.value.length
+  }
+
+  return 0
+})
+
 const constructRosterTable = () => {
 
   tableColumns.value = ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value']
-  const rows = filteredRows.value.slice(1).map((row) => {
+
+
+  const rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
     return [row[2], '', '', '', '', '', '', '', '', '', '', '']
-  })
+  }) : []
 
 
   if(rosterSet.value) {
@@ -63,7 +82,6 @@ const constructRosterTable = () => {
 
       row[10] = cost
       row[11] = roster[1].toFixed(2)
-      // row[10] = roster.value
     })
   }
 
@@ -79,18 +97,12 @@ watch(() => filteredRows.value, (newFilteredRows) => {
 watch(() => rosterSet.value, (newRosterSet) => {
   console.log('Roster set updated', newRosterSet)
   constructRosterTable()
-  // tableRows.value.forEach((row, index) => {
-  //   row.map((element, index2) => {
-  //     row[index2 + 3] = rosterSet[index][0][index2]?.name
-  //   })
-  //   row.push('test')
-  // })
 })
 
 const rostersUpdatedCallback = (rosters) => { 
   console.log('Rosters updated', rosters)
-  rosterSet.value = rosters
-  setItem('rosterSet', rosters)
+  rosterSet.value = rosters.slice(0, rowCount.value)
+  setItem('rosterSet', rosterSet.value)
 }
 
 const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
@@ -123,6 +135,7 @@ const resetVals = () => {
 
 onMounted(() => {
   console.log('Mounted', props.id)
+  setId(props.id)
   contests.value = getItem('contests')
   selectedSlate.value = getItem('selectedSlate')
   filteredRows.value = getItem('tableRows')
@@ -149,7 +162,7 @@ watch(() => selectedSlate.value, (newVal) => {
   setItem('selectedSlate', newVal)
 })
 
-const constructOutputFile = (rosters, filename) => {
+const downloadFile = () => {
   const lines = contests.value.split('\n')
   let toWrite = ''
   toWrite += lines[0] + '\n'
@@ -160,19 +173,20 @@ const constructOutputFile = (rosters, filename) => {
     const p2 = splitLine[1]
     const p3 = splitLine[2]
     const p4 = splitLine[3]
-    const roster = rosters[i - 1]
-    const playerParts = roster.players.split(',')
+    const roster = rosterSet.value[i - 1]
+    const players = roster[0]
     if(site.value === 'fd') {
       toWrite += `"${p1}","${p2}","${p3}",`
     } else {
       toWrite += `"${p1}","${p2}","${p3}","${p4}",`
     }
-    playerParts.forEach((element) => {
-      toWrite += `"${element}",`
+    players.forEach((element) => {
+      toWrite += `"${element.name}",`
     });
-    
-    toWrite += `${roster.value},`
-    toWrite += `${roster.cost}\n`
+    // toWrite += `${roster[1]},`
+    // toWrite += `${roster[2]}\n`
+
+    toWrite += `${roster[1]}\n`
   }
   
   toWrite = toWrite.replace(/\r\n/g, '\n');
@@ -181,7 +195,7 @@ const constructOutputFile = (rosters, filename) => {
   const url = window.URL.createObjectURL(blob);
 
   const a = document.createElement('a');
-  a.setAttribute('download', filename);
+  a.setAttribute('download', 'test.txt');
   a.setAttribute('href', url);
 
   a.click();
@@ -260,8 +274,7 @@ const uploadSlateFile = (evt) => {
       
       constructRosterTable()
       
-      contests.value = Papa.unparse(filteredRows)
-
+      contests.value = Papa.unparse(filteredRows.value)
     };
   })();
 
@@ -316,11 +329,11 @@ const deleteSlate = () => {
         </div>
         <div v-show="selectedSlate">
           <div class="collapse-button">
-            <img :src="collapseIcon" alt="live view" width="26" height="26"
+            <img :src="collapseIcon" alt="expand" width="26" height="26"
             @click="toggleCollapseState"
             v-show="isCollapsed"
             >
-            <img :src="collapseIcon" alt="live view" width="26" height="26" class="expand-button-state"
+            <img :src="collapseIcon" alt="collapse" width="26" height="26" class="expand-button-state"
             @click="toggleCollapseState"
             v-show="!isCollapsed"
             >
@@ -329,7 +342,6 @@ const deleteSlate = () => {
     </div>
     <div v-show="!isCollapsed">
       <div class="input-grid" v-show="selectedSlate">
-        <!-- <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea> -->
         <TableComponent 
         :columns="tableColumns"
         :rows="tableRows"
@@ -338,7 +350,19 @@ const deleteSlate = () => {
       <div class="input-file-row" v-show="selectedSlate">
         <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
       </div>
-  </div>
+    </div>
+    <div class="footer">
+      <div>
+        {{ rowCount }} row  {{ rowCount > 1 ? 's': '' }} average value: {{ averageRosterValue }}
+      </div>
+      <div>
+        <button class="button download-button" @click="downloadFile">
+          <img :src="downloadIcon" alt="download" width="20" height="20">
+        </button>
+        
+        
+      </div>
+    </div>
   </div>
 </template>
 
@@ -380,7 +404,7 @@ const deleteSlate = () => {
   justify-content: space-between;
 }
 
-.delete-button, .play-button {
+.delete-button, .play-button, .download-button {
   border-radius: 50%;
   border: none;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -389,7 +413,7 @@ const deleteSlate = () => {
   height: 1.9rem;
 }
 
-.delete-button:active, .play-button:active {
+.delete-button:active, .play-button:active, .download-button:active {
   background-color: gray;
   box-shadow: none;
 }
@@ -420,5 +444,14 @@ const deleteSlate = () => {
 
 .expand-button-state {
   transform: rotate(180deg);
+}
+
+.footer {
+  display: flex;
+  line-height: 1rem;
+  font-size: 1rem;
+  padding: 0.2rem 1rem;
+  margin-bottom: 0.2rem;
+  justify-content: space-between;
 }
 </style>

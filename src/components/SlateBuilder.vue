@@ -314,10 +314,17 @@ const deleteSlate = () => {
           <ToggleButton></ToggleButton>
           <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
-        <div v-show="selectedSlate" class="collapse-button">
-          <img :src="collapseIcon" alt="live view" width="26" height="26"
-          @click="toggleCollapseState"
-          >
+        <div v-show="selectedSlate">
+          <div class="collapse-button">
+            <img :src="collapseIcon" alt="live view" width="26" height="26"
+            @click="toggleCollapseState"
+            v-show="isCollapsed"
+            >
+            <img :src="collapseIcon" alt="live view" width="26" height="26" class="expand-button-state"
+            @click="toggleCollapseState"
+            v-show="!isCollapsed"
+            >
+          </div>
         </div>
     </div>
     <div v-show="!isCollapsed">
@@ -392,6 +399,7 @@ const deleteSlate = () => {
   align-items: center;
   align-self: center;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 
@@ -408,5 +416,9 @@ const deleteSlate = () => {
 
 .play-button-parent {
   text-align: center;
+}
+
+.expand-button-state {
+  transform: rotate(180deg);
 }
 </style>

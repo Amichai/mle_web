@@ -74,13 +74,13 @@ onMounted(async () => {
   slatePlayerData.value = splitData(data4)
 })
 
-const openGridColumnStyle = 'minmax(50rem, 2.5fr) 1rem minmax(18rem, 1fr)'
+const openGridColumnStyle = '70% 1rem 29% 1rem'
 
 const gridColumns = ref(openGridColumnStyle)
 const isPanelOpen = ref(true)
 
 const closePanel = () => {
-  gridColumns.value = '10fr 0fr 0fr'
+  gridColumns.value = '100% 0rem 0% 1rem'
   isPanelOpen.value = false
 }
 
@@ -88,7 +88,7 @@ const openPanel = () => {
   gridColumns.value = openGridColumnStyle
   setTimeout(() => {
     isPanelOpen.value = true
-  }, 490)
+  }, 190)
 }
 
 const startPingingAPI = () => {
@@ -132,9 +132,13 @@ const startPingingAPI = () => {
   margin: 1rem;
   display: grid;
   width: 100%;
-  transition: grid-template-columns 0.5s linear;
+  transition: grid-template-columns 0.2s linear;
+}
+
+.column-1 {
 }
 
 .column-2 {
+  
 }
 </style>

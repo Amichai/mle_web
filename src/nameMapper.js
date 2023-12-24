@@ -13,7 +13,7 @@ export const nameMapper = {
   'Marcus Morris Sr.': 'Marcus Morris',
   'Andre Jackson Jr.': 'Andre Jackson',
   'TyTy Washington Jr.': 'TyTy Washington',
-  'KJ Martin': 'Kenyon Martin',
+  // 'KJ Martin': 'Kenyon Martin',
   'Jabari Smith Jr.': 'Jabari Smith',
   'Troy Brown Jr.': 'Troy Brown',
   'Wendell Moore Jr.': 'Wendell Moore',
@@ -37,5 +37,9 @@ export const nameMapper = {
   'Reggie Bullock Jr.': 'Reggie Bullock',
   'Trey Murphy III': 'Trey Murphy',
   'A.J. Green': 'AJ Green',
+  'AJ Lawson': 'A.J. Lawson',
   'David Duke Jr.': 'David Duke',
+  'Brandon Boston Jr.': 'Brandon Boston',
+  'Ricky Council IV': 'Ricky Council',
+  'R.J. Hampton': 'RJ Hampton',
 }

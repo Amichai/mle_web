@@ -15,6 +15,10 @@ const props = defineProps({
   selected: {
     type: String,
     default: ''
+  },
+  isEnabled: {
+    type: Boolean,
+    default: true
   }
 })
 const selectedSlate = ref(props.selected)
@@ -43,7 +47,7 @@ const emits = defineEmits(['selectedSlateChanged'])
     <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('FD')">
     <div v-show="!selectedSlate" style="width: 20px;"></div>
 
-    <select v-model="selectedSlate" placeholder="slate" @change="selectedSlateChanged">
+    <select v-model="selectedSlate" placeholder="slate" @change="selectedSlateChanged" :disabled="!props.isEnabled">
       <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
         {{ slate }}
       </option>

@@ -106,6 +106,7 @@ const resetVals = () => {
   contests.value = ''
   tableColumns.value = []
   tableRows.value = []
+  selectedSlate.value = ''
 }
 
 onMounted(() => {
@@ -276,31 +277,39 @@ const deleteSlate = () => {
         {{ myIndex }}
       </div>
       <SlatePicker 
-        @selectedSlateChanged="slateSelected"
-        :availableSlates="availableSlates" 
-        :isFirstSlateAsDefault="false"
-        :selected="selectedSlate"
+          v-show="!selectedSlate"
+          @selectedSlateChanged="slateSelected"
+          :availableSlates="availableSlates" 
+          :isFirstSlateAsDefault="false"
+          :selected="selectedSlate"
         />
-        <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
-          <img :src="playIcon" alt="optimize" width="30">
-        </button>
-        <button class="button play-button" @click="optimizeHandler" v-show="isGeneratingRosters">
-          <img :src="stopIcon" alt="optimize" width="30">
-        </button>
-        <div class="view-selector">
+        <div class="slate-name">
+          <p>
+            {{  selectedSlate }}
+          </p>
+        </div>
+        <div v-show="selectedSlate">
+          <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
+            <img :src="playIcon" alt="optimize" width="30">
+          </button>
+          <button class="button play-button" @click="optimizeHandler" v-show="isGeneratingRosters">
+            <img :src="stopIcon" alt="optimize" width="30">
+          </button>
+        </div>
+        <div class="view-selector" v-show="selectedSlate">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
           <ToggleButton></ToggleButton>
           <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
     </div>
-    <div class="input-grid">
+    <div class="input-grid" v-show="selectedSlate">
       <!-- <textarea name="rosters" class="roster-results span-3" rows="3" placeholder="contests" v-model="contests"></textarea> -->
       <TableComponent 
       :columns="tableColumns"
       :rows="tableRows"
       ></TableComponent>
     </div>
-    <div class="input-file-row">
+    <div class="input-file-row" v-show="selectedSlate">
       <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
     </div>
   </div>
@@ -337,9 +346,9 @@ const deleteSlate = () => {
 }
 
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   align-items: center;
-  flex-direction: row;
   gap: 1rem;
   justify-content: space-between;
 }
@@ -371,5 +380,10 @@ const deleteSlate = () => {
   color: black;
   border-radius: 50%;
   padding: 0 0.5rem;
+}
+
+.slate-name {
+  font-size: 1rem;
+  padding: 0.5rem;
 }
 </style>

@@ -20,7 +20,7 @@ const tableRows = computed(() => {
   return namesSortedByExposure.value.map((name) => {
     return [
       name,
-      exposures.value[name].count,
+      `${exposures.value[name].count} / ${props.rosters.length}`,
       exposures.value[name].team,
       exposures.value[name].startTime,
       exposures.value[name].projection,

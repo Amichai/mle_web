@@ -27,7 +27,7 @@ const emits = defineEmits([])
 }
 
 .title {
-  color: #040000;
+  color: white;
   text-align: center;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   /* font-family: Inter; */

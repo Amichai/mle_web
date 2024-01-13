@@ -93,6 +93,7 @@ const loadTableData = () => {
         const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
         return {
           name: row[2],
+          playerId: row[1],
           position: row[3],
           salary: row[4],
           team: row[5],

@@ -197,7 +197,13 @@ export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
     // averageRosterValue.value = newAverageValue
     
     // activeRostersUpdatedCallback(lineupTableRows.value.map((row) => (row[3])))
-    activeRostersUpdatedCallback(topRostersToReturn)
+    const toReturn = topRostersToReturn.map((roster) => ({
+      players: roster[0],
+      value: roster[1],
+      cost: roster[0].map((row) => row.cost).reduce((a, b) => a + b, 0),
+    }))
+
+    activeRostersUpdatedCallback(toReturn)
   }
 
 

@@ -6,7 +6,7 @@ import ToggleButton from '../components/ToggleButton.vue';
 import TableComponent from '../components/TableComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
-import { useOptimizer } from '../composables/optimizer.js'
+import { useOptimizer } from '../composables/useOptimizer.js'
 import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
 import stopIcon from '@/assets/stop.png'
@@ -45,7 +45,7 @@ const rowCount = computed(() => {
 const averageRosterValue = computed(() => {
   if(rosterSet.value) {
     const total = rosterSet.value.reduce((acc, curr) => {
-      return acc + curr[1]
+      return acc + curr.value
     }, 0)
 
     return total / rosterSet.value.length
@@ -71,17 +71,16 @@ const constructRosterTable = () => {
         return
       }
 
-      for(var i = 0; i < 9; i += 1) {
-        row[i + 1] = roster[0][i]?.name
+      if(!roster.players) {
+        return
       }
 
-      const cost = roster[0].reduce((acc, curr) => {
-        return acc + parseInt(curr.salary)
-      }, 0)
+      for(var i = 0; i < 9; i += 1) {
+        row[i + 1] = roster.players[i]?.name
+      }
 
-
-      row[10] = cost
-      row[11] = roster[1].toFixed(2)
+      row[10] = roster.cost
+      row[11] = roster.value.toFixed(2)
     })
   }
 
@@ -105,6 +104,7 @@ const rostersUpdatedCallback = (rosters) => {
   setItem('rosterSet', rosterSet.value)
 }
 
+///TODO: we should pass in the roster count from the uploaded roster file
 const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
 
 const { getItem, setItem, setId } = useLocalStorage()
@@ -174,14 +174,16 @@ const downloadFile = () => {
     const p3 = splitLine[2]
     const p4 = splitLine[3]
     const roster = rosterSet.value[i - 1]
-    const players = roster[0]
+    const players = roster.players
     if(site.value === 'fd') {
       toWrite += `"${p1}","${p2}","${p3}",`
     } else {
       toWrite += `"${p1}","${p2}","${p3}","${p4}",`
     }
+
+    debugger
     players.forEach((element) => {
-      toWrite += `"${element.name}",`
+      toWrite += `"${element.name}:${element.playerId}",`
     });
     // toWrite += `${roster[1]},`
     // toWrite += `${roster[2]}\n`
@@ -353,7 +355,7 @@ const deleteSlate = () => {
     </div>
     <div class="footer">
       <div>
-        {{ rowCount }} row  {{ rowCount > 1 ? 's': '' }} average value: {{ averageRosterValue }}
+        {{ rowCount }} roster {{ rowCount > 1 ? 's': '' }} average value: {{ averageRosterValue.toFixed(2) }}
       </div>
       <div>
         <button class="button download-button" @click="downloadFile">

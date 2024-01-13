@@ -57,6 +57,11 @@ const loadTableData = () => {
   if(!nameToPlayerData.value) {
     return
   }
+
+  const teamToStartTime = props.teamData.reduce((acc, row) => {
+    acc[row[0]] = row[2]
+    return acc
+  }, {})
   
   const bySlate = availableSlates.value.reduce((acc, slate) => {
     acc[slate] = props.slatePlayerData
@@ -90,6 +95,7 @@ const loadTableData = () => {
         }
         row.push(status)
 
+
         const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
         return {
           name: row[2],
@@ -99,7 +105,8 @@ const loadTableData = () => {
           team: row[5],
           projection: projectionRounded,
           override: projectionRounded,
-          status: row[7]
+          status: row[7],
+          startTime: teamToStartTime[row[5]]
         }
       })
     return acc

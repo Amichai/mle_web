@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import SlatePicker from '../components/SlatePicker.vue';
 import ToggleButton from '../components/ToggleButton.vue';
 import TableComponent from '../components/TableComponent.vue';
+import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/useOptimizer.js'
@@ -32,6 +33,8 @@ const props = defineProps({
     required: true
   },
 })
+
+const isShowingPlayerExposures = ref(false)
 
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
@@ -105,7 +108,8 @@ const rostersUpdatedCallback = (rosters) => {
 }
 
 ///TODO: we should pass in the roster count from the uploaded roster file
-const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(30, rostersUpdatedCallback)
+//rosterSet.value.length
+const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(rowCount.value, rostersUpdatedCallback)
 
 const { getItem, setItem, setId } = useLocalStorage()
 
@@ -323,7 +327,7 @@ const deleteSlate = () => {
         </div>
         <div class="view-selector" v-show="selectedSlate">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
-          <ToggleButton></ToggleButton>
+          <ToggleButton v-model="isShowingPlayerExposures"></ToggleButton>
           <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
         <div v-show="selectedSlate">
@@ -342,9 +346,14 @@ const deleteSlate = () => {
     <div v-show="!isCollapsed">
       <div class="input-grid" v-show="selectedSlate">
         <TableComponent 
-        :columns="tableColumns"
-        :rows="tableRows"
+          v-show="!isShowingPlayerExposures"
+          :columns="tableColumns"
+          :rows="tableRows"
         ></TableComponent>
+        <PlayerExposureComponent 
+          v-show="isShowingPlayerExposures"
+          :rosters="rosterSet"
+        />
       </div>
       <div class="input-file-row" v-show="selectedSlate">
         <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">

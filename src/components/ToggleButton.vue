@@ -1,12 +1,25 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+
+const emits = defineEmits(['update:modelValue'])
   
-const emits = defineEmits([])
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    required: true
+  }
+})
+
+const isEnabledState = ref(props.modelValue)
+
+watch(() => isEnabledState.value, (newVal) => {
+  emits('update:modelValue', newVal)
+})
 </script>
 
 <template>
   <label class="switch">
-    <input type="checkbox">
+    <input type="checkbox" v-model="isEnabledState">
     <span class="slider round"></span>
   </label>
 </template>

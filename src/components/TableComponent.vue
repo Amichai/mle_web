@@ -42,6 +42,7 @@ table {
   border-collapse: collapse;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
   font-weight: 300;
+  overflow-x: auto;
 }
 
 th, td {

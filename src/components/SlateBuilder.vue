@@ -181,14 +181,11 @@ const downloadFile = () => {
       toWrite += `"${p1}","${p2}","${p3}","${p4}",`
     }
 
-    debugger
     players.forEach((element) => {
       toWrite += `"${element.name}:${element.playerId}",`
     });
-    // toWrite += `${roster[1]},`
-    // toWrite += `${roster[2]}\n`
-
-    toWrite += `${roster[1]}\n`
+    toWrite += `${roster.value.toFixed(2)},`
+    toWrite += `${roster.cost}\n`
   }
   
   toWrite = toWrite.replace(/\r\n/g, '\n');

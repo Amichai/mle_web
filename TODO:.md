@@ -11,3 +11,10 @@ show the games at the top of the table (filtering)
 lineup builder
 
 force to zero any projection less than 10?
+
+----
+Better visual indicator when optimizing lineups
+Roster score reset bug
+Use the overridden projections when optimizing
+Highlight players who's projection is overwritten
+Tooltip the players to show cost, value, team etc.

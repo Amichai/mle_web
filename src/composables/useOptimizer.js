@@ -1,6 +1,6 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 
-export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
+export function useOptimizer(activeRostersUpdatedCallback) {
   let topRosters = []
 
   const isGeneratingRosters = ref(false)
@@ -170,6 +170,7 @@ export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
     const topRostersToReturn = topRosters.slice(0, rosterCount)
     const averageRosterValue = topRostersToReturn.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / rosterCount
     
+
     console.log("Average roster value: ", averageRosterValue.toFixed(2))
 
       ///check to see that we're still improving
@@ -210,7 +211,9 @@ export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
   var intervalId = undefined
   var byPositionFiltered = undefined
   var lockedTeams = undefined
-  const startStopGeneratingRosters = (_byPosition, _lockedTeams) => {
+  var rosterCount = 0
+  const startStopGeneratingRosters = (_byPosition, _lockedTeams, _rosterCount) => {
+    rosterCount = _rosterCount
     byPositionFiltered = _byPosition
     lockedTeams = _lockedTeams
     
@@ -219,9 +222,8 @@ export function useOptimizer(rosterCount, activeRostersUpdatedCallback) {
     }
 
     if(!isGeneratingRosters.value) {
-      // intervalId = setInterval(() => generateRosters(), 1)
-      intervalId = setTimeout(() => generateRosters(), 1)
-
+      intervalId = setInterval(() => generateRosters(), 1)
+      // intervalId = setTimeout(() => generateRosters(), 1)
       isGeneratingRosters.value = true
     } else {
       isGeneratingRosters.value = false

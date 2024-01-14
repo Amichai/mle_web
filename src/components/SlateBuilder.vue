@@ -109,7 +109,7 @@ const rostersUpdatedCallback = (rosters) => {
 
 ///TODO: we should pass in the roster count from the uploaded roster file
 //rosterSet.value.length
-const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(rowCount.value, rostersUpdatedCallback)
+const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(rostersUpdatedCallback)
 
 const { getItem, setItem, setId } = useLocalStorage()
 
@@ -243,7 +243,7 @@ const optimizeHandler = async () => {
     return acc
   }, {})
 
-  startStopGeneratingRosters(byPosition, [])
+  startStopGeneratingRosters(byPosition, [], rowCount.value)
   if (currentTime > startTime.value) {
     // reoptimize()
     // optimize(selectedSlate.value)

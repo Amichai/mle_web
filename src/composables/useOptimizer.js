@@ -204,7 +204,9 @@ export function useOptimizer(activeRostersUpdatedCallback) {
       cost: roster[0].map((row) => row.cost).reduce((a, b) => a + b, 0),
     }))
 
-    activeRostersUpdatedCallback(toReturn)
+    if (toReturn.length) {
+      activeRostersUpdatedCallback(toReturn)
+    }
   }
 
 
@@ -212,7 +214,10 @@ export function useOptimizer(activeRostersUpdatedCallback) {
   var byPositionFiltered = undefined
   var lockedTeams = undefined
   var rosterCount = 0
-  const startStopGeneratingRosters = (_byPosition, _lockedTeams, _rosterCount) => {
+  const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
+
+    appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)))
+
     rosterCount = _rosterCount
     byPositionFiltered = _byPosition
     lockedTeams = _lockedTeams

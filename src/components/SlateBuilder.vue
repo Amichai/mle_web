@@ -243,7 +243,7 @@ const optimizeHandler = async () => {
     return acc
   }, {})
 
-  startStopGeneratingRosters(byPosition, [], rowCount.value)
+  startStopGeneratingRosters(byPosition, [], rosterSet.value, rowCount.value)
   if (currentTime > startTime.value) {
     // reoptimize()
     // optimize(selectedSlate.value)
@@ -300,7 +300,7 @@ const deleteSlate = () => {
 </script>
 
 <template>
-  <div class="root">
+  <div :class="['root', isGeneratingRosters && 'is-generating-rosters']">
     <div class="header">
       <button class="button delete-button" @click="deleteSlate">
         <img :src="trashIcon" alt="delete slate" width="30">
@@ -461,5 +461,9 @@ const deleteSlate = () => {
   padding: 0.2rem 1rem;
   margin-bottom: 0.2rem;
   justify-content: space-between;
+}
+
+.is-generating-rosters {
+  background-color: lightpink;
 }
 </style>

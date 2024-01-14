@@ -13,8 +13,11 @@ lineup builder
 force to zero any projection less than 10?
 
 ----
-Better visual indicator when optimizing lineups
-Roster score reset bug
+ - Better visual indicator when optimizing lineups
+ - Roster score reset bug
 Use the overridden projections when optimizing
 Highlight players who's projection is overwritten
 Tooltip the players to show cost, value, team etc.
+Autostop the optimization process
+reopitmize with locked teams
+DK vs FD optimizers

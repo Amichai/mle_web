@@ -104,7 +104,9 @@ watch(() => props.tableData, (newVal) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(playerRow, index) in slateData" :key="index">
+      <tr v-for="(playerRow, index) in slateData" :key="index"
+        :class="playerRow['projection'] != playerRow['override'] ? 'override-row' : ''"
+      >
       <td><b>{{ index + 1 }}</b></td>
       <td>{{ playerRow['name'] }}</td>
       <td>{{ playerRow['position'] }}</td>
@@ -174,6 +176,15 @@ thead {
 .button:active {
   background-color: gray;
   box-shadow: none;
+}
+table tr.override-row:nth-child(odd)
+{
+  background-color: #E9E983 !important;
+}
+
+table tr.override-row:nth-child(even)
+{
+  background-color: #FFFF33 !important;
 }
 
 </style>

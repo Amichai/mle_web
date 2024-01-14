@@ -14,6 +14,8 @@ import stopIcon from '@/assets/stop.png'
 import trashIcon from '@/assets/trash.png'
 import collapseIcon from '@/assets/arrow.png'
 import downloadIcon from '@/assets/download.png'
+import dklogo from '@/assets/draftkings.png'
+import fdlogo from '@/assets/fanduel.png'
   
 const props = defineProps({
   id: {
@@ -38,6 +40,15 @@ const isShowingPlayerExposures = ref(false)
 
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
+const selectedSlateSite = computed(() => {
+  if(selectedSlate.value.includes('DK')) {
+    return 'dk'
+  } else if(selectedSlate.value.includes('FD')) {
+    return 'fd'
+  }
+
+  return ''
+})
 
 const rosterSet = ref([])
 
@@ -313,9 +324,9 @@ const deleteSlate = () => {
           :selected="selectedSlate"
         />
         <div class="slate-name">
-          <p>
+          <img :src="fdlogo" alt="fanduel" height="20" v-if="selectedSlateSite === 'fd'">
+          <img :src="dklogo" alt="draftkings" height="20" v-if="selectedSlateSite === 'dk'">
             {{ myIndex }} - {{  selectedSlate }}
-          </p>
         </div>
         <div v-show="selectedSlate" class="play-button-parent">
           <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
@@ -406,7 +417,7 @@ const deleteSlate = () => {
 
 .header {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: 1fr 2.5fr 1fr 2.5fr 1fr;
   align-items: center;
   gap: 1rem;
   justify-content: space-between;
@@ -439,6 +450,9 @@ const deleteSlate = () => {
   font-size: 1rem;
   padding: 0.5rem;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .collapse-button {

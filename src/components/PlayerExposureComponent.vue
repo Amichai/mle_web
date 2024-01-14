@@ -20,6 +20,7 @@ const tableRows = computed(() => {
   return namesSortedByExposure.value.map((name) => {
     return [
       name,
+      exposures.value[name].cost,
       `${exposures.value[name].count} / ${props.rosters.length}`,
       exposures.value[name].team,
       exposures.value[name].startTime,
@@ -37,6 +38,7 @@ watch(() => props.rosters, (newVal) => {
           name: name,
           projection: player.projection,
           team: player.team,
+          cost: player.cost,
           startTime: player.startTime,
           count: 0
         }
@@ -52,7 +54,7 @@ const emits = defineEmits([])
 
 <template>
   <TableComponent 
-    :columns="[ 'Name', 'Exposure', 'Team', 'Start Time', 'Projection' ]"
+    :columns="[ 'Name', 'Salary', 'Exposure', 'Team', 'Start Time', 'Projection' ]"
     :rows="tableRows"
   ></TableComponent>
 </template>

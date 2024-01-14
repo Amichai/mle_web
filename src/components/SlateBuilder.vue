@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import Papa from 'papaparse';
 import SlatePicker from '../components/SlatePicker.vue';
 import ToggleButton from '../components/ToggleButton.vue';
-import TableComponent from '../components/TableComponent.vue';
+import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
@@ -90,7 +90,8 @@ const constructRosterTable = () => {
       }
 
       for(var i = 0; i < 9; i += 1) {
-        row[i + 1] = roster.players[i]?.name
+        const player = roster.players[i]
+        row[i + 1] = player
       }
 
       row[10] = roster.cost
@@ -146,6 +147,8 @@ const resetVals = () => {
   tableColumns.value = []
   tableRows.value = []
   selectedSlate.value = ''
+  rosterSet.value = []
+  setItem('rosterSet', rosterSet.value)
 }
 
 onMounted(() => {
@@ -356,11 +359,11 @@ const deleteSlate = () => {
     </div>
     <div v-show="!isCollapsed">
       <div class="input-grid" v-show="selectedSlate">
-        <TableComponent 
+        <LineupsTable 
           v-show="!isShowingPlayerExposures"
           :columns="tableColumns"
           :rows="tableRows"
-        ></TableComponent>
+        ></LineupsTable>
         <PlayerExposureComponent 
           v-show="isShowingPlayerExposures"
           :rosters="rosterSet"
@@ -372,7 +375,7 @@ const deleteSlate = () => {
     </div>
     <div class="footer">
       <div>
-        {{ rowCount }} roster {{ rowCount > 1 ? 's': '' }} average value: {{ averageRosterValue.toFixed(2) }}
+        {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average value: {{ averageRosterValue.toFixed(2) }}
       </div>
       <div>
         <button class="button download-button" @click="downloadFile">

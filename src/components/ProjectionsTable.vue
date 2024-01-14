@@ -22,7 +22,7 @@ const slateData = ref([])
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
 
 const isNumeric = (value) => {
-  return value.trim() !== "" && !isNaN(+value);
+  return value !== "" && !isNaN(+value);
 }
 
 const overrideChanged = (playerRow) => {
@@ -35,7 +35,7 @@ const overrideChanged = (playerRow) => {
   const playerId = playerRow['playerId']
   const override = playerRow['override']
   if(isNumeric(override)) {
-    playerIdToOverride[playerId] = override
+    playerIdToOverride[playerId] = parseFloat(override)
   } else {
     delete playerIdToOverride[playerId]
     playerRow['override'] = playerRow['projection']
@@ -114,7 +114,7 @@ watch(() => props.tableData, (newVal) => {
       <td>{{ playerRow['team'] }}</td>
       <td>{{ playerRow['projection'] }}</td>
       <td>
-        <input class="override" type="text" v-model="playerRow['override']" 
+        <input class="override" type="number" v-model="playerRow['override']" 
           @change="() => overrideChanged(playerRow)"
         />
       </td>

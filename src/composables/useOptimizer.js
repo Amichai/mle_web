@@ -40,7 +40,7 @@ export function useOptimizer(activeRostersUpdatedCallback) {
     const positionsToSwap = positionsToFill[idx]
     const swapCandidates = byPositionFiltered[positionsToSwap].filter((row) => 
         !currentNames.includes(row.name) 
-        && row.projection > rowToSwap.projection
+        && row.override > rowToSwap.override
         && row.cost <= costRemaining + rowToSwap.cost)
 
     if(swapCandidates.length === 0) {
@@ -74,7 +74,7 @@ export function useOptimizer(activeRostersUpdatedCallback) {
     for(var i = 0; i < 3; i += 1) {
       const idx = rand(0, players.length - 1)
       if(!lockedTeams.includes(players[idx].team)) {
-        players[idx] = {name: '', cost: 0, projection: -1000}
+        players[idx] = {name: '', cost: 0, override: -1000}
         removeCount += 1
       }
     }
@@ -92,9 +92,11 @@ export function useOptimizer(activeRostersUpdatedCallback) {
       }
     })
 
-    const totalValue = players.map((row) => row.projection).reduce((a, b) => a + b, 0)
+    const totalValue = players.map((row) => row.override).reduce((a, b) => a + b, 0)
     const lineupKey = players.map((row) => row.name).sort().join('|')
+    // console.log('total value', totalValue, lineupKey)
 
+    
     return [players, totalValue, lineupKey]
   }
 

@@ -6,7 +6,7 @@ import collapse from '@/assets/collapse.png'
 import { nameMapper } from './../nameMapper.js'
 
 
-const currentTab = ref('Tab2')
+const currentTab = ref('Tab1')
 
 const emits = defineEmits(['openPanel'])
 
@@ -38,6 +38,7 @@ const isOpenLocal = ref(props.isOpen)
 const availableSlates = ref([])
 const tableData = ref([])
 const nameToPlayerData = ref({})
+const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
 
 watch(() => props.isOpen, (newVal) => {
   isOpenLocal.value = newVal;
@@ -97,6 +98,9 @@ const loadTableData = () => {
 
 
         const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
+
+        const overrides = slateToIdToOverride[slate]
+        
         return {
           name: row[2],
           playerId: row[1],
@@ -104,7 +108,7 @@ const loadTableData = () => {
           salary: row[4],
           team: row[5],
           projection: projectionRounded,
-          override: projectionRounded,
+          override: overrides ? overrides[row[1]] ?? projectionRounded : projectionRounded,
           status: row[7],
           startTime: teamToStartTime[row[5]]
         }

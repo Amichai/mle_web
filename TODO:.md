@@ -17,10 +17,10 @@ force to zero any projection less than 10?
  - Roster score reset bug
  - put a site logo next to each slate on the optimizer
 
-Use the overridden projections when optimizing
-Highlight players who's projection is overwritten
+ - Use the overridden projections when optimizing
+ - Highlight players who's projection is overwritten
 
-Tooltip the players to show cost, value, team etc.
+ - Tooltip the players to show cost, value, team etc.
 
 Autostop the optimization process
 reopitmize with locked teams
@@ -30,3 +30,5 @@ write every download result to our db
 news feed
 Stop optimizing when I tab away from my lineups tab
 Use an icon to represent each team in a table cell
+Add color highlights for players who are out or GTD
+Timezone awareness

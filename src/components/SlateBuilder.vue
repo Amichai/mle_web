@@ -137,7 +137,15 @@ const contests = ref('')
 const tableColumns = ref([])
 const tableRows = ref([])
 
-const site = ref('fd')
+const site = computed(() => {
+  if(selectedSlate.value.includes('DK')) {
+    return 'dk'
+  } else if(selectedSlate.value.includes('FD')) {
+    return 'fd'
+  }
+
+  return ''
+})
 const startTime = ref(0)
 const isCollapsed = ref(false)
 
@@ -200,19 +208,19 @@ const downloadFile = () => {
     }
 
     players.forEach((element) => {
-      toWrite += `"${element.name}:${element.playerId}",`
+      toWrite += `"${element.playerId}:${element.name}",`
     });
     toWrite += `${roster.value.toFixed(2)},`
     toWrite += `${roster.cost}\n`
   }
-  
   toWrite = toWrite.replace(/\r\n/g, '\n');
   console.log(toWrite)
   const blob = new Blob([toWrite], { type: 'text/plain' });
   const url = window.URL.createObjectURL(blob);
 
+  const contest_count = lines.length - 1
   const a = document.createElement('a');
-  a.setAttribute('download', 'test.txt');
+  a.setAttribute('download', `${selectedSlate.value} ${contest_count} entries.csv`);
   a.setAttribute('href', url);
 
   a.click();
@@ -267,22 +275,9 @@ const updateRosterSetPlayerProjections = () => {
 const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
-  const byPosition = slateData.reduce((acc, curr) => {
-    const positions = curr.position.split('/')
-    positions.forEach((position) => {
-      if (acc[position] === undefined) {
-        acc[position] = []
-      }
-
-      curr.cost = parseInt(curr.salary)
-      acc[position].push(curr)
-    })
-    
-    return acc
-  }, {})
 
   updateRosterSetPlayerProjections()
-  startStopGeneratingRosters(byPosition, [], rosterSet.value, rowCount.value)
+  startStopGeneratingRosters(slateData, [], rosterSet.value, rowCount.value, site.value)
   if (currentTime > startTime.value) {
     // reoptimize()
     // optimize(selectedSlate.value)

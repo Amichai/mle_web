@@ -240,6 +240,30 @@ const showExposures = async () => {
   // console.log(startTimeExposures.value)
 }
 
+const updateRosterSetPlayerProjections = () => {
+  const players = props.tableData[selectedSlate.value]
+  const idToPlayer = players.reduce((acc, curr) => {
+    acc[curr.playerId] = curr
+    return acc
+  }, {})
+  rosterSet.value.forEach((roster) => {
+    roster.players.forEach((player) => {
+      player.projection = idToPlayer[player.playerId].projection
+      player.override = idToPlayer[player.playerId].override
+    })
+
+    roster.value = roster.players.reduce((acc, curr) => {
+      return acc + curr.override
+    }, 0)
+    
+    roster.cost = roster.players.reduce((acc, curr) => {
+      return acc + curr.cost
+    }, 0)
+  })
+  // id to player
+  // for each roster, update the players by id
+}
+
 const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
@@ -257,6 +281,7 @@ const optimizeHandler = async () => {
     return acc
   }, {})
 
+  updateRosterSetPlayerProjections()
   startStopGeneratingRosters(byPosition, [], rosterSet.value, rowCount.value)
   if (currentTime > startTime.value) {
     // reoptimize()

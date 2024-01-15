@@ -218,6 +218,7 @@ export function useOptimizer(activeRostersUpdatedCallback) {
   var rosterCount = 0
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
 
+    topRosters = []
     appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)))
 
     rosterCount = _rosterCount

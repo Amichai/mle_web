@@ -28,12 +28,13 @@ const emits = defineEmits([])
         <td><b>{{ index + 1 }}</b></td>
         <td v-for="(cell, cellIndex) in row" :key="cellIndex"
         v-show="props.columns[cellIndex] || cell"
+        :class="[cell.override !== cell.projection && 'overriden']"
         >
-          <div v-if="(typeof cell === 'object')" class="tooltip">
+          <div v-if="(typeof cell === 'object')" :class="['tooltip']">
             {{ cell.name }}
             <span class="tooltiptext">{{ cell.override }}</span>
           </div>
-          <div v-else>
+          <div v-else :class="[cellIndex === 0 && 'contest-name']">
             {{ cell }}
           </div>
         </td>
@@ -92,5 +93,19 @@ table tr:nth-child(odd)
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+table tr:nth-child(odd) .overriden
+{
+  background-color: #E9E983 !important;
+}
+
+table tr:nth-child(even) .overriden
+{
+  background-color: #FFFF33 !important;
+}
+
+.contest-name {
+  font-size: 0.75rem
 }
 </style>

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
-import TableComponent from '../components/TableComponent.vue';
   
 const props = defineProps({
   rosters: {
@@ -8,6 +7,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const columns = ref([ 'Name', 'Salary', 'Exposure', 'Team', 'Start Time', 'Projection'])
 
 const exposures = ref({})
 const namesSortedByExposure = computed(() => {
@@ -17,16 +18,12 @@ const namesSortedByExposure = computed(() => {
 })
 
 const tableRows = computed(() => {
-  return namesSortedByExposure.value.map((name) => {
-    return [
-      name,
-      exposures.value[name].cost,
-      `${exposures.value[name].count} / ${props.rosters.length}`,
-      exposures.value[name].team,
-      exposures.value[name].startTime,
-      exposures.value[name].projection,
-    ]
-  })
+  const toReturn = namesSortedByExposure.value.map((name) => {
+    return { ...exposures.value[name], exposure: `${exposures.value[name].count}/${props.rosters.length}`
+  }})
+
+  console.log(toReturn)
+  return toReturn
 })
 
 watch(() => props.rosters, (newVal) => {
@@ -37,6 +34,7 @@ watch(() => props.rosters, (newVal) => {
         acc[name] = {
           name: name,
           projection: player.projection,
+          override: player.override,
           team: player.team,
           cost: player.cost,
           startTime: player.startTime,
@@ -53,11 +51,60 @@ const emits = defineEmits([])
 </script>
 
 <template>
-  <TableComponent 
-    :columns="[ 'Name', 'Salary', 'Exposure', 'Team', 'Start Time', 'Projection' ]"
-    :rows="tableRows"
-  ></TableComponent>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th v-for="(column, index) in columns" :key="index" v-show="column">{{ column }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(row, index) in tableRows" :key="index"  :class="[row['override'] !== row['projection'] && 'overriden']">
+        <td><b>{{ index + 1 }}</b></td>
+        <td>{{ row['name'] }}</td>
+        <td>{{ row['cost'] }}</td>
+        <td>{{ row['exposure'] }}</td>
+        <td>{{ row['team'] }}</td>
+        <td>{{ row['startTime'] }}</td>
+        <td>{{ row['override'] }}</td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
-<style>
+<style scoped>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-weight: 300;
+  overflow-x: auto;
+}
+
+th, td {
+  border: 1px solid darkgray;
+  padding: 0.2rem;
+  text-align: left;
+}
+
+tr {
+  line-height: 1rem;
+  font-size: 1rem;
+  background-color: #f2f2f2;
+}
+
+table tr:nth-child(odd)
+{
+  background-color: lightgray;
+}
+
+table tr.overriden:nth-child(odd)
+{
+  background-color: #E9E983 !important;
+}
+
+table tr.overriden:nth-child(even)
+{
+  background-color: #FFFF33 !important;
+}
 </style>

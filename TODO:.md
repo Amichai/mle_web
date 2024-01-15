@@ -28,3 +28,5 @@ DK vs FD optimizers
 time zone handling
 write every download result to our db
 news feed
+Stop optimizing when I tab away from my lineups tab
+Use an icon to represent each team in a table cell

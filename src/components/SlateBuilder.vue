@@ -157,6 +157,7 @@ const resetVals = () => {
   selectedSlate.value = ''
   rosterSet.value = []
   setItem('rosterSet', rosterSet.value)
+  setItem('tableRows', tableRows.value)
 }
 
 onMounted(() => {
@@ -228,6 +229,7 @@ const downloadFile = () => {
 }
 
 const getCurrentTimeDecimal = () => {
+  return 8.1
   var now = new Date();
   var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
   current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
@@ -394,8 +396,8 @@ const deleteSlate = () => {
       </div>
     </div>
     <div class="footer">
-      <div>
-        {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average value: {{ averageRosterValue.toFixed(2) }}
+      <div v-if="rowCount > 0">
+        {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
       </div>
       <div>
         <button class="button download-button" @click="downloadFile">

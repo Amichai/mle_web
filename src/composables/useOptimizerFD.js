@@ -217,7 +217,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   var lockedTeams = undefined
   var rosterCount = 0
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
-
     topRosters = []
     appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)))
 
@@ -321,15 +320,15 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   }
   const reoptimizeRosters = () => {
     //produce all roster keys
-    const allRosterKeys = topRosters.slice(0, lineupTableRows.value.length).map((row) => row[2])
+    const allRosterKeys = topRosters.map((row) => row[2])
 
     /// 1000 * 10 rosters = 10000
     /// x * 100 = 10
-    const outerLoopCount = (10000 / lineupTableRows.value.length) + 1
+    const outerLoopCount = (10000 / topRosters.length) + 1
     console.log("Reoptimize outer loop count: ", outerLoopCount)
 
     for(var j = 0; j < outerLoopCount; j += 1) {
-      for(var i = 0; i < lineupTableRows.value.length; i += 1) {
+      for(var i = 0; i < topRosters.length; i += 1) {
         const toImprove = topRosters[i]
         const rosterCloned = cloneRoster(toImprove)[0]
 

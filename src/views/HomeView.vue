@@ -30,26 +30,30 @@ const queryData = async (url) => {
 }
 
 const pingApi = async () => {
-  console.log('pinging API...')
+    console.log('pinging API...')
 
-  // TODO: this should return n version numbers, one for each of the file downloads (one base file, and one dynamic override file)
-  const url = 'https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/data?key=v'
-  const response = await fetch(url)
-  const data = await response.json()
-  const newDataVersion = data.Items[0].ct.S
-  pingPeriod.value = data.Items[0].period.S
-  if(newDataVersion !== dataVersion) {
-    console.log('new data version detected: ', newDataVersion)
-    dataVersion = newDataVersion
-    localStorage.setItem(`data-version`, newDataVersion)
-    const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/breakingNews.txt')
-    localStorage.setItem('breaking-news', result)
-    const rows = result.split('\n');
-    console.log(rows);
-    breakingNewsRows.value = rows
+  try {
+    // TODO: this should return n version numbers, one for each of the file downloads (one base file, and one dynamic override file)
+    const url = 'https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/data?key=v'
+    const response = await fetch(url)
+    const data = await response.json()
+    const newDataVersion = data.Items[0].ct.S
+    pingPeriod.value = data.Items[0].period.S
+    if(newDataVersion !== dataVersion) {
+      console.log('new data version detected: ', newDataVersion)
+      dataVersion = newDataVersion
+      localStorage.setItem(`data-version`, newDataVersion)
+      const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/breakingNews.txt')
+      localStorage.setItem('breaking-news', result)
+      const rows = result.split('\n');
+      console.log(rows);
+      breakingNewsRows.value = rows
+    }
+
+    pingCounter.value += 1
+  } catch (error) {
+    console.error('error pinging API: ', error)
   }
-
-  pingCounter.value += 1
 
   intervalId = setTimeout(pingApi, pingPeriod.value * 1000)
 }
@@ -61,16 +65,19 @@ const splitData = (data) => {
 onMounted(async () => {
   startPingingAPI()
 
-  const data1 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/player_data')
+  const today = new Date();
+  const formattedDate = today.toISOString().split('T')[0];
+
+  const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`)
   playerData.value = splitData(data1)
 
-  const data2 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/slate_data')
+  const data2 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_data_${formattedDate}`)
   slateData.value = splitData(data2)
   
-  const data3 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/team_data')
+  const data3 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/team_data_${formattedDate}`)
   teamData.value = splitData(data3)
   
-  const data4 = await queryData('https://amichai-dfs-data.s3.amazonaws.com/slate_player_data')
+  const data4 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_player_data_${formattedDate}`)
   slatePlayerData.value = splitData(data4)
 })
 

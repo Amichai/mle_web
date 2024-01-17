@@ -23,7 +23,7 @@ force to zero any projection less than 10?
  - Tooltip the players to show cost, value, team etc.
 
 Autostop the optimization process
-reopitmize with locked teams
+reopitmize with locked teams - visual indication for locked players
 DK vs FD optimizers
 time zone handling
 write every download result to our db
@@ -32,3 +32,4 @@ Stop optimizing when I tab away from my lineups tab
 Use an icon to represent each team in a table cell
 Add color highlights for players who are out or GTD
 Timezone awareness
+Prune the player pool for faster optimization

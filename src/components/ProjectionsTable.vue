@@ -3,6 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import SlatePicker from '../components/SlatePicker.vue';
 import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
+import { convertTimeStringToDecimal } from '../utils.js'
 
 const emits = defineEmits([])
 
@@ -16,6 +17,20 @@ const props = defineProps({
     required: true
   },
 })
+
+const isPlayerLocked = (startTime) => {
+  const currentTime = getCurrentTimeDecimal()
+  const decimalStartTime = convertTimeStringToDecimal(startTime)
+  const toReturn = decimalStartTime < currentTime
+  return toReturn
+}
+
+const getCurrentTimeDecimal = () => {
+  var now = new Date();
+  var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
+  current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
+  return current_time;
+}
 
 const selectedSlate = ref('')
 const slateData = ref([])
@@ -105,7 +120,7 @@ watch(() => props.tableData, (newVal) => {
     </thead>
     <tbody>
       <tr v-for="(playerRow, index) in slateData" :key="index"
-        :class="playerRow['projection'] != playerRow['override'] ? 'override-row' : ''"
+        :class="[playerRow['projection'] != playerRow['override'] ? 'override-row' : '', isPlayerLocked(playerRow.startTime) && 'is-locked']"
       >
       <td><b>{{ index + 1 }}</b></td>
       <td>{{ playerRow['name'] }}</td>
@@ -187,4 +202,7 @@ table tr.override-row:nth-child(even)
   background-color: #FFFF33 !important;
 }
 
+.is-locked {
+  color: #6b0c0c !important;
+}
 </style>

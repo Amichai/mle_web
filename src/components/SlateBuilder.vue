@@ -385,6 +385,7 @@ const deleteSlate = () => {
           v-show="!isShowingPlayerExposures"
           :columns="tableColumns"
           :rows="tableRows"
+          :currentTime="getCurrentTimeDecimal()"
         ></LineupsTable>
         <PlayerExposureComponent 
           v-show="isShowingPlayerExposures"

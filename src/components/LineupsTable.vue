@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+import { convertTimeStringToDecimal } from '../utils.js'
   
 const props = defineProps({
   columns: {
@@ -10,9 +11,20 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  currentTime: {
+    type: Number,
+    required: true
+  },
 })
 
 const emits = defineEmits([])
+
+const isPlayerLocked = (startTime) => {
+  const currentTime = props.currentTime
+  const decimalStartTime = convertTimeStringToDecimal(startTime)
+  const toReturn = decimalStartTime < currentTime
+  return toReturn
+}
 </script>
 
 <template>
@@ -30,7 +42,7 @@ const emits = defineEmits([])
         v-show="props.columns[cellIndex] || cell"
         :class="[cell.override !== cell.projection && 'overriden']"
         >
-          <div v-if="(typeof cell === 'object')" :class="['tooltip']">
+          <div v-if="(typeof cell === 'object')" :class="['tooltip', isPlayerLocked(cell.startTime) && 'is-locked']">
             {{ cell.name }}
             <span class="tooltiptext">{{ cell.override }}</span>
           </div>
@@ -107,5 +119,9 @@ table tr:nth-child(even) .overriden
 
 .contest-name {
   font-size: 0.75rem
+}
+
+.is-locked {
+  color: #6b0c0c !important;
 }
 </style>

@@ -69,6 +69,7 @@ const formatTime = (date) => {
 
 const formatRows = (rows) => {
   newsRowsLocal.value = []
+  const newRows = []
   rows.forEach((row) => {
     const parts = row.split(',')
     const time = parts[0]
@@ -78,9 +79,24 @@ const formatRows = (rows) => {
     const timeString = new Date(parseFloat(time) * 1000)
     newsRowsLocal.value.push(`${formatTime(timeString)}`)
     projections.forEach((projection) => {
-      newsRowsLocal.value.push(`${projection}`)
+      const name = projection[0]
+      const team = projection[1]
+      const fdInitial = projection[2]
+      const dkInitial = projection[3]
+      const fdFinal = projection[4]
+      const dkFinal = projection[5]
+      const fdDiff = (fdFinal - fdInitial).toFixed(2)
+      const dkDiff = (dkFinal - dkInitial).toFixed(2)
+      
+      newRows.push([`fd: ${name} ${fdInitial.toFixed(2)} → ${fdFinal.toFixed(2)} (${fdDiff > 0 ? '+' : ''}${fdDiff})`, Math.abs(fdDiff)])
+      newRows.push([`dk: ${name} ${dkInitial.toFixed(2)} → ${dkFinal.toFixed(2)} (${fdDiff > 0 ? '+' : ''}${dkDiff})`, Math.abs(dkDiff)])
     })
   })
+
+  newsRowsLocal.value = [...newsRowsLocal.value, ...newRows.sort((a, b) => {
+    return b[1] - a[1]
+  }).map((row) => row[0])]
+
 }
 
 watch(() => props.newsRows, (newVal) => {
@@ -130,9 +146,11 @@ const selectedSite = ref('1')
 
     </div>
     <div class="feed">
-      <p v-for="(row, idx) in newsRowsFiltered" :key="idx">
-        {{ row }}
-      </p>
+      <div v-for="(row, idx) in newsRowsFiltered" :key="idx">
+        <p>
+          {{ row }}
+        </p>
+      </div>
     </div>
 
   </div>

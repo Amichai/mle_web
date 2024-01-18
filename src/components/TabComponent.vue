@@ -37,7 +37,7 @@ const isOpenLocal = ref(props.isOpen)
 
 const availableSlates = ref([])
 const tableData = ref([])
-const nameToPlayerData = ref({})
+const nameToPlayerData = ref(null)
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
 
 watch(() => props.isOpen, (newVal) => {
@@ -46,6 +46,17 @@ watch(() => props.isOpen, (newVal) => {
 
 onMounted(() => {
   availableSlates.value = props.slateData.map((row) => row[0])
+
+  if(props.playerData.length === 0) {
+    return
+  }
+  
+  nameToPlayerData.value = {}
+  for(const row of props.playerData) {
+    nameToPlayerData.value[row[0]] = row
+  }
+
+  loadTableData()
 })
 
 

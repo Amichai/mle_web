@@ -81,6 +81,10 @@ onMounted(async () => {
   slatePlayerData.value = splitData(data4)
 })
 
+const isPlayerDataAvailable = computed(() => {
+  return playerData.value.length > 2
+})
+
 const openGridColumnStyle = '70% 1rem 29% 1rem'
 
 const gridColumns = ref(openGridColumnStyle)
@@ -115,7 +119,11 @@ const startPingingAPI = () => {
         <div class="column-1">
           <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
             :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
+            v-if="isPlayerDataAvailable"
           />
+          <div v-else class="background-message">
+            No slate data
+          </div>
         </div>
         <div></div>
         <div class="column-2">
@@ -142,10 +150,16 @@ const startPingingAPI = () => {
   transition: grid-template-columns 0.2s linear;
 }
 
-.column-1 {
+.background-message {
+  background-color: lightgray;
+  color: black;
+  height: calc(100vh - 6rem);
+  border-radius: 1.1rem;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 0.5rem;
+  overflow: auto;
 }
 
-.column-2 {
-  
-}
 </style>

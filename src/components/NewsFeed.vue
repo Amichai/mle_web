@@ -26,6 +26,8 @@ onMounted(() => {
   console.log('mounted')
   console.log(props.newsRows)
   console.log(newsRowsLocal)
+
+  formatRows(props.newsRows)
 })
 
 const emits = defineEmits(['closePanel'])
@@ -50,8 +52,40 @@ watch(() => props.pingCounter, (newVal) => {
     }
 })
 
+const formatTime = (date) => {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+    let ampm = hours >= 12 ? 'pm' : 'am';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    let strTime = hours + ':' + minutes + ':' + seconds + ampm;
+    return strTime;
+}
+
+const formatRows = (rows) => {
+  newsRowsLocal.value = []
+  rows.forEach((row) => {
+    const parts = row.split(',')
+    const time = parts[0]
+    const startIdx = row.indexOf(',')
+    const projections = JSON.parse(row.substring(startIdx + 2, row.length))
+
+    const timeString = new Date(parseFloat(time) * 1000)
+    newsRowsLocal.value.push(`${formatTime(timeString)}`)
+    projections.forEach((projection) => {
+      newsRowsLocal.value.push(`${projection}`)
+    })
+  })
+}
+
 watch(() => props.newsRows, (newVal) => {
-  newsRowsLocal.value = newVal;
+  formatRows(newVal)
+  // newsRowsLocal.value = newVal;
 })
 
 const newsRowsFiltered = computed(() => {

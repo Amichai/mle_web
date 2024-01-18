@@ -3,6 +3,7 @@ import HeaderBar from '../components/HeaderBar.vue';
 import NewsFeed from '../components/NewsFeed.vue';
 import TabComponent from '../components/TabComponent.vue';
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+import { getTodaysDate } from '../utils.js'
 
 const pingCounter = ref(0)
 let dataVersion = localStorage.getItem(`data-version`) || '0';
@@ -43,7 +44,7 @@ const pingApi = async () => {
       console.log('new data version detected: ', newDataVersion)
       dataVersion = newDataVersion
       localStorage.setItem(`data-version`, newDataVersion)
-      const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/breakingNews.txt')
+      const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/news_feed.txt')
       localStorage.setItem('breaking-news', result)
       const rows = result.split('\n');
       console.log(rows);
@@ -65,8 +66,7 @@ const splitData = (data) => {
 onMounted(async () => {
   startPingingAPI()
 
-  const today = new Date();
-  const formattedDate = today.toISOString().split('T')[0];
+  const formattedDate = getTodaysDate()
 
   const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`)
   playerData.value = splitData(data1)

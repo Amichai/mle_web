@@ -229,25 +229,11 @@ const downloadFile = () => {
 }
 
 const getCurrentTimeDecimal = () => {
-  return 8.1
+  return 7.1
   var now = new Date();
   var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
   current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
   return current_time;
-}
-
-const showExposures = async () => {
-  // const exposures = await getRosterExposures(slateId.value, contests.value, sport.value, site.value)
-  
-  // slatePlayers.value = JSON.parse(exposures.name_to_player)
-  // playerExposures.value = Object.keys(exposures.player_exposures).map((player) => {
-  //   return [player, exposures.player_exposures[player]]
-  // }).sort((a, b) => b[1] - a[1])
-
-  // startTimeExposures.value = exposures.start_times
-
-  // console.log(playerExposures.value)
-  // console.log(startTimeExposures.value)
 }
 
 const updateRosterSetPlayerProjections = () => {
@@ -277,9 +263,10 @@ const updateRosterSetPlayerProjections = () => {
 const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
-
   updateRosterSetPlayerProjections()
-  startStopGeneratingRosters(slateData, [], rosterSet.value, rowCount.value, site.value)
+  const lockedTeams = ["MIN"]
+  // const lockedTeams = []
+  startStopGeneratingRosters(slateData, lockedTeams, rosterSet.value, rowCount.value, site.value)
   if (currentTime > startTime.value) {
     // reoptimize()
     // optimize(selectedSlate.value)

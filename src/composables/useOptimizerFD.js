@@ -221,7 +221,13 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
     appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)))
 
     rosterCount = _rosterCount
-    byPositionFiltered = _byPosition
+    byPositionFiltered = Object.keys(_byPosition).reduce((acc, key) => {
+      const players = _byPosition[key]
+      acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
+
+      return acc
+    }, {})
+
     lockedTeams = _lockedTeams
     
     if(intervalId) {
@@ -229,9 +235,17 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
     }
 
     if(!isGeneratingRosters.value) {
-      intervalId = setInterval(() => generateRosters(), 1)
+      if(lockedTeams.length === 0) {
+        intervalId = setInterval(() => generateRosters(), 1)
+        isGeneratingRosters.value = true
+      } else {
+        isGeneratingRosters.value = true
+        setTimeout(() => {
+          generateRosters()
+          isGeneratingRosters.value = false
+        }, 1)
+      }
       // intervalId = setTimeout(() => generateRosters(), 1)
-      isGeneratingRosters.value = true
     } else {
       isGeneratingRosters.value = false
     }

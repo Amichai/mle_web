@@ -53,3 +53,12 @@ export const convertTimeStringToDecimal = (timeString) => {
 
   return lookup[timeString]
 }
+
+export const getTodaysDate = () => {
+  const today = new Date();
+  const localOffset = today.getTimezoneOffset() * 60000;
+  const targetTime = new Date(today.getTime() - localOffset);
+  const formattedDate = targetTime.toISOString();
+
+  return formattedDate.split('T')[0]
+}

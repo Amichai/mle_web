@@ -67,17 +67,35 @@ const formatTime = (date) => {
     return strTime;
 }
 
+const isToday = (timeInSeconds) => {
+  const today = new Date();
+    // Create a date object for the given time
+    const dateToCheck = new Date(timeInSeconds * 1000); // Convert seconds to milliseconds
+
+    // Check if the year, month, and day are the same
+    return today.getFullYear() === dateToCheck.getFullYear() &&
+           today.getMonth() === dateToCheck.getMonth() &&
+           today.getDate() === dateToCheck.getDate();
+}
+
 const formatRows = (rows) => {
   newsRowsLocal.value = []
-  const newRows = []
   rows.forEach((row) => {
+    const newRows = []
     const parts = row.split(',')
     const time = parts[0]
     const startIdx = row.indexOf(',')
     const projections = JSON.parse(row.substring(startIdx + 2, row.length))
 
     const timeString = new Date(parseFloat(time) * 1000)
-    newsRowsLocal.value.push(`${formatTime(timeString)}`)
+
+    if(!isToday(time)) {
+      return
+    }
+
+    newsRowsLocal.value.push({
+      text: `${formatTime(timeString)}`
+    })
     projections.forEach((projection) => {
       const name = projection[0]
       const team = projection[1]
@@ -88,26 +106,37 @@ const formatRows = (rows) => {
       const fdDiff = (fdFinal - fdInitial).toFixed(2)
       const dkDiff = (dkFinal - dkInitial).toFixed(2)
       
-      newRows.push([`fd: ${name} ${fdInitial.toFixed(2)} → ${fdFinal.toFixed(2)} (${fdDiff > 0 ? '+' : ''}${fdDiff})`, Math.abs(fdDiff)])
-      newRows.push([`dk: ${name} ${dkInitial.toFixed(2)} → ${dkFinal.toFixed(2)} (${fdDiff > 0 ? '+' : ''}${dkDiff})`, Math.abs(dkDiff)])
+      if((fdInitial > 13 || fdFinal > 13) && Math.abs(fdDiff) > 0.3) {
+        newRows.push([`${name} ${fdInitial.toFixed(2)} → ${fdFinal.toFixed(2)} (${fdDiff > 0 ? '+' : ''}${fdDiff})`, fdDiff, 'fd', team])
+      }
+      if((dkInitial > 13 || dkFinal > 13) && Math.abs(dkDiff) > 0.3) {
+        newRows.push([`${name} ${dkInitial.toFixed(2)} → ${dkFinal.toFixed(2)} (${fdDiff > 0 ? '+' : ''}${dkDiff})`, dkDiff, 'dk', team])
+      }
     })
+
+    newsRowsLocal.value = [...newsRowsLocal.value, ...newRows.sort((a, b) => {
+      return b[1] - a[1]
+    }).map((row) =>
+    ({
+      text: row[0],
+      diff: row[1],
+      site: row[2],
+      team: row[3],
+    }))]
   })
 
-  newsRowsLocal.value = [...newsRowsLocal.value, ...newRows.sort((a, b) => {
-    return b[1] - a[1]
-  }).map((row) => row[0])]
+
 
 }
 
 watch(() => props.newsRows, (newVal) => {
   formatRows(newVal)
-  // newsRowsLocal.value = newVal;
 })
 
 const newsRowsFiltered = computed(() => {
-  const fdRows =  newsRowsLocal.value.filter((row) => !row.includes('dk:')).map((row) => row.replace('fd:', ''))
+  const fdRows =  newsRowsLocal.value.filter((row) => !row.site || row.site === 'fd')
   
-  const dkRows =  newsRowsLocal.value.filter((row) => !row.includes('fd:')).map((row) => row.replace('dk:', ''))
+  const dkRows =  newsRowsLocal.value.filter((row) => !row.site || row.site === 'dk')
 
   return selectedSite.value === '1' ? fdRows : dkRows
 })
@@ -147,8 +176,8 @@ const selectedSite = ref('1')
     </div>
     <div class="feed">
       <div v-for="(row, idx) in newsRowsFiltered" :key="idx">
-        <p>
-          {{ row }}
+        <p :class="[row.diff > 1 && 'highlight-1', row.diff < -1 && 'highlight-2', !row.diff && 'bold-text']">
+          {{ row.text }}
         </p>
       </div>
     </div>
@@ -230,5 +259,18 @@ const selectedSite = ref('1')
 .animate-cube {
     animation: rotateCube 2s ease-in-out;
     visibility: visible !important;
+}
+
+.highlight-1 {
+  color: green;
+}
+
+.highlight-2 {
+  color: red;
+}
+
+.bold-text {
+  font-weight: bold;
+  text-decoration: underline;
 }
 </style>

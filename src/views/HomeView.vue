@@ -10,6 +10,9 @@ let dataVersion = localStorage.getItem(`data-version`) || '0';
 let breakingNews = localStorage.getItem('breaking-news') || '';
 const breakingNewsRows = ref(breakingNews.split('\n'));
 
+let projectionData = localStorage.getItem('projections') || '{}';
+const projections = ref(JSON.parse(projectionData));
+
 const playerData = ref([])
 const teamData = ref([])
 const slateData = ref([])
@@ -49,6 +52,10 @@ const pingApi = async () => {
       const rows = result.split('\n');
       console.log(rows);
       breakingNewsRows.value = rows
+
+      const projectionData = await queryData('https://amichai-dfs-data.s3.amazonaws.com/projections.txt')
+      localStorage.setItem('projections', projectionData)
+      projections.value = JSON.parse(projectionData)
     }
 
     pingCounter.value += 1
@@ -119,7 +126,9 @@ const startPingingAPI = () => {
         <div class="column-1">
           <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
             :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
+            :projections="projections"
             v-if="isPlayerDataAvailable"
+            
           />
           <div v-else class="background-message">
             No slate data
@@ -127,7 +136,8 @@ const startPingingAPI = () => {
         </div>
         <div></div>
         <div class="column-2">
-          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen" :pingCounter="pingCounter" :newsRows="breakingNewsRows"/>
+          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen" :pingCounter="pingCounter" :newsRows="breakingNewsRows"
+          />
         </div>
       </div>
     </div>

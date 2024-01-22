@@ -31,6 +31,17 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  projections: {
+    type: Object,
+    required: true
+  },
+})
+
+watch(() => props.projections, (newVal) => {
+  console.log('projections changed')
+  console.log(newVal)
+
+  loadTableData()
 })
 
 const isOpenLocal = ref(props.isOpen)
@@ -95,8 +106,14 @@ const loadTableData = () => {
 
         if(slate.includes('DK')) {
           projection = playerData[3]
+          if(name in props.projections) {
+            projection = props.projections[name][1]
+          }
         } else {
           projection = playerData[2]
+          if(name in props.projections) {
+            projection = props.projections[name][0]
+          }
         }
         
         const status = playerData[4]
@@ -106,7 +123,6 @@ const loadTableData = () => {
           row.push(projection)
         }
         row.push(status)
-
 
         const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
 

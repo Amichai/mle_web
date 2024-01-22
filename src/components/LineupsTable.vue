@@ -47,6 +47,8 @@ const isPlayerLocked = (startTime) => {
             <span class="tooltiptext">{{ cell.override }}
               <br>
             {{ cell.team }}
+            <br>
+            {{ `$${cell.cost}` }}
             </span>
           </div>
           <div v-else :class="[cellIndex === 0 && 'contest-name']">

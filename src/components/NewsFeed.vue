@@ -103,6 +103,7 @@ const formatRows = (rows) => {
       const dkInitial = projection[3]
       const fdFinal = projection[4]
       const dkFinal = projection[5]
+      
       const fdDiff = (fdFinal - fdInitial).toFixed(2)
       const dkDiff = (dkFinal - dkInitial).toFixed(2)
       

@@ -36,7 +36,7 @@ watch(() => props.rosters, (newVal) => {
           projection: player.projection,
           override: player.override,
           team: player.team,
-          cost: player.cost,
+          cost: `$${player.cost}`,
           startTime: player.startTime,
           count: 0
         }

@@ -229,7 +229,6 @@ const downloadFile = () => {
 }
 
 const getCurrentTimeDecimal = () => {
-  return 7.1
   var now = new Date();
   var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
   current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
@@ -264,8 +263,8 @@ const optimizeHandler = async () => {
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
   updateRosterSetPlayerProjections()
-  const lockedTeams = ["MIN"]
-  // const lockedTeams = []
+  // const lockedTeams = ["MIN"]
+  const lockedTeams = []
   startStopGeneratingRosters(slateData, lockedTeams, rosterSet.value, rowCount.value, site.value)
   if (currentTime > startTime.value) {
     // reoptimize()

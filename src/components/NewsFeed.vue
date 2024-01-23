@@ -81,6 +81,9 @@ const isToday = (timeInSeconds) => {
 const formatRows = (rows) => {
   newsRowsLocal.value = []
   rows.forEach((row) => {
+    if(!row) {
+      return
+    }
     const newRows = []
     const parts = row.split(',')
     const time = parts[0]
@@ -103,6 +106,10 @@ const formatRows = (rows) => {
       const dkInitial = projection[3]
       const fdFinal = projection[4]
       const dkFinal = projection[5]
+
+      if(!fdInitial || !dkInitial) {
+        return
+      }
       
       const fdDiff = (fdFinal - fdInitial).toFixed(2)
       const dkDiff = (dkFinal - dkInitial).toFixed(2)

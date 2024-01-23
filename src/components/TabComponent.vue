@@ -31,17 +31,6 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  projections: {
-    type: Object,
-    required: true
-  },
-})
-
-watch(() => props.projections, (newVal) => {
-  console.log('projections changed')
-  console.log(newVal)
-
-  loadTableData()
 })
 
 const isOpenLocal = ref(props.isOpen)
@@ -50,6 +39,19 @@ const availableSlates = ref([])
 const tableData = ref([])
 const nameToPlayerData = ref(null)
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
+
+
+const loadNameToPlayerData = () => {
+  nameToPlayerData.value = {}
+  for(const row of props.playerData) {
+    let name = row[0]
+    if(name in nameMapper) {
+      name = nameMapper[name]
+    }
+
+    nameToPlayerData.value[name] = row
+  }
+}
 
 watch(() => props.isOpen, (newVal) => {
   isOpenLocal.value = newVal;
@@ -61,11 +63,7 @@ onMounted(() => {
   if(props.playerData.length === 0) {
     return
   }
-  
-  nameToPlayerData.value = {}
-  for(const row of props.playerData) {
-    nameToPlayerData.value[row[0]] = row
-  }
+  loadNameToPlayerData()
 
   loadTableData()
 })
@@ -90,7 +88,6 @@ const loadTableData = () => {
     acc[slate] = props.slatePlayerData
     .filter((row) => row[0] === slate)
     .map((row) => {
-
         let name = row[2]
         if(name in nameMapper) {
           name = nameMapper[name]
@@ -98,22 +95,29 @@ const loadTableData = () => {
         const playerData = nameToPlayerData.value[name]
         if (!playerData) {
           ///Are you missing a name conversion here?
-          debugger
+          // debugger
+          console.log(name)
+          // debugger
+          return {
+            name: name,
+            position: row[3],
+            salary: row[4],
+            team: row[5],
+            projection: 0,
+            override: 0,
+            status: row[7],
+            startTime: teamToStartTime[row[5]]
+          }
         } 
-        row.push(playerData[1])
+
+        // row.push(playerData[1])
 
         let projection = '0.0'
 
         if(slate.includes('DK')) {
           projection = playerData[3]
-          if(name in props.projections) {
-            projection = props.projections[name][1]
-          }
         } else {
           projection = playerData[2]
-          if(name in props.projections) {
-            projection = props.projections[name][0]
-          }
         }
         
         const status = playerData[4]
@@ -127,7 +131,6 @@ const loadTableData = () => {
         const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
 
         const overrides = slateToIdToOverride[slate]
-        
         return {
           name: row[2],
           playerId: row[1],
@@ -151,9 +154,7 @@ watch(() => props.slatePlayerData, (newVal) => {
 })
 
 watch(() => props.playerData, (newVal) => {
-  for(const row of newVal) {
-    nameToPlayerData.value[row[0]] = row
-  }
+  loadNameToPlayerData()
 
   loadTableData()
 })

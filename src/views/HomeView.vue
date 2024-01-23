@@ -10,9 +10,6 @@ let dataVersion = localStorage.getItem(`data-version`) || '0';
 let breakingNews = localStorage.getItem('breaking-news') || '';
 const breakingNewsRows = ref(breakingNews.split('\n'));
 
-let projectionData = localStorage.getItem('projections') || '{}';
-const projections = ref(JSON.parse(projectionData));
-
 const playerData = ref([])
 const teamData = ref([])
 const slateData = ref([])
@@ -53,9 +50,9 @@ const pingApi = async () => {
       console.log(rows);
       breakingNewsRows.value = rows
 
-      const projectionData = await queryData('https://amichai-dfs-data.s3.amazonaws.com/projections.txt')
-      localStorage.setItem('projections', projectionData)
-      projections.value = JSON.parse(projectionData)
+      const formattedDate = getTodaysDate()
+      const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`)
+      playerData.value = splitData(data1)
     }
 
     pingCounter.value += 1
@@ -86,6 +83,7 @@ onMounted(async () => {
   
   const data4 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_player_data_${formattedDate}`)
   slatePlayerData.value = splitData(data4)
+
 })
 
 const isPlayerDataAvailable = computed(() => {
@@ -126,7 +124,6 @@ const startPingingAPI = () => {
         <div class="column-1">
           <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
             :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
-            :projections="projections"
             v-if="isPlayerDataAvailable"
             
           />

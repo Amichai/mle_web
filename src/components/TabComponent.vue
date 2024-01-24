@@ -8,7 +8,7 @@ import { nameMapper } from './../nameMapper.js'
 
 const currentTab = ref('Tab1')
 
-const emits = defineEmits(['openPanel'])
+const emits = defineEmits(['openPanel', 'selectedSiteChanged'])
 
 const props = defineProps({
   isOpen: {
@@ -162,6 +162,10 @@ const selectTab = (tabName) => {
   currentTab.value = tabName
 }
 
+const selectedSiteChanged = (newSite) => {
+  emits('selectedSiteChanged', newSite)
+}
+
 </script>
 
 <template>
@@ -184,6 +188,7 @@ const selectTab = (tabName) => {
         :tableData="tableData"
         :availableSlates="availableSlates"
         :selectedSlateGlobal="selectedSlate"
+        @selectedSiteChanged="selectedSiteChanged"
       />
     </div>
     <div v-show="currentTab === 'Tab2'">

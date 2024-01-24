@@ -15,15 +15,15 @@ const teamData = ref([])
 const slateData = ref([])
 const slatePlayerData = ref([])
 const pingPeriod = ref('')
+const selectedSite = ref('FD')
 
 let intervalId = null;
 
-const queryData = async (url) => {
+const queryData = async (url, noCache=false) => {
   // Fetch the CSV file
   const response = await fetch(url, {
     headers: {
-      // 'Cache-Control': 'no-cache',
-      'Cache-Control': 'max-age=600',
+      'Cache-Control': noCache ? 'no-cache' : 'max-age=600',
     },
   })
   const data = await response.text()
@@ -51,7 +51,7 @@ const pingApi = async () => {
       breakingNewsRows.value = rows
 
       const formattedDate = getTodaysDate()
-      const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`)
+      const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`, true)
       playerData.value = splitData(data1)
     }
 
@@ -124,6 +124,7 @@ const startPingingAPI = () => {
         <div class="column-1">
           <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
             :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
+            @selectedSiteChanged="selectedSite = $event"
             v-if="isPlayerDataAvailable"
             
           />
@@ -134,6 +135,7 @@ const startPingingAPI = () => {
         <div></div>
         <div class="column-2">
           <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen" :pingCounter="pingCounter" :newsRows="breakingNewsRows"
+          :selectedSiteInitial="selectedSite"
           />
         </div>
       </div>

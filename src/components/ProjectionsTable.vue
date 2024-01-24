@@ -5,7 +5,7 @@ import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
 import { convertTimeStringToDecimal } from '../utils.js'
 
-const emits = defineEmits([])
+const emits = defineEmits(['selectedSiteChanged'])
 
 const props = defineProps({
   availableSlates: {
@@ -43,6 +43,12 @@ const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.p
 watch(() => props.selectedSlateGlobal, (newVal) => {
   selectedSlate.value = newVal
 })
+
+const selectedSlateChanged = (newSlate) => {
+    selectedSlate.value = newSlate
+    const newSite = newSlate.includes('FD') ? 'FD' : 'DK'
+    emits('selectedSiteChanged', newSite)
+}
 
 const isNumeric = (value) => {
   return value !== "" && !isNaN(+value);
@@ -92,7 +98,6 @@ watch(() => props.availableSlates, (newVal) => {
 })
 
 watch(()  => selectedSlate.value, (newVal) => {
-  console.log('selected slate changed: ', newVal)
   slateData.value = props.tableData[selectedSlate.value]
 })
 
@@ -104,7 +109,7 @@ watch(() => props.tableData, (newVal) => {
 <template>
   <div class="projections-header">
     <SlatePicker
-      @selectedSlateChanged="selectedSlate = $event"
+      @selectedSlateChanged="selectedSlateChanged"
       :availableSlates="availableSlates" 
       :selected="selectedSlate"
       />

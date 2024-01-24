@@ -19,7 +19,17 @@ const props = defineProps({
   newsRows: {
     type: Array,
     default: () => []
+  },
+  selectedSiteInitial: {
+    type: String,
+    required: true
   }
+})
+
+const selectedSite = ref(props.selectedSiteInitial)
+
+watch(() => props.selectedSiteInitial, (newVal) => {
+  selectedSite.value = newVal
 })
 
 onMounted(() => {
@@ -28,6 +38,10 @@ onMounted(() => {
   console.log(newsRowsLocal)
 
   formatRows(props.newsRows)
+
+  nextTick(() => {
+    scrollToBottom()
+  })
 })
 
 const emits = defineEmits(['closePanel'])
@@ -139,6 +153,8 @@ const formatRows = (rows) => {
 
 watch(() => props.newsRows, (newVal) => {
   formatRows(newVal)
+
+  scrollToBottom()
 })
 
 const newsRowsFiltered = computed(() => {
@@ -146,15 +162,17 @@ const newsRowsFiltered = computed(() => {
   
   const dkRows =  newsRowsLocal.value.filter((row) => !row.site || row.site === 'dk')
 
-  return selectedSite.value === '1' ? fdRows : dkRows
+  return selectedSite.value === 'FD' ? fdRows : dkRows
 })
 
 const closePanel = () => {
   emits('closePanel');
 }
 
-const selectedSite = ref('1')
-
+const scrollToBottom = () => {
+  var div = document.getElementById("feed");
+  div.scrollTop = div.scrollHeight;
+}
 </script>
 
 <template>
@@ -175,14 +193,14 @@ const selectedSite = ref('1')
         <p>Breaking News</p>
       </div>
       <div class="site-selector">
-        <input type="radio" id="option1" name="option" value="1" v-model="selectedSite">
+        <input type="radio" id="option1" name="option" value="FD" v-model="selectedSite">
         <label for="option1"><img :src="fdlogo" alt="fanduel" height="20"></label>
-        <input type="radio" id="option2" name="option" value="2" v-model="selectedSite">
+        <input type="radio" id="option2" name="option" value="DK" v-model="selectedSite">
         <label for="option2"><img :src="dklogo" alt="draftkings" height="20"></label>
       </div>
 
     </div>
-    <div class="feed">
+    <div class="feed" id="feed">
       <div v-for="(row, idx) in newsRowsFiltered" :key="idx">
         <p :class="[row.diff > 1 && 'highlight-1', row.diff < -1 && 'highlight-2', !row.diff && 'bold-text']">
           {{ row.text }}
@@ -280,5 +298,22 @@ const selectedSite = ref('1')
 .bold-text {
   font-weight: bold;
   text-decoration: underline;
+}
+
+/* Styling for the scrollbar */
+.feed::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+.feed::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Color of the track */
+}
+
+.feed::-webkit-scrollbar-thumb {
+  background: #888; /* Color of the scrollbar thumb */
+}
+
+.feed::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Color of the scrollbar thumb when hovered */
 }
 </style>

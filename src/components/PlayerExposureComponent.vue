@@ -29,7 +29,10 @@ const tableRows = computed(() => {
 watch(() => props.rosters, (newVal) => {
   exposures.value = newVal.reduce((acc, roster) => {
     roster.players.forEach((player) => {
-      const name = player.name
+      const name = player?.name
+      if(!name) {
+        return
+      }
       if(!acc[name]) {
         acc[name] = {
           name: name,

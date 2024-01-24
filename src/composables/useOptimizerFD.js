@@ -191,6 +191,14 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   var byPositionFiltered = undefined
   var lockedTeams = undefined
   var rosterCount = 0
+  
+  const stopGeneratingRosters = () => {
+    if(intervalId) {
+      clearInterval(intervalId)
+    }
+    isGeneratingRosters.value = false
+  }
+
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
     topRosters = []
     appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !_lockedTeams.length)
@@ -347,5 +355,5 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   }
 
 
-  return { startStopGeneratingRosters, isGeneratingRosters }
+  return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }
 }

@@ -4,8 +4,13 @@ import { useOptimizerDK } from '../composables/useOptimizerDK.js'
 
 export function useOptimizer(rostersUpdatedCallback) {
 
-  const { startStopGeneratingRosters: startStopFD, isGeneratingRosters: isGeneratingFD } = useOptimizerFD(rostersUpdatedCallback)
-  const { startStopGeneratingRosters: startStopDK, isGeneratingRosters: isGeneratingDK } = useOptimizerDK(rostersUpdatedCallback)
+  const { startStopGeneratingRosters: startStopFD, isGeneratingRosters: isGeneratingFD, stopGeneratingRosters: stopFD } = useOptimizerFD(rostersUpdatedCallback)
+  const { startStopGeneratingRosters: startStopDK, isGeneratingRosters: isGeneratingDK, stopGeneratingRosters: stopDK } = useOptimizerDK(rostersUpdatedCallback)
+
+  const stopGeneratingRosters = () => {
+    stopFD()
+    stopDK()
+  }
 
   const startStopGeneratingRosters = (slateData, lockedTeams, rosterSet, rosterCount, site) => {
     if (site === 'fd') {
@@ -52,5 +57,5 @@ export function useOptimizer(rostersUpdatedCallback) {
     return isGeneratingDK.value || isGeneratingFD.value
   })
 
-  return { startStopGeneratingRosters, isGeneratingRosters }
+  return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }
 }

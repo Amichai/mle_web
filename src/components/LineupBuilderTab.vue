@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import addIcon from '@/assets/add.png'
 import SlateBuilder from '../components/SlateBuilder.vue'
 
-const emits = defineEmits([])
+const emits = defineEmits(['slateGotFocus'])
 
 const props = defineProps({
   availableSlates: {
@@ -14,6 +14,10 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  selectedTab: {
+    type: String,
+    required: true
+  }
 })
 
 const slateIds = ref([])
@@ -47,6 +51,10 @@ const lowestAvailableId = () => {
   return id
 }
 
+const gotFocus = (slate) => {
+  emits('slateGotFocus', slate)
+}
+
 </script>
 
 <template>
@@ -56,8 +64,10 @@ const lowestAvailableId = () => {
         :id="slateId"
         :availableSlates="availableSlates"
         :tableData="tableData"
+        :selectedTab="selectedTab"
         @delete="() => removeSlate(index)"
-        />
+        @gotFocus="(slate) => gotFocus(slate)"
+      />
     </div>
   <button class="add-button" @click="addSlate">
     <img :src="addIcon" alt="add slate" width="30">

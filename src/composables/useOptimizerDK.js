@@ -223,6 +223,14 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
   var byPositionFiltered = undefined
   var lockedTeams = undefined
   var rosterCount = 0
+
+  const stopGeneratingRosters = () => {
+    if(intervalId) {
+      clearInterval(intervalId)
+    }
+    isGeneratingRosters.value = false
+  }
+
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
 
     topRosters = []
@@ -369,5 +377,5 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
   }
 
 
-  return { startStopGeneratingRosters, isGeneratingRosters }
+  return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }
 }

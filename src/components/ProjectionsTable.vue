@@ -16,6 +16,10 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  selectedSlateGlobal: {
+    type: String,
+    required: true
+  },
 })
 
 const isPlayerLocked = (startTime) => {
@@ -35,6 +39,10 @@ const getCurrentTimeDecimal = () => {
 const selectedSlate = ref('')
 const slateData = ref([])
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
+
+watch(() => props.selectedSlateGlobal, (newVal) => {
+  selectedSlate.value = newVal
+})
 
 const isNumeric = (value) => {
   return value !== "" && !isNaN(+value);
@@ -97,7 +105,9 @@ watch(() => props.tableData, (newVal) => {
   <div class="projections-header">
     <SlatePicker
       @selectedSlateChanged="selectedSlate = $event"
-      :availableSlates="availableSlates" />
+      :availableSlates="availableSlates" 
+      :selected="selectedSlate"
+      />
     <button class="button reset-button" @click="resetProjections">
       <img :src="resetIcon" alt="reset projections" width="40">
     </button>

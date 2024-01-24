@@ -25,6 +25,10 @@ const isPlayerLocked = (startTime) => {
   const toReturn = decimalStartTime < currentTime
   return toReturn
 }
+
+watch(() => props.rows, (newVal) => {
+  console.log("rows changed", newVal)
+})
 </script>
 
 <template>
@@ -40,7 +44,7 @@ const isPlayerLocked = (startTime) => {
         <td><b>{{ index + 1 }}</b></td>
         <td v-for="(cell, cellIndex) in row" :key="cellIndex"
         v-show="props.columns[cellIndex] || cell"
-        :class="[cell.override !== cell.projection && 'overriden']"
+        :class="[cell?.override !== cell?.projection && 'overriden']"
         >
           <div v-if="(typeof cell === 'object')" :class="['tooltip', isPlayerLocked(cell.startTime) && 'is-locked']">
             {{ cell.name }}

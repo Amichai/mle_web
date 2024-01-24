@@ -35,6 +35,14 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  selectedTab: {
+    type: String,
+    required: true
+  },
+})
+
+watch(() => props.selectedTab, (newVal) => {
+  stopGeneratingRosters()
 })
 
 const isShowingPlayerExposures = ref(false)
@@ -132,7 +140,7 @@ const rostersUpdatedCallback = (rosters) => {
 
 ///TODO: we should pass in the roster count from the uploaded roster file
 //rosterSet.value.length
-const { startStopGeneratingRosters, isGeneratingRosters } = useOptimizer(rostersUpdatedCallback)
+const { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters } = useOptimizer(rostersUpdatedCallback)
 
 const { getItem, setItem, setId } = useLocalStorage()
 
@@ -140,7 +148,7 @@ watch(() => props.index, (newVal) => {
   myIndex.value = newVal + 1
 })
 
-const emits = defineEmits(['delete'])
+const emits = defineEmits(['delete', 'gotFocus'])
 const reader = new FileReader();
 
 const contests = ref('')
@@ -186,6 +194,7 @@ const toggleCollapseState = () => {
 
 const slateSelected = (newVal) => {
   selectedSlate.value = newVal
+  emits('gotFocus', newVal)
 }
 
 watch(() => props.id, (newVal) => {
@@ -201,6 +210,8 @@ watch(() => selectedSlate.value, (newVal) => {
 })
 
 const downloadFile = () => {
+  stopGeneratingRosters()
+  emits('gotFocus', selectedSlate.value)
   const lines = contests.value.split('\n')
   let toWrite = ''
   toWrite += lines[0] + '\n'
@@ -254,6 +265,9 @@ const updateRosterSetPlayerProjections = () => {
   }, {})
   rosterSet.value.forEach((roster) => {
     roster.players.forEach((player) => {
+      if(!player.name) {
+        return
+      }
       player.projection = idToPlayer[player.playerId].projection
       player.override = idToPlayer[player.playerId].override
     })
@@ -271,6 +285,7 @@ const updateRosterSetPlayerProjections = () => {
 }
 
 const optimizeHandler = async () => {
+  emits('gotFocus', selectedSlate.value)
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
   updateRosterSetPlayerProjections()
@@ -289,6 +304,7 @@ const optimizeHandler = async () => {
 }
 
 const uploadSlateFile = (evt) => {
+  emits('gotFocus', selectedSlate.value)
   const files = evt.target.files; // FileList object
   const f = files[0];
   const name = f.name;
@@ -312,14 +328,15 @@ const uploadSlateFile = (evt) => {
       rosterSet.value = playerSets.map((playerSet) => {
         return {
           cost: playerSet.reduce((acc, curr) => {
-            return acc + parseInt(curr.salary)
+            return acc + parseInt(curr?.salary ?? '0')
           }, 0),
           value: playerSet.reduce((acc, curr) => {
-            return acc + curr.override
+            return acc + curr?.override ?? 0
           }, 0),
           players: playerSet,
         }
       })
+
       constructRosterTable()
       
       contests.value = Papa.unparse(filteredRows.value)
@@ -330,6 +347,7 @@ const uploadSlateFile = (evt) => {
 }
 
 const deleteSlate = () => {
+  stopGeneratingRosters()
   resetVals()
   nextTick(() => {
     emits('delete')

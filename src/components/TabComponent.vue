@@ -40,6 +40,7 @@ const tableData = ref([])
 const nameToPlayerData = ref(null)
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
 
+const selectedSlate = ref('')
 
 const loadNameToPlayerData = () => {
   nameToPlayerData.value = {}
@@ -95,8 +96,6 @@ const loadTableData = () => {
         const playerData = nameToPlayerData.value[name]
         if (!playerData) {
           ///Are you missing a name conversion here?
-          // debugger
-          console.log(name)
           // debugger
           return {
             name: name,
@@ -159,6 +158,9 @@ watch(() => props.playerData, (newVal) => {
   loadTableData()
 })
 
+const selectTab = (tabName) => {
+  currentTab.value = tabName
+}
 
 </script>
 
@@ -166,8 +168,8 @@ watch(() => props.playerData, (newVal) => {
   <div class="tab-component">
     <div class="top-bar">
       <div class="tabs">
-        <button v-bind:class="{ active: currentTab === 'Tab1' }" @click="currentTab = 'Tab1'">Projections</button>
-        <button v-bind:class="{ active: currentTab === 'Tab2' }" @click="currentTab = 'Tab2'">Lineups</button>
+        <button v-bind:class="{ active: currentTab === 'Tab1' }" @click="selectTab('Tab1')">Projections</button>
+        <button v-bind:class="{ active: currentTab === 'Tab2' }" @click="selectTab('Tab2')">Lineups</button>
       </div>
 
 
@@ -181,12 +183,15 @@ watch(() => props.playerData, (newVal) => {
       <ProjectionsTable 
         :tableData="tableData"
         :availableSlates="availableSlates"
+        :selectedSlateGlobal="selectedSlate"
       />
     </div>
     <div v-show="currentTab === 'Tab2'">
       <LineupBuilderTab 
         :availableSlates="availableSlates"
         :tableData="tableData"
+        :selectedTab="currentTab"
+        @slateGotFocus="selectedSlate = $event"
       />
     </div>
   </div>

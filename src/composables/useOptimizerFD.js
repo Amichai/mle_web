@@ -36,7 +36,7 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
     if(lockedTeams.includes(team)) {
       return false
     }
-    
+
     const positionsToSwap = positionsToFill[idx]
     const swapCandidates = byPositionFiltered[positionsToSwap].filter((row) => 
         !currentNames.includes(row.name) 
@@ -175,31 +175,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
 
     console.log("Average roster value: ", averageRosterValue.toFixed(2))
 
-      ///check to see that we're still improving
-    // lineupTableRows.value = uploadTemplateCells.map((cells, index) => {
-    //   const players = topRosters[index % topRosters.length][0]
-
-    //   const roster = playerListToRoster(players)
-    //   const rosterCost = roster[0].map((row) => row.cost).reduce((a, b) => a + b, 0).toFixed(2)
-    //   const rosterValue = roster[1].toFixed(2)
-
-    //   const toReturn = [...cells.slice(0, 3), ...roster, ...[rosterCost, rosterValue]]
-    //   return toReturn
-    // }).filter((row) => row[0])
-    // const rosterValueSum = lineupTableRows.value.reduce((partialSum, row) => partialSum + parseFloat(row[7]), 0) / lineupTableRows.value.length
-    // const newAverageValue =  rosterValueSum.toFixed(2)
-    // if(averageRosterValue.value == newAverageValue) {
-    //   noChangeCount += 1
-    // } else {
-    //   noChangeCount = 0
-    // }
-    // if (noChangeCount > 4) {
-    //   startStopGeneratingRosters()
-    //   noChangeCount = 0
-    // }
-    // averageRosterValue.value = newAverageValue
-    
-    // activeRostersUpdatedCallback(lineupTableRows.value.map((row) => (row[3])))
     const toReturn = topRostersToReturn.map((roster) => ({
       players: roster[0],
       value: roster[1],
@@ -218,7 +193,7 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   var rosterCount = 0
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
     topRosters = []
-    appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)))
+    appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !_lockedTeams.length)
 
     rosterCount = _rosterCount
     byPositionFiltered = Object.keys(_byPosition).reduce((acc, key) => {
@@ -335,7 +310,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   const reoptimizeRosters = () => {
     //produce all roster keys
     const allRosterKeys = topRosters.map((row) => row[2])
-
     /// 1000 * 10 rosters = 10000
     /// x * 100 = 10
     const outerLoopCount = (10000 / topRosters.length) + 1
@@ -362,7 +336,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
             topRosters[i] = roster
             // remove the old roster key
             // add the new roster key
-
             const indexToRemove = allRosterKeys.indexOf(oldRosterKey)
             allRosterKeys.splice(indexToRemove, 1)
             allRosterKeys.push(newRosterKey)
@@ -370,7 +343,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
         }
       }
     }
-
     updateLineupSet()
   }
 

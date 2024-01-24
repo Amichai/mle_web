@@ -5,6 +5,7 @@ import SlatePicker from '../components/SlatePicker.vue';
 import ToggleButton from '../components/ToggleButton.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
+import { convertTimeStringToDecimal } from '../utils.js'
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/useOptimizer.js'
@@ -52,6 +53,16 @@ const selectedSlateSite = computed(() => {
 
 const rosterSet = ref([])
 
+const playerByPlayerId = computed(() => {
+  const players = props.tableData[selectedSlate.value]
+  const idToPlayer = players.reduce((acc, curr) => {
+    acc[curr.playerId] = curr
+    return acc
+  }, {})
+  
+  return idToPlayer
+})
+
 const rowCount = computed(() => {
   return filteredRows.value ? filteredRows.value.length - 1 : 0
 })
@@ -74,9 +85,9 @@ const constructRosterTable = () => {
 
 
   const rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
-    return [row[2], '', '', '', '', '', '', '', '', '', '', '']
+    // return [row[2], '', '', '', '', '', '', '', '', '', '', '']
+    return [row[2], row[3].split(':')[1], row[4].split(':')[1], row[5].split(':')[1], row[6].split(':')[1], row[7].split(':')[1], row[8].split(':')[1], row[9].split(':')[1], row[10].split(':')[1], row[11].split(':')[1]]
   }) : []
-
 
   if(rosterSet.value) {
     rows.forEach((row, index) => {
@@ -264,24 +275,17 @@ const optimizeHandler = async () => {
   const slateData = props.tableData[selectedSlate.value]
   updateRosterSetPlayerProjections()
   // const lockedTeams = ["MIN"]
-  const lockedTeams = []
+  const lockedTeams = slateData.reduce((acc, curr) => {
+    const startTime = convertTimeStringToDecimal(curr.startTime)
+    const isLocked = startTime < currentTime
+    if(isLocked && !acc.includes(curr.team)) {
+      acc.push(curr.team)
+    }
+
+    return acc
+  }, [])
+
   startStopGeneratingRosters(slateData, lockedTeams, rosterSet.value, rowCount.value, site.value)
-  if (currentTime > startTime.value) {
-    // reoptimize()
-    // optimize(selectedSlate.value)
-    // alert('Slate has already started')
-    // return
-
-
-    // const result = await runReoptimizer(sport.value, site.value, 
-    // gameType.value, slateId.value, rosterCount.value, iterCount.value, contests.value, excludedPlayers.value)
-    // constructOutputFile(result, `${site.value}_${slateName.value}_${slateId.value}_reopto.csv`)
-  } else {
-    // optimize(selectedSlate.value)
-    // const result = await runOptimizer(sport.value, site.value, 
-    // gameType.value, slateId.value, rosterCount.value, iterCount.value, excludedPlayers.value)
-    // constructOutputFile(result, `${site.value}_${slateName.value}_${slateId.value}.csv`)
-  }
 }
 
 const uploadSlateFile = (evt) => {
@@ -297,6 +301,25 @@ const uploadSlateFile = (evt) => {
 
       setItem('tableRows', filteredRows.value)
       
+      const playerSets = filteredRows.value.slice(1).map((row) => {
+        return row.slice(3, 12).map((player) => {
+          const splitPlayer = player.split(':')
+          const playerId = splitPlayer[0]
+          const matchedPlayer = playerByPlayerId.value[playerId]
+          return matchedPlayer
+        })
+      })
+      rosterSet.value = playerSets.map((playerSet) => {
+        return {
+          cost: playerSet.reduce((acc, curr) => {
+            return acc + parseInt(curr.salary)
+          }, 0),
+          value: playerSet.reduce((acc, curr) => {
+            return acc + curr.override
+          }, 0),
+          players: playerSet,
+        }
+      })
       constructRosterTable()
       
       contests.value = Papa.unparse(filteredRows.value)
@@ -304,12 +327,6 @@ const uploadSlateFile = (evt) => {
   })();
 
   reader.readAsText(f);
-}
-
-const reoptimizeHandler = async  (sport, site, type) => {
-  // const result = await runReoptimizer(sport, site, type, slateId.value, rosterCount.value, iterCount.value, contests.value, excludedPlayers.value)
-  // console.log(result)
-  // constructOutputFile(result, `${site}_reoptimize.csv`)
 }
 
 const deleteSlate = () => {

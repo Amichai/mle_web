@@ -13,17 +13,8 @@ lineup builder
 force to zero any projection less than 10?
 
 ----
- - Better visual indicator when optimizing lineups
- - Roster score reset bug
- - put a site logo next to each slate on the optimizer
-
- - Use the overridden projections when optimizing
- - Highlight players who's projection is overwritten
-
- - Tooltip the players to show cost, value, team etc.
 
 Autostop the optimization process
-reopitmize with locked teams - visual indication for locked players
 DK vs FD optimizers
 time zone handling
 write every download result to our db
@@ -33,3 +24,6 @@ Use an icon to represent each team in a table cell
 Add color highlights for players who are out or GTD
 Timezone awareness
 Prune the player pool for faster optimization
+Still missing projections due to name mapping. Full validation step
+
+Second website to upload and modify, the s3 file backend

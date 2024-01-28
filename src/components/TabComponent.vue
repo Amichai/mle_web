@@ -96,9 +96,9 @@ const loadTableData = () => {
         const playerData = nameToPlayerData.value[name]
         if (!playerData) {
           ///Are you missing a name conversion here?
-          // debugger
           return {
             name: name,
+            playerId: row[1],
             position: row[3],
             salary: row[4],
             team: row[5],

@@ -218,7 +218,6 @@ const scrollToBottom = () => {
   gap: 1rem;
   width: 100%;
   justify-content: space-between;
-  font-style: italic;
   user-select: none;
 }
 .news-feed {
@@ -288,11 +287,13 @@ const scrollToBottom = () => {
 }
 
 .highlight-1 {
-  color: green;
+  /* color: green; */
+  background-color: rgba(144, 238, 144, 0.657);
 }
 
 .highlight-2 {
-  color: red;
+  /* color: red; */
+  background-color: rgba(240, 128, 128, 0.461);
 }
 
 .bold-text {

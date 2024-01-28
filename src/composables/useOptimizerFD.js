@@ -210,6 +210,7 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
 
       return acc
     }, {})
+    
 
     lockedTeams = _lockedTeams
     

@@ -11,7 +11,7 @@ const emits = defineEmits([])
       <img :src="logo" alt="money line edge" class="logo" height="40">
 
       <div class="title">
-        Money Line Edge
+        MONEY LINE EDGE
       </div>
   </div>
 </template>
@@ -27,7 +27,9 @@ const emits = defineEmits([])
 }
 
 .title {
-  color: white;
+
+  font-family: Anton;
+  color: #f5bf42;
   text-align: center;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   /* font-family: Inter; */
@@ -36,7 +38,6 @@ const emits = defineEmits([])
   font-weight: 400;
   line-height: normal;
   align-self: center;
-  font-style: italic;
 }
 
 .logo {

@@ -50,6 +50,9 @@ const isShowingPlayerExposures = ref(false)
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
 const selectedSlateSite = computed(() => {
+  if(!selectedSlate.value) {
+    return ''
+  }
   if(selectedSlate.value.includes('DK')) {
     return 'dk'
   } else if(selectedSlate.value.includes('FD')) {
@@ -185,7 +188,7 @@ onMounted(() => {
   contests.value = getItem('contests')
   selectedSlate.value = getItem('selectedSlate')
   filteredRows.value = getItem('tableRows')
-  rosterSet.value = getItem('rosterSet')
+  rosterSet.value = getItem('rosterSet') ?? []
 })
 
 const toggleCollapseState = () => {
@@ -212,6 +215,12 @@ watch(() => selectedSlate.value, (newVal) => {
 const downloadFile = () => {
   stopGeneratingRosters()
   emits('gotFocus', selectedSlate.value)
+  const players = props.tableData[selectedSlate.value]
+  const nameToId = players.reduce((acc, curr) => {
+    acc[curr.name] = curr.playerId
+    return acc
+  }, {})
+
   const lines = contests.value.split('\n')
   let toWrite = ''
   toWrite += lines[0] + '\n'
@@ -231,7 +240,7 @@ const downloadFile = () => {
     }
 
     players.forEach((element) => {
-      toWrite += `"${element.playerId}:${element.name}",`
+      toWrite += `"${nameToId[element.name]}:${element.name}",`
     });
     toWrite += `${roster.value.toFixed(2)},`
     toWrite += `${roster.cost}\n`
@@ -265,19 +274,20 @@ const updateRosterSetPlayerProjections = () => {
   }, {})
   rosterSet.value.forEach((roster) => {
     roster.players.forEach((player) => {
-      if(!player.name) {
+      if(!player?.name) {
         return
       }
-      player.projection = idToPlayer[player.playerId].projection
-      player.override = idToPlayer[player.playerId].override
+
+      player.projection = idToPlayer[player.playerId]?.projection ?? 0
+      player.override = idToPlayer[player.playerId]?.override ?? 0
     })
 
     roster.value = roster.players.reduce((acc, curr) => {
-      return acc + curr.override
+      return acc + curr?.override ?? 0
     }, 0)
     
     roster.cost = roster.players.reduce((acc, curr) => {
-      return acc + curr.cost
+      return acc + curr?.cost ?? 0
     }, 0)
   })
   // id to player

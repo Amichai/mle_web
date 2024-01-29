@@ -130,7 +130,6 @@ watch(() => props.tableData, (newVal) => {
         <th>Team</th>
         <th>Projection</th>
         <th>Override</th>
-        <th>Status</th>
       </tr>
     </thead>
     <tbody>
@@ -138,7 +137,13 @@ watch(() => props.tableData, (newVal) => {
         :class="[playerRow['projection'] != playerRow['override'] ? 'override-row' : '', isPlayerLocked(playerRow.startTime) && 'is-locked']"
       >
       <td><b>{{ index + 1 }}</b></td>
-      <td>{{ playerRow['name'] }}</td>
+      <td>
+        <div class="name-row">
+        {{ playerRow['name'] }}
+        <div class="out-tag" v-show="playerRow['status'] === 'O'">OUT</div>
+        <div class="q-tag" v-show="playerRow['status'] === 'GTD'">Q</div>
+        </div>  
+      </td>
       <td>{{ playerRow['position'] }}</td>
       <td>{{ playerRow['salary'] }}</td>
       <td>{{ playerRow['team'] }}</td>
@@ -148,7 +153,6 @@ watch(() => props.tableData, (newVal) => {
           @change="() => overrideChanged(playerRow)"
         />
       </td>
-      <td>{{ playerRow['status'] }}</td>
       </tr>
     </tbody>
   </table>
@@ -219,5 +223,28 @@ table tr.override-row:nth-child(even)
 
 .is-locked {
   color: #6b0c0c !important;
+}
+
+.name-row {
+  display: flex;  
+}
+
+.out-tag, .q-tag {
+  color: rgb(255, 255, 255);
+  margin-left: 3px;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-weight: bold;
+  font-size: 10px;
+  line-height: 13px;
+  text-align: center;
+}
+
+.out-tag {
+  background-color: rgb(184, 20, 39);
+}
+
+.q-tag {
+  background-color: rgb(202, 71, 11);
 }
 </style>

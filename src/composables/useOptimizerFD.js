@@ -84,6 +84,9 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
 
   const playerListToRoster = (players) => {
     players.forEach((player) => {
+      if(!player.id) {
+        // debugger
+      }
       if(player.id && !(player.id in props.byPlayerId)) {
         // debugger
       }

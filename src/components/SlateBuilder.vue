@@ -168,7 +168,7 @@ const site = computed(() => {
 
   return ''
 })
-const startTime = ref(0)
+
 const isCollapsed = ref(false)
 
 const resetVals = () => {
@@ -317,7 +317,7 @@ const uploadSlateFile = (evt) => {
   emits('gotFocus', selectedSlate.value)
   const files = evt.target.files; // FileList object
   const f = files[0];
-  const name = f.name;
+  // const name = f.name;
 
   reader.onload = (() => {
     return function (e) {

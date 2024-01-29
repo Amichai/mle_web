@@ -53,7 +53,7 @@ watch(() => props.isOpen, (newVal) => {
 })
 
 watch(() => props.pingCounter, (newVal) => {
-  console.log('ping counter changed to: ', newVal)
+  console.log('ping counter changed to: ', newVal, new Date().toLocaleString())
 
   var cube = document.querySelector(".ping-dot");
   if (cube) {
@@ -102,6 +102,22 @@ const formatRows = (rows) => {
     const parts = row.split(',')
     const time = parts[0]
     const startIdx = row.indexOf(',')
+    let canParseJSON = false
+    try {
+      JSON.parse(row.substring(startIdx + 2, row.length))
+      canParseJSON = true
+    } catch {
+      canParseJSON = false
+    }
+
+    if(!canParseJSON) {
+      newsRowsLocal.value.push({
+        text: row
+      })
+
+      return
+    }
+
     const projections = JSON.parse(row.substring(startIdx + 2, row.length))
 
     const timeString = new Date(parseFloat(time) * 1000)
@@ -153,8 +169,9 @@ const formatRows = (rows) => {
 
 watch(() => props.newsRows, (newVal) => {
   formatRows(newVal)
-
-  scrollToBottom()
+  nextTick(() => {
+    scrollToBottom()
+  })
 })
 
 const newsRowsFiltered = computed(() => {

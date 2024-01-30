@@ -23,15 +23,14 @@ const props = defineProps({
 })
 const selectedSlate = ref(props.selected)
 
-watch(() => props.selected, (newVal) => {
-  selectedSlate.value = newVal
+onMounted(() => {
+  selectedSlate.value = localStorage.getItem('selectedSlate') || ''
+
+  console.log("Selected slate", selectedSlate.value)
 })
 
-
-watch(() => props.availableSlates, (newVal) => {
-  if(props.isFirstSlateAsDefault) {
-    selectedSlate.value = newVal[0]
-  }
+watch(() => props.selected, (newVal) => {
+  selectedSlate.value = newVal
 })
 
 const selectedSlateChanged = () => {

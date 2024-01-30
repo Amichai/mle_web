@@ -30,12 +30,20 @@ const selectedSite = ref(props.selectedSiteInitial)
 
 watch(() => props.selectedSiteInitial, (newVal) => {
   selectedSite.value = newVal
+
+  console.log("Selected site1", selectedSite.value)
 })
 
 onMounted(() => {
-  console.log('mounted')
-  console.log(props.newsRows)
-  console.log(newsRowsLocal)
+  const persistedSlate = localStorage.getItem('selectedSlate') || ''
+  if(persistedSlate.includes('FD')) {
+    selectedSite.value = 'FD'
+  } 
+  if(persistedSlate.includes('DK')) {
+    selectedSite.value = 'DK'
+  }
+
+  console.log("Selected site2", selectedSite.value)
 
   formatRows(props.newsRows)
 

@@ -4,8 +4,11 @@ import SlatePicker from '../components/SlatePicker.vue';
 import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
 import { convertTimeStringToDecimal } from '../utils.js'
+import { useLogoProvider } from '../composables/useLogoProvider.js'
 
 const emits = defineEmits(['selectedSiteChanged'])
+
+const { getLogo } = useLogoProvider()
 
 const props = defineProps({
   availableSlates: {
@@ -47,6 +50,7 @@ watch(() => props.selectedSlateGlobal, (newVal) => {
 const selectedSlateChanged = (newSlate) => {
     selectedSlate.value = newSlate
     const newSite = newSlate.includes('FD') ? 'FD' : 'DK'
+    localStorage.setItem('selectedSlate', newSlate)
     emits('selectedSiteChanged', newSite)
 }
 
@@ -89,12 +93,11 @@ const resetProjections = () => {
   console.log('override changed: ', slateToIdToOverride)
 }
 
-onMounted(() => {
-  selectedSlate.value = props.availableSlates[0]
-})
-
 watch(() => props.availableSlates, (newVal) => {
-  selectedSlate.value = newVal[0]
+  selectedSlate.value = localStorage.getItem('selectedSlate') || ''
+  if(!selectedSlate.value){
+    selectedSlate.value = props.availableSlates[0]
+  } 
 })
 
 watch(()  => selectedSlate.value, (newVal) => {
@@ -146,7 +149,7 @@ watch(() => props.tableData, (newVal) => {
       </td>
       <td>{{ playerRow['position'] }}</td>
       <td>{{ playerRow['salary'] }}</td>
-      <td>{{ playerRow['team'] }}</td>
+      <td><component :is="getLogo(playerRow.team)" /> </td>
       <td>{{ playerRow['projection'] }}</td>
       <td>
         <input class="override" type="number" v-model="playerRow['override']" 

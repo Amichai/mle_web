@@ -236,7 +236,6 @@ table tr.override-row:nth-child(even)
   padding: 1px 4px;
   font-weight: bold;
   font-size: 10px;
-  line-height: 13px;
   text-align: center;
 }
 

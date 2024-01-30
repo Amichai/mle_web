@@ -83,19 +83,9 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
   }
 
   const playerListToRoster = (players) => {
-    players.forEach((player) => {
-      if(!player.id) {
-        // debugger
-      }
-      if(player.id && !(player.id in props.byPlayerId)) {
-        // debugger
-      }
-      if(player.id) {
-        player.value = props.byPlayerId[player.id]?.value ?? 0
-      }
-    })
-
-    const totalValue = players.map((row) => row.override).reduce((a, b) => a + b, 0)
+    const totalValue = players.map((row) => {
+      return row.override
+    }).reduce((a, b) => a + b, 0)
     const lineupKey = players.map((row) => row.name).sort().join('|')
     // console.log('total value', totalValue, lineupKey)
 
@@ -204,7 +194,12 @@ export function useOptimizerFD(activeRostersUpdatedCallback) {
 
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
     topRosters = []
-    appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !_lockedTeams.length)
+    
+    ///don't try to append lineups with undefined players
+    if(rosterSet.every((roster) => roster.players.filter((player) => !player).length === 0)) {
+      appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !_lockedTeams.length)
+    }
+
 
     rosterCount = _rosterCount
     byPositionFiltered = Object.keys(_byPosition).reduce((acc, key) => {

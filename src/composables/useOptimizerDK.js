@@ -6,7 +6,7 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
   const isGeneratingRosters = ref(false)
   const MAX_COST = 50000
 
-  const positionsToFill = ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL", "UTIL"]
+  const positionsToFill = ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL"]
 
   const cloneRoster = (roster) => {
     return JSON.parse(JSON.stringify(roster))
@@ -25,10 +25,10 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
 
     var idx;
 
-    if(currentNames.length != 9) {
+    if(currentNames.length != 8) {
       idx = lineup.findIndex((row) => !row.name)
     } else {
-      idx = getRandomInt(9)
+      idx = getRandomInt(8)
     }
 
     const rowToSwap = lineup[idx]
@@ -232,12 +232,23 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
   }
 
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
-
     topRosters = []
-    appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)))
+    
+    ///don't try to append lineups with undefined players
+    if(rosterSet.every((roster) => roster.players.filter((player) => !player).length === 0)) {
+      appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !_lockedTeams.length)
+    }
+
 
     rosterCount = _rosterCount
-    byPositionFiltered = _byPosition
+    byPositionFiltered = Object.keys(_byPosition).reduce((acc, key) => {
+      const players = _byPosition[key]
+      acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
+
+      return acc
+    }, {})
+    
+
     lockedTeams = _lockedTeams
     
     if(intervalId) {
@@ -245,9 +256,17 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
     }
 
     if(!isGeneratingRosters.value) {
-      intervalId = setInterval(() => generateRosters(), 1)
+      if(lockedTeams.length === 0) {
+        intervalId = setInterval(() => generateRosters(), 1)
+        isGeneratingRosters.value = true
+      } else {
+        isGeneratingRosters.value = true
+        setTimeout(() => {
+          generateRosters()
+          isGeneratingRosters.value = false
+        }, 1)
+      }
       // intervalId = setTimeout(() => generateRosters(), 1)
-      isGeneratingRosters.value = true
     } else {
       isGeneratingRosters.value = false
     }
@@ -336,15 +355,14 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
   }
   const reoptimizeRosters = () => {
     //produce all roster keys
-    const allRosterKeys = topRosters.slice(0, lineupTableRows.value.length).map((row) => row[2])
-
+    const allRosterKeys = topRosters.map((row) => row[2])
     /// 1000 * 10 rosters = 10000
     /// x * 100 = 10
-    const outerLoopCount = (10000 / lineupTableRows.value.length) + 1
+    const outerLoopCount = (10000 / topRosters.length) + 1
     console.log("Reoptimize outer loop count: ", outerLoopCount)
 
     for(var j = 0; j < outerLoopCount; j += 1) {
-      for(var i = 0; i < lineupTableRows.value.length; i += 1) {
+      for(var i = 0; i < topRosters.length; i += 1) {
         const toImprove = topRosters[i]
         const rosterCloned = cloneRoster(toImprove)[0]
 
@@ -364,7 +382,6 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
             topRosters[i] = roster
             // remove the old roster key
             // add the new roster key
-
             const indexToRemove = allRosterKeys.indexOf(oldRosterKey)
             allRosterKeys.splice(indexToRemove, 1)
             allRosterKeys.push(newRosterKey)
@@ -372,7 +389,6 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
         }
       }
     }
-
     updateLineupSet()
   }
 

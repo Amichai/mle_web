@@ -92,7 +92,8 @@ const averageRosterValue = computed(() => {
 
 const constructRosterTable = () => {
 
-  tableColumns.value = ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value']
+  tableColumns.value = site.value === 'fd' ? ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value'] : ['Contest', "PG", "SG", "SF", "PF", "C", "G", "F", "UTIL", 'Cost', 'Value']
+
 
 
   const rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
@@ -116,8 +117,10 @@ const constructRosterTable = () => {
         row[i + 1] = player
       }
 
-      row[10] = roster.cost
-      row[11] = roster.value.toFixed(2)
+      const offset = site.value === 'fd' ? 0 : -1
+
+      row[10 + offset] = roster.cost
+      row[11 + offset] = roster.value.toFixed(2)
     })
   }
 
@@ -240,7 +243,8 @@ const downloadFile = () => {
     }
 
     players.forEach((element) => {
-      toWrite += `"${nameToId[element.name]}:${element.name}",`
+      toWrite += site.value === 'fd' ? `"${nameToId[element.name]}:${element.name}",`
+      : `"${nameToId[element.name]}",`
     });
     toWrite += `${roster.value.toFixed(2)},`
     toWrite += `${roster.cost}\n`
@@ -410,6 +414,16 @@ const deleteSlate = () => {
           </div>
         </div>
     </div>
+    <div class="footer">
+      <div v-if="rowCount > 0">
+        {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
+      </div>
+      <div>
+        <button class="button download-button" @click="downloadFile">
+          <img :src="downloadIcon" alt="download" width="20" height="20">
+        </button>
+      </div>
+    </div>
     <div v-show="!isCollapsed">
       <div class="input-grid" v-show="selectedSlate">
         <LineupsTable 
@@ -425,18 +439,6 @@ const deleteSlate = () => {
       </div>
       <div class="input-file-row" v-show="selectedSlate">
         <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
-      </div>
-    </div>
-    <div class="footer">
-      <div v-if="rowCount > 0">
-        {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
-      </div>
-      <div>
-        <button class="button download-button" @click="downloadFile">
-          <img :src="downloadIcon" alt="download" width="20" height="20">
-        </button>
-        
-        
       </div>
     </div>
   </div>

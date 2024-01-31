@@ -4,6 +4,7 @@ import NewsFeed from '../components/NewsFeed.vue';
 import TabComponent from '../components/TabComponent.vue';
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { getTodaysDate } from '../utils.js'
+import { teamNameMapper } from './../nameMapper.js'
 
 const pingCounter = ref(0)
 let dataVersion = localStorage.getItem(`data-version`) || '0';
@@ -27,6 +28,10 @@ const queryData = async (url, noCache=false) => {
     },
   })
   const data = await response.text()
+  if(data.includes('<Error><Code>AccessDenied</Code><Message>Access Denied</Message>')) {
+    return null
+  }
+
   return data
 }
 
@@ -52,7 +57,7 @@ const pingApi = async () => {
 
       const formattedDate = getTodaysDate()
       const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`, true)
-      playerData.value = splitData(data1)
+      playerData.value = splitData(data1, 1)
     }
 
     pingCounter.value += 1
@@ -63,9 +68,27 @@ const pingApi = async () => {
   intervalId = setTimeout(pingApi, pingPeriod.value * 1000)
 }
 
-const splitData = (data) => {
-  return data.split('\n').filter(i => i).map((row) => row.split(','))
+
+const splitData = (data, teamColumn = null) => {
+  if(data === null) {
+    return []
+  }
+
+  const toReturn = data.split('\n').filter(i => i).map((row) => row.split(','))
+  if(teamColumn) {
+    toReturn.forEach((row) => {
+      if(!(row[teamColumn] in teamNameMapper)) {
+        return
+      }
+
+      row[teamColumn] = teamNameMapper[row[teamColumn]]
+    })
+  }
+
+  return toReturn
 }
+
+
 
 onMounted(async () => {
   startPingingAPI()
@@ -73,21 +96,21 @@ onMounted(async () => {
   const formattedDate = getTodaysDate()
 
   const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`)
-  playerData.value = splitData(data1)
+  playerData.value = splitData(data1, 1)
 
   const data2 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_data_${formattedDate}`)
   slateData.value = splitData(data2)
   
   const data3 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/team_data_${formattedDate}`)
+
   teamData.value = splitData(data3)
   
   const data4 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_player_data_${formattedDate}`)
-  slatePlayerData.value = splitData(data4)
-
+  slatePlayerData.value = splitData(data4, 5)
 })
 
 const isPlayerDataAvailable = computed(() => {
-  return playerData.value.length > 2
+  return playerData.value.length > 2 && slateData.value
 })
 
 const openGridColumnStyle = '70% 1rem 29% 1rem'

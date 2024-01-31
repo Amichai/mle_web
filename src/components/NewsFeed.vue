@@ -35,13 +35,13 @@ watch(() => props.selectedSiteInitial, (newVal) => {
 })
 
 onMounted(() => {
-  const persistedSlate = localStorage.getItem('selectedSlate') || ''
-  if(persistedSlate.includes('FD')) {
-    selectedSite.value = 'FD'
-  } 
-  if(persistedSlate.includes('DK')) {
-    selectedSite.value = 'DK'
-  }
+  // const persistedSlate = localStorage.getItem('selectedSlate') || ''
+  // if(persistedSlate.includes('FD')) {
+  //   selectedSite.value = 'FD'
+  // } 
+  // if(persistedSlate.includes('DK')) {
+  //   selectedSite.value = 'DK'
+  // }
 
   console.log("Selected site2", selectedSite.value)
 

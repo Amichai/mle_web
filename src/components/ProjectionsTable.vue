@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import SlatePicker from '../components/SlatePicker.vue';
 import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
-import { convertTimeStringToDecimal } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
 import { useLogoProvider } from '../composables/useLogoProvider.js'
 
 const emits = defineEmits(['selectedSiteChanged'])
@@ -30,13 +30,6 @@ const isPlayerLocked = (startTime) => {
   const decimalStartTime = convertTimeStringToDecimal(startTime)
   const toReturn = decimalStartTime < currentTime
   return toReturn
-}
-
-const getCurrentTimeDecimal = () => {
-  var now = new Date();
-  var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
-  current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
-  return current_time;
 }
 
 const selectedSlate = ref('')
@@ -94,7 +87,7 @@ const resetProjections = () => {
 }
 
 watch(() => props.availableSlates, (newVal) => {
-  selectedSlate.value = localStorage.getItem('selectedSlate') || ''
+  // selectedSlate.value = localStorage.getItem('selectedSlate') || ''
   if(!selectedSlate.value){
     selectedSlate.value = props.availableSlates[0]
   } 

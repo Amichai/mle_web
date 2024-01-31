@@ -44,3 +44,11 @@ export const nameMapper = {
   'Ricky Council IV': 'Ricky Council',
   'R.J. Hampton': 'RJ Hampton',
 }
+
+export const teamNameMapper = {
+  'NYK': 'NY',
+  'GSW': 'GS',
+  'PHX': 'PHO',
+  'SAS': 'SA',
+  'NOP': 'NO',
+}

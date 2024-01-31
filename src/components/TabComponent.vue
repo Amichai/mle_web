@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import ProjectionsTable from '../components/ProjectionsTable.vue';
 import LineupBuilderTab from '../components/LineupBuilderTab.vue';
 import collapse from '@/assets/collapse.png'
-import { nameMapper } from './../nameMapper.js'
+import { nameMapper, teamNameMapper } from './../nameMapper.js'
 
 
 const currentTab = ref('Tab1')
@@ -81,7 +81,14 @@ const loadTableData = () => {
   }
 
   const teamToStartTime = props.teamData.reduce((acc, row) => {
-    acc[row[0]] = row[2]
+    const team = row[0]
+    acc[team] = row[2]
+    return acc
+  }, {})
+
+  const teamToOpponent = props.teamData.reduce((acc, row) => {
+    const team = row[0]
+    acc[team] = row[1]
     return acc
   }, {})
   
@@ -93,6 +100,21 @@ const loadTableData = () => {
         if(name in nameMapper) {
           name = nameMapper[name]
         } 
+
+        const team = row[5]
+        const opponent = teamToOpponent[team]
+        if(!opponent) {
+          // name mapping problem?
+          debugger
+        }
+
+        const startTime = teamToStartTime[team]
+
+        if(!startTime) {
+          // name mapping problem?
+          debugger
+        }
+
         const playerData = nameToPlayerData.value[name]
         if (!playerData) {
           ///Are you missing a name conversion here?
@@ -101,15 +123,14 @@ const loadTableData = () => {
             playerId: row[1],
             position: row[3],
             salary: row[4],
-            team: row[5],
+            team,
             projection: 0,
             override: 0,
             status: row[7],
-            startTime: teamToStartTime[row[5]]
+            opp: opponent,
+            startTime,
           }
         } 
-
-        // row.push(playerData[1])
 
         let projection = '0.0'
 
@@ -135,11 +156,12 @@ const loadTableData = () => {
           playerId: row[1],
           position: row[3],
           salary: row[4],
-          team: row[5],
+          team,
           projection: projectionRounded,
           override: overrides ? overrides[row[1]] ?? projectionRounded : projectionRounded,
           status: row[7],
-          startTime: teamToStartTime[row[5]]
+          opp: opponent,
+          startTime,
         }
       })
     return acc

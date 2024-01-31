@@ -5,7 +5,7 @@ import SlatePicker from '../components/SlatePicker.vue';
 import ToggleButton from '../components/ToggleButton.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
-import { convertTimeStringToDecimal } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/useOptimizer.js'
@@ -144,8 +144,6 @@ const rostersUpdatedCallback = (rosters) => {
   setItem('rosterSet', rosterSet.value)
 }
 
-///TODO: we should pass in the roster count from the uploaded roster file
-//rosterSet.value.length
 const { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters } = useOptimizer(rostersUpdatedCallback)
 
 const { getItem, setItem, setId } = useLocalStorage()
@@ -263,13 +261,6 @@ const downloadFile = () => {
   window.URL.revokeObjectURL(url);
 }
 
-const getCurrentTimeDecimal = () => {
-  var now = new Date();
-  var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
-  current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
-  return current_time;
-}
-
 const updateRosterSetPlayerProjections = () => {
   const players = props.tableData[selectedSlate.value]
   const idToPlayer = players.reduce((acc, curr) => {
@@ -332,11 +323,18 @@ const uploadSlateFile = (evt) => {
       setItem('tableRows', filteredRows.value)
       
       const playerSets = filteredRows.value.slice(1).map((row) => {
-        return row.slice(3, 12).map((player) => {
-          const splitPlayer = player.split(':')
-          const playerId = splitPlayer[0]
-          const matchedPlayer = playerByPlayerId.value[playerId]
-          return matchedPlayer
+        const startOffset = site.value === 'dk' ? 1 : 0
+        return row.slice(3 + startOffset, 12).map((player) => {
+          if(player.includes(' (')){
+            const playerId = parseInt(player.split(' (')[1].split(')')[0])
+            const matchedPlayer = playerByPlayerId.value[playerId]
+            return matchedPlayer
+          } else {
+            const splitPlayer = player.split(':')
+            const playerId = splitPlayer[0]
+            const matchedPlayer = playerByPlayerId.value[playerId]
+            return matchedPlayer
+          }
         })
       })
       rosterSet.value = playerSets.map((playerSet) => {
@@ -383,7 +381,7 @@ const deleteSlate = () => {
           :isFirstSlateAsDefault="false"
           :selected="selectedSlate"
         />
-        <div class="slate-name">
+        <div class="slate-name" @click="toggleCollapseState">
           <img :src="fdlogo" alt="fanduel" height="20" v-if="selectedSlateSite === 'fd'">
           <img :src="dklogo" alt="draftkings" height="20" v-if="selectedSlateSite === 'dk'">
             {{ myIndex }} - {{  selectedSlate }}
@@ -402,7 +400,7 @@ const deleteSlate = () => {
           <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
         <div v-show="selectedSlate">
-          <div class="collapse-button">
+          <div class="collapse-button" @click="toggleCollapseState">
             <img :src="collapseIcon" alt="expand" width="26" height="26"
             @click="toggleCollapseState"
             v-show="isCollapsed"

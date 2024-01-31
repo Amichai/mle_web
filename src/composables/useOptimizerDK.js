@@ -1,4 +1,5 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
 
 export function useOptimizerDK(activeRostersUpdatedCallback) {
   let topRosters = []
@@ -90,39 +91,26 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
   }
 
   const playerListToRoster = (players) => {
-    players.forEach((player) => {
-      if(player.id && !(player.id in props.byPlayerId)) {
-        // debugger
-      }
-      if(player.id) {
-        player.value = props.byPlayerId[player.id]?.value ?? 0
-      }
-    })
-
     const totalValue = players.map((row) => row.override).reduce((a, b) => a + b, 0)
     const lineupKey = players.map((row) => row.name).sort().join('|')
     // console.log('total value', totalValue, lineupKey)
-
-    
     return [players, totalValue, lineupKey]
   }
 
   const isRosterValid = (players) => {
-    const teamToCount = {}
-    for (var i = 0; i < players.length; i += 1) {
-      const player = players[i]
+    const seenKeys = []
+    players.forEach((player) => {
       const team = player.team
-      if(!(team in teamToCount)) {
-        teamToCount[team] = 1
-      } else {
-        teamToCount[team] += 1
-        if (i > 4 && teamToCount[team] > 4) {
-          return false
-        }
+      const opp = player.opp
+      const key1 = `${team}|${opp}`
+      const key2 = `${opp}|${team}`
+      if(!seenKeys.includes(key1)) {
+        seenKeys.push(key1)
+        seenKeys.push(key2)
       }
-    }
+    })
 
-    return true
+    return seenKeys.length > 2
   }
 
   const l = (lineup, prop) => {
@@ -182,31 +170,6 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
 
     console.log("Average roster value: ", averageRosterValue.toFixed(2))
 
-      ///check to see that we're still improving
-    // lineupTableRows.value = uploadTemplateCells.map((cells, index) => {
-    //   const players = topRosters[index % topRosters.length][0]
-
-    //   const roster = playerListToRoster(players)
-    //   const rosterCost = roster[0].map((row) => row.cost).reduce((a, b) => a + b, 0).toFixed(2)
-    //   const rosterValue = roster[1].toFixed(2)
-
-    //   const toReturn = [...cells.slice(0, 3), ...roster, ...[rosterCost, rosterValue]]
-    //   return toReturn
-    // }).filter((row) => row[0])
-    // const rosterValueSum = lineupTableRows.value.reduce((partialSum, row) => partialSum + parseFloat(row[7]), 0) / lineupTableRows.value.length
-    // const newAverageValue =  rosterValueSum.toFixed(2)
-    // if(averageRosterValue.value == newAverageValue) {
-    //   noChangeCount += 1
-    // } else {
-    //   noChangeCount = 0
-    // }
-    // if (noChangeCount > 4) {
-    //   startStopGeneratingRosters()
-    //   noChangeCount = 0
-    // }
-    // averageRosterValue.value = newAverageValue
-    
-    // activeRostersUpdatedCallback(lineupTableRows.value.map((row) => (row[3])))
     const toReturn = topRostersToReturn.map((roster) => ({
       players: roster[0],
       value: roster[1],
@@ -214,6 +177,11 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
     }))
 
     if (toReturn.length) {
+
+      toReturn.forEach((roster) => {
+        optimizeRosterForLateSwap(roster.players)
+      })
+
       activeRostersUpdatedCallback(toReturn)
     }
   }
@@ -233,23 +201,22 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
 
   const startStopGeneratingRosters = (_byPosition, _lockedTeams, rosterSet, _rosterCount) => {
     topRosters = []
+    lockedTeams = _lockedTeams
     
     ///don't try to append lineups with undefined players
     if(rosterSet.every((roster) => roster.players.filter((player) => !player).length === 0)) {
-      appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !_lockedTeams.length)
+      appendNewLineups(rosterSet.map((roster) => playerListToRoster(roster.players)), !lockedTeams.length)
     }
 
 
     rosterCount = _rosterCount
     byPositionFiltered = Object.keys(_byPosition).reduce((acc, key) => {
       const players = _byPosition[key]
-      acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
+      acc[key] = players.filter((row) => !lockedTeams.includes(row.team))
 
       return acc
     }, {})
     
-
-    lockedTeams = _lockedTeams
     
     if(intervalId) {
       clearInterval(intervalId)
@@ -390,6 +357,62 @@ export function useOptimizerDK(activeRostersUpdatedCallback) {
       }
     }
     updateLineupSet()
+  }
+
+  const positionsMapper = {"PG": ["PG", "G", "UTIL"], "SG": ["SG", "G", "UTIL"], "SF": ["SF", "F", "UTIL"], "PF": ["PF", "F", "UTIL"], "C": ["C", "UTIL"]}
+
+  const considerSwap = (idx1, idx2, players, currentTime) => {
+    const player1 = players[idx1]
+    const player2 = players[idx2]
+    const player1StartTime = convertTimeStringToDecimal(player1.startTime) 
+    const player2StartTime = convertTimeStringToDecimal(player2.startTime) 
+    const isPlayer1Locked = player1StartTime < currentTime
+    const isPlayer2Locked = player1StartTime < currentTime
+
+    if (isPlayer1Locked || isPlayer2Locked) {
+        return;
+    }
+    
+    if (player1StartTime > player2StartTime) {
+        // make sure the swap is valid!
+        const player2Positions = player2.position.split('/');
+        const allPositions = []
+        player2Positions.forEach((position) => {
+          const mappedPositions = positionsMapper[position]
+          mappedPositions.forEach((mappedPosition) => {
+            if(!allPositions.includes(mappedPosition)) {
+              allPositions.push(mappedPosition)
+            }
+          })
+        })
+        
+        if (allPositions.some(p => p === positionsToFill[idx1])) {
+            // execute swap
+            players[idx2] = player1;
+            players[idx1] = player2;
+        }
+    }
+  }
+
+
+  const optimizeRosterForLateSwap = (players) => {
+    const currentTime = getCurrentTimeDecimal()
+    considerSwap(0, 5, players, currentTime)
+    considerSwap(1, 5, players, currentTime)
+    considerSwap(2, 6, players, currentTime)
+    considerSwap(3, 6, players, currentTime)
+    considerSwap(0, 7, players, currentTime)
+    considerSwap(1, 7, players, currentTime)
+    considerSwap(2, 7, players, currentTime)
+    considerSwap(3, 7, players, currentTime)
+    considerSwap(4, 7, players, currentTime)
+    considerSwap(5, 7, players, currentTime)
+    considerSwap(6, 7, players, currentTime)
+    considerSwap(0, 5, players, currentTime)
+    considerSwap(1, 5, players, currentTime)
+    considerSwap(2, 6, players, currentTime)
+    considerSwap(3, 6, players, currentTime)
+    considerSwap(0, 7, players, currentTime)
   }
 
 

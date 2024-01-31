@@ -24,7 +24,7 @@ const props = defineProps({
 const selectedSlate = ref(props.selected)
 
 onMounted(() => {
-  selectedSlate.value = localStorage.getItem('selectedSlate') || ''
+  // selectedSlate.value = localStorage.getItem('selectedSlate') || ''
 
   console.log("Selected slate", selectedSlate.value)
 })

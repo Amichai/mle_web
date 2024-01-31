@@ -1,28 +1,30 @@
-TODO:
+Scroll to the bottom when the news feed updates - 
+Editor admin page - 
+Status column - 
+Team logos - 
+Dk reoptimizer -
+Player Out/in messages -
+Check our lineups are actually valid - 
+Fix the DK validator by checking how many unique games are in a lineup - 
+Optimize dk for late swap -
 
- - Row color pallete, overridden projetions
-- Icons for out, gtd, and team logos
-----
-Preserve and use projection overrides
-Hoist up the data formatting steup so it's available in both tabs
-Upload distinct fd v dk projections
-table sort
-show the games at the top of the table (filtering)
-lineup builder
 
-force to zero any projection less than 10?
+Persist which slate we're looking at to local storage. Keep it in sync with news feed etc.
+Keep the slate dropdown and the news feed radio box in-sync (and track the most recent lineup modification)
+Add a short-lived diff highlight/annotation on our tables
 
-----
 
-Autostop the optimization process
-DK vs FD optimizers
-time zone handling
-write every download result to our db
-Stop optimizing when I tab away from my lineups tab
-Use an icon to represent each team in a table cell
-Add color highlights for players who are out or GTD
+Upload competitor projections
+Upload Analytics on file download - new endpoint for this
+
+Make sure we notice the projection update on the table and in our data model
+
+
+Control from my phone!
+Add a "new messages" indicator to the newsfeed UI
+
+Persist the projection of locked players
 Timezone awareness
-Prune the player pool for faster optimization
-Still missing projections due to name mapping. Full validation step
 
-Second website to upload and modify, the s3 file backend
+
+Download my projections to disk

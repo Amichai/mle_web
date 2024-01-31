@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+import { useLogoProvider } from '../composables/useLogoProvider.js'
   
 const props = defineProps({
   rosters: {
@@ -7,6 +8,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const { getLogo } = useLogoProvider()
 
 const columns = ref([ 'Name', 'Salary', 'Exposure', 'Team', 'Start Time', 'Projection'])
 
@@ -67,7 +70,7 @@ const emits = defineEmits([])
         <td>{{ row['name'] }}</td>
         <td>{{ row['cost'] }}</td>
         <td>{{ row['exposure'] }}</td>
-        <td>{{ row['team'] }}</td>
+        <td><component :is="getLogo(row.team)" /> </td>
         <td>{{ row['startTime'] }}</td>
         <td>{{ row['override'] }}</td>
       </tr>

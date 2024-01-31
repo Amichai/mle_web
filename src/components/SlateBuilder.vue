@@ -445,6 +445,7 @@ const deleteSlate = () => {
 <style scoped>
 .input-grid {
   overflow: auto;
+  min-height: 6rem;
 }
 
 .span-3 {

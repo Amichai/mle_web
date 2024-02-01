@@ -125,7 +125,7 @@ watch(() => props.tableData, (newVal) => {
         <th>Salary</th>
         <th>Team</th>
         <th>Projection</th>
-        <th>Override</th>
+        <th style="width: 20%;">Override</th>
       </tr>
     </thead>
     <tbody>
@@ -142,12 +142,17 @@ watch(() => props.tableData, (newVal) => {
       </td>
       <td>{{ playerRow['position'] }}</td>
       <td>{{ playerRow['salary'] }}</td>
-      <td><component :is="getLogo(playerRow.team)" /> </td>
+      <td><component :is="getLogo(playerRow.team)" /></td>
       <td>{{ playerRow['projection'] }}</td>
       <td>
-        <input class="override" type="number" v-model="playerRow['override']" 
-          @change="() => overrideChanged(playerRow)"
-        />
+        <div class="override-cell">
+          <input class="override" type="number" v-model="playerRow['override']" 
+            @change="() => overrideChanged(playerRow)"
+          />
+          <div v-if="playerRow.override !== playerRow.projection">
+            ({{ playerRow.override - playerRow.projection > 0 ? '+' : '' }}{{ (playerRow.override - playerRow.projection).toFixed(2) }})
+          </div>
+        </div>
       </td>
       </tr>
     </tbody>
@@ -241,5 +246,11 @@ table tr.override-row:nth-child(even)
 
 .q-tag {
   background-color: rgb(202, 71, 11);
+}
+
+.override-cell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 </style>

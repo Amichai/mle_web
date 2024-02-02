@@ -213,7 +213,8 @@ watch(() => selectedSlate.value, (newVal) => {
   setItem('selectedSlate', newVal)
 })
 
-const downloadFile = () => {
+const downloadFile = (evt) => {
+  evt.stopPropagation()
   stopGeneratingRosters()
   emits('gotFocus', selectedSlate.value)
   const lines = contests.value.split('\n')
@@ -284,7 +285,8 @@ const updateRosterSetPlayerProjections = () => {
   // for each roster, update the players by id
 }
 
-const optimizeHandler = async () => {
+const optimizeHandler = async (evt) => {
+  evt.stopPropagation()
   emits('gotFocus', selectedSlate.value)
   const currentTime = getCurrentTimeDecimal()
   const slateData = props.tableData[selectedSlate.value]
@@ -353,7 +355,8 @@ const uploadSlateFile = (evt) => {
   reader.readAsText(f);
 }
 
-const deleteSlate = () => {
+const deleteSlate = (evt) => {
+  evt.stopPropagation()
   stopGeneratingRosters()
   resetVals()
   nextTick(() => {
@@ -365,7 +368,7 @@ const deleteSlate = () => {
 
 <template>
   <div :class="['root', isGeneratingRosters && 'is-generating-rosters']">
-    <div class="header">
+    <div class="header" @click="toggleCollapseState">
       <button class="button delete-button" @click="deleteSlate">
         <img :src="trashIcon" alt="delete slate" width="30">
       </button>
@@ -381,7 +384,7 @@ const deleteSlate = () => {
           <img :src="dklogo" alt="draftkings" height="20" v-if="selectedSlateSite === 'dk'">
             {{ myIndex }} - {{  selectedSlate }}
         </div>
-        <div v-show="selectedSlate" class="play-button-parent">
+        <div v-show="selectedSlate" class="play-button-parent" @click="toggleCollapseState">
           <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
             <img :src="playIcon" alt="optimize" width="30">
           </button>
@@ -407,7 +410,7 @@ const deleteSlate = () => {
           </div>
         </div>
     </div>
-    <div class="status-bar">
+    <div class="status-bar" @click="toggleCollapseState">
       <div v-if="rowCount > 0">
         {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
       </div>

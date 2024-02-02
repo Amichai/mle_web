@@ -216,12 +216,6 @@ watch(() => selectedSlate.value, (newVal) => {
 const downloadFile = () => {
   stopGeneratingRosters()
   emits('gotFocus', selectedSlate.value)
-  const players = props.tableData[selectedSlate.value]
-  const nameToId = players.reduce((acc, curr) => {
-    acc[curr.name] = curr.playerId
-    return acc
-  }, {})
-
   const lines = contests.value.split('\n')
   let toWrite = ''
   toWrite += lines[0] + '\n'
@@ -241,8 +235,9 @@ const downloadFile = () => {
     }
 
     players.forEach((element) => {
-      toWrite += site.value === 'fd' ? `"${nameToId[element.name]}:${element.name}",`
-      : `"${nameToId[element.name]}",`
+      const playerId = element.playerId
+      toWrite += site.value === 'fd' ? `"${playerId}:${element.name}",`
+      : `"${playerId}",`
     });
     toWrite += `${roster.value.toFixed(2)},`
     toWrite += `${roster.cost}\n`
@@ -412,7 +407,7 @@ const deleteSlate = () => {
           </div>
         </div>
     </div>
-    <div class="footer">
+    <div class="status-bar">
       <div v-if="rowCount > 0">
         {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
       </div>
@@ -526,7 +521,7 @@ const deleteSlate = () => {
   transform: rotate(180deg);
 }
 
-.footer {
+.status-bar {
   display: flex;
   line-height: 1rem;
   font-size: 1rem;

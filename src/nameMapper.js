@@ -43,6 +43,7 @@ export const nameMapper = {
   'Brandon Boston Jr.': 'Brandon Boston',
   'Ricky Council IV': 'Ricky Council',
   'R.J. Hampton': 'RJ Hampton',
+  'Scotty Pippen Jr.': 'Scotty Pippen',
 }
 
 export const teamNameMapper = {

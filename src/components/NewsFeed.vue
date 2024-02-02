@@ -63,7 +63,7 @@ watch(() => props.isOpen, (newVal) => {
 watch(() => props.pingCounter, (newVal) => {
   console.log('ping counter changed to: ', newVal, new Date().toLocaleString())
 
-  var cube = document.querySelector(".ping-dot");
+  let cube = document.querySelector(".ping-dot");
   if (cube) {
       cube.classList.add("animate-cube");
 
@@ -195,7 +195,7 @@ const closePanel = () => {
 }
 
 const scrollToBottom = () => {
-  var div = document.getElementById("feed");
+  let div = document.getElementById("feed");
   div.scrollTop = div.scrollHeight;
 }
 </script>

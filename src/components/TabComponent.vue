@@ -143,12 +143,13 @@ const loadTableData = () => {
         const status = playerData[4]
         if (status === 'O') {
           row.push('0.0')
+          projection = '0.0'
         } else {
           row.push(projection)
         }
         row.push(status)
 
-        const projectionRounded = Math.round(parseFloat(row[6]) * 100) / 100;
+        const projectionRounded = Math.round(parseFloat(projection) * 100) / 100;
 
         const overrides = slateToIdToOverride[slate]
         return {
@@ -159,7 +160,7 @@ const loadTableData = () => {
           team,
           projection: projectionRounded,
           override: overrides ? overrides[row[1]] ?? projectionRounded : projectionRounded,
-          status: row[7],
+          status,
           opp: opponent,
           startTime,
         }

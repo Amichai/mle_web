@@ -64,8 +64,8 @@ export const getTodaysDate = () => {
 }
 
 export const getCurrentTimeDecimal = () => {
-  var now = new Date();
-  var current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
+  let now = new Date();
+  let current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
   current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
   return current_time;
 }

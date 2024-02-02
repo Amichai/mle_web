@@ -5,10 +5,13 @@ import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
 import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
 import { useLogoProvider } from '../composables/useLogoProvider.js'
+import { useProjectionsParser } from '../composables/useProjectionsParser.js'
+import { nameMapper } from './../nameMapper.js'
 
 const emits = defineEmits(['selectedSiteChanged'])
 
 const { getLogo } = useLogoProvider()
+const { parseProjectionFile } = useProjectionsParser()
 
 const props = defineProps({
   availableSlates: {
@@ -100,6 +103,39 @@ watch(()  => selectedSlate.value, (newVal) => {
 watch(() => props.tableData, (newVal) => {
   slateData.value = props.tableData[selectedSlate.value]
 })
+
+const uploadProjections = () => {
+  document.getElementById('formFileProjections').click();
+}
+
+const projectionFileUploaded = (evt) => {
+  const files = evt.target.files; // FileList object
+  const file = files[0];
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    const contents = e.target.result
+    const projections = parseProjectionFile(contents)
+
+    for (const playerRow of slateData.value) {
+      const name = playerRow.name
+      let name2 = null
+      if(name in nameMapper) {
+        name2 = nameMapper[name]
+      }
+
+      if(name in projections) {
+        playerRow['override'] = projections[name]
+        overrideChanged(playerRow)
+      }
+      else if(name2 !== null && name2 in projections) {
+        playerRow['override'] = projections[name2]
+        overrideChanged(playerRow)
+      }
+    }
+  }
+  reader.readAsText(file)
+
+}
 </script>
 
 <template>
@@ -112,9 +148,14 @@ watch(() => props.tableData, (newVal) => {
     <button class="button reset-button" @click="resetProjections">
       <img :src="resetIcon" alt="reset projections" width="40">
     </button>
-    <button class="button upload-button" @click="uploadProjections">
-      <img :src="uploadIcon" alt="upload projections" width="40">
-    </button>
+    <div class="file-upload-wrapper">
+      <button class="button upload-button" @click="uploadProjections">
+        <img :src="uploadIcon" alt="upload projections" width="40">
+      </button>
+      <input class="form-control-projections" type="file" 
+      @change="projectionFileUploaded"
+      id="formFileProjections">
+    </div>
   </div>
   <table>
     <thead>
@@ -227,7 +268,8 @@ table tr.override-row:nth-child(even)
 }
 
 .name-row {
-  display: flex;  
+  display: flex;
+  align-items: center;
 }
 
 .out-tag, .q-tag {
@@ -252,5 +294,9 @@ table tr.override-row:nth-child(even)
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.form-control-projections {
+  display: none;
 }
 </style>

@@ -28,3 +28,6 @@ Timezone awareness
 
 
 Download my projections to disk
+
+Add showdown slates
+Max eposure setting

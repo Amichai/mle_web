@@ -193,12 +193,14 @@ onMounted(() => {
 })
 
 const toggleCollapseState = () => {
+  console.log('Toggling collapse state')
   isCollapsed.value = !isCollapsed.value
 }
 
 const slateSelected = (newVal) => {
   selectedSlate.value = newVal
   emits('gotFocus', newVal)
+  isCollapsed.value = false
 }
 
 watch(() => props.id, (newVal) => {
@@ -379,7 +381,7 @@ const deleteSlate = (evt) => {
           :isFirstSlateAsDefault="false"
           :selected="selectedSlate"
         />
-        <div class="slate-name" @click="toggleCollapseState">
+        <div class="slate-name">
           <img :src="fdlogo" alt="fanduel" height="20" v-if="selectedSlateSite === 'fd'">
           <img :src="dklogo" alt="draftkings" height="20" v-if="selectedSlateSite === 'dk'">
             {{ myIndex }} - {{  selectedSlate }}

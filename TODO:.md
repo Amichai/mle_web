@@ -29,7 +29,6 @@ Download my projections to disk
 Add showdown slates
 
 
-Flash the slate builder UI when the lineups change
 
 Deploy
 Remote control of the website and scraper
@@ -39,3 +38,4 @@ compare to preexisting optimizer
 ****Persist the projection of locked players
 ****Upload Analytics on file download - new endpoint for this
 ****Max eposure setting
+****Flash the slate builder UI when the lineups change

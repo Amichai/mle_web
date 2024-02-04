@@ -71,7 +71,6 @@ const overrideChanged = (playerRow) => {
   }
   
   localStorage.setItem('slateToIdToOverride', JSON.stringify(slateToIdToOverride))
-  console.log('override changed: ', slateToIdToOverride)
 }
 
 const resetProjections = () => {
@@ -85,8 +84,14 @@ const resetProjections = () => {
   })
 
   localStorage.setItem('slateToIdToOverride', JSON.stringify(slateToIdToOverride))
+}
 
-  console.log('override changed: ', slateToIdToOverride)
+const resetRow = (row) => {
+  const playerId = row.playerId
+  delete slateToIdToOverride[selectedSlate.value][playerId];
+  row['override'] = row['projection']
+  localStorage.setItem('slateToIdToOverride', JSON.stringify(slateToIdToOverride))
+
 }
 
 watch(() => props.availableSlates, (newVal) => {
@@ -192,6 +197,7 @@ const projectionFileUploaded = (evt) => {
           />
           <div v-if="playerRow.override !== playerRow.projection">
             ({{ playerRow.override - playerRow.projection > 0 ? '+' : '' }}{{ (playerRow.override - playerRow.projection).toFixed(2) }})
+            <button class="reset-row" @click="() => resetRow(playerRow)">×</button>
           </div>
         </div>
       </td>
@@ -298,5 +304,10 @@ table tr.override-row:nth-child(even)
 
 .form-control-projections {
   display: none;
+}
+
+.reset-row {
+  border: none;
+  border-radius: 1rem;
 }
 </style>

@@ -29,10 +29,11 @@ import SAS from '@/assets/NBA/SAS.png'
 import TOR from '@/assets/NBA/TOR.png'
 import UTA from '@/assets/NBA/UTA.png'
 import WAS from '@/assets/NBA/WAS.png'
+import POR from '@/assets/NBA/POR.png'
 
 export function useLogoProvider() {
   const nameToLogoUrl = {
-    ATL, BKN, BOS, CHA, CHI, CHE, CLE, DAL, DEN, DET, GSW, HOU, IND, LAC, LAL, MEM, MIA, MIL, MIN, NOP, NYK, OKC, ORL, PHI, PHO, SAC, SAS, TOR, UTA, WAS, 'NY': NYK, 'GS': GSW, 'PHX': PHO, 'SA' : SAS, 'NO': NOP,
+    ATL, BKN, BOS, CHA, CHI, CHE, CLE, DAL, DEN, DET, GSW, HOU, IND, LAC, LAL, MEM, MIA, MIL, MIN, NOP, NYK, OKC, ORL, PHI, PHO, SAC, SAS, TOR, UTA, WAS, POR, 'NY': NYK, 'GS': GSW, 'PHX': PHO, 'SA' : SAS, 'NO': NOP,
   }
 
   const getLogo = (team) => {

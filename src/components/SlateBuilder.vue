@@ -46,6 +46,7 @@ watch(() => props.selectedTab, (newVal) => {
 })
 
 const isShowingPlayerExposures = ref(false)
+const isRosterDifferenceHighlighted = ref(false)
 
 const myIndex = ref(props.index + 1)
 const selectedSlate = ref('')
@@ -138,9 +139,36 @@ watch(() => rosterSet.value, (newRosterSet) => {
   constructRosterTable()
 })
 
+const areRostersDifferent = (rosters1, rosters2) => {
+  if(rosters1.length !== rosters2.length) {
+    return true
+  }
+
+  for(let i = 0; i < rosters1.length; i += 1) {
+    for(let j = 0; j < rosters1[i].players.length; j += 1) {
+      if(rosters1[i].players[j]?.playerId !== rosters2[i].players[j]?.playerId) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+let timeoutId = null
 const rostersUpdatedCallback = (rosters) => { 
   console.log('Rosters updated', rosters)
+  const areDifferent = areRostersDifferent(rosters, rosterSet.value)
+  isRosterDifferenceHighlighted.value = areDifferent
+  if(timeoutId) {
+    clearTimeout(timeoutId)
+  }
+
+  timeoutId = setTimeout(() => {
+    isRosterDifferenceHighlighted.value = false
+  }, 2000)
+
   rosterSet.value = rosters.slice(0, rowCount.value)
+
   setItem('rosterSet', rosterSet.value)
 }
 
@@ -370,7 +398,7 @@ const deleteSlate = (evt) => {
 
 <template>
   <div :class="['root', isGeneratingRosters && 'is-generating-rosters']">
-    <div class="header" @click="toggleCollapseState">
+    <div :class="['header', isRosterDifferenceHighlighted && 'highlight-difference']" @click="toggleCollapseState">
       <button class="button delete-button" @click="deleteSlate">
         <img :src="trashIcon" alt="delete slate" width="30">
       </button>
@@ -536,6 +564,21 @@ const deleteSlate = (evt) => {
 }
 
 .is-generating-rosters {
-  background-color: lightpink;
+  background-color: lightgreen;
 }
+
+@keyframes fadeBackgroundColor {
+  from {
+    background-color: yellow; /* Starting color */
+  }
+  to {
+    background-color: transparent; /* End color */
+  }
+}
+
+.highlight-difference {
+  animation: fadeBackgroundColor 2s forwards;
+  border-radius: 0.5rem;
+}
+
 </style>

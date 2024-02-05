@@ -1,6 +1,6 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 
-export function useOptimizerFD(activeRostersUpdatedCallback) {
+export function useOptimizerFD(activeRostersUpdatedCallback, maxExposurePercentage) {
   let topRosters = []
 
   const isGeneratingRosters = ref(false)

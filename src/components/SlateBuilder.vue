@@ -5,6 +5,7 @@ import SlatePicker from '../components/SlatePicker.vue';
 import ToggleButton from '../components/ToggleButton.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
+import ExposureSlider from '../components/ExposureSlider.vue';
 import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
@@ -172,7 +173,9 @@ const rostersUpdatedCallback = (rosters) => {
   setItem('rosterSet', rosterSet.value)
 }
 
-const { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters } = useOptimizer(rostersUpdatedCallback)
+const maxExposurePercentage = ref('1')
+
+const { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters } = useOptimizer(rostersUpdatedCallback, maxExposurePercentage)
 
 const { getItem, setItem, setId } = useLocalStorage()
 
@@ -184,6 +187,10 @@ const emits = defineEmits(['delete', 'gotFocus'])
 const reader = new FileReader();
 
 const contests = ref('')
+
+watch(() => maxExposurePercentage.value, (newVal) => {
+  console.log('Max exposure changed', newVal)
+})
 
 const tableColumns = ref([])
 const tableRows = ref([])
@@ -421,6 +428,7 @@ const deleteSlate = (evt) => {
           <button class="button play-button" @click="optimizeHandler" v-show="isGeneratingRosters">
             <img :src="stopIcon" alt="optimize" width="30">
           </button>
+          <ExposureSlider v-model="maxExposurePercentage" />
         </div>
         <div class="view-selector" v-show="selectedSlate">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
@@ -548,6 +556,8 @@ const deleteSlate = (evt) => {
 
 .play-button-parent {
   text-align: center;
+  display: flex;
+  align-items: center;
 }
 
 .expand-button-state {

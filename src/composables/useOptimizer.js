@@ -2,9 +2,8 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useOptimizerFD } from '../composables/useOptimizerFD.js'
 import { useOptimizerDK } from '../composables/useOptimizerDK.js'
 
-export function useOptimizer(rostersUpdatedCallback) {
-
-  const { startStopGeneratingRosters: startStopFD, isGeneratingRosters: isGeneratingFD, stopGeneratingRosters: stopFD } = useOptimizerFD(rostersUpdatedCallback)
+export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
+  const { startStopGeneratingRosters: startStopFD, isGeneratingRosters: isGeneratingFD, stopGeneratingRosters: stopFD } = useOptimizerFD(rostersUpdatedCallback, maxExposurePercentage)
   const { startStopGeneratingRosters: startStopDK, isGeneratingRosters: isGeneratingDK, stopGeneratingRosters: stopDK } = useOptimizerDK(rostersUpdatedCallback)
 
   const stopGeneratingRosters = () => {

@@ -386,7 +386,7 @@ const deleteSlate = (evt) => {
           <img :src="dklogo" alt="draftkings" height="20" v-if="selectedSlateSite === 'dk'">
             {{ myIndex }} - {{  selectedSlate }}
         </div>
-        <div v-show="selectedSlate" class="play-button-parent" @click="toggleCollapseState">
+        <div v-show="selectedSlate" class="play-button-parent">
           <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
             <img :src="playIcon" alt="optimize" width="30">
           </button>

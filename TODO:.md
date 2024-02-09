@@ -36,6 +36,6 @@ compare to preexisting optimizer
 
 ****Persist the projection of locked players
 ****Upload Analytics on file download - new endpoint for this
-****Max eposure setting
 
+****Max eposure setting -
 ****Flash the slate builder UI when the lineups change - 

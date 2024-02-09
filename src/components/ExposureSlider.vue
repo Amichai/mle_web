@@ -24,7 +24,7 @@ watch(() => maxExposure.value, (newVal) => {
 
 <template>
   <div class="exposure-slider">
-    <p class="title">max exp {{ (maxExposure) }}</p>
+    <p class="title">max exp {{ maxExposure }}</p>
     <div class="exposure-slider-component">
       <p class="slider-label">0.5</p>
       <div class="exposure-slider">
@@ -71,7 +71,7 @@ watch(() => maxExposure.value, (newVal) => {
 }
 
 .title {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   text-align: left;
   width: 8rem;
 }

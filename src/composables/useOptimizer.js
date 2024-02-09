@@ -4,7 +4,7 @@ import { useOptimizerDK } from '../composables/useOptimizerDK.js'
 
 export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
   const { startStopGeneratingRosters: startStopFD, isGeneratingRosters: isGeneratingFD, stopGeneratingRosters: stopFD } = useOptimizerFD(rostersUpdatedCallback, maxExposurePercentage)
-  const { startStopGeneratingRosters: startStopDK, isGeneratingRosters: isGeneratingDK, stopGeneratingRosters: stopDK } = useOptimizerDK(rostersUpdatedCallback)
+  const { startStopGeneratingRosters: startStopDK, isGeneratingRosters: isGeneratingDK, stopGeneratingRosters: stopDK } = useOptimizerDK(rostersUpdatedCallback, maxExposurePercentage)
 
   const stopGeneratingRosters = () => {
     stopFD()

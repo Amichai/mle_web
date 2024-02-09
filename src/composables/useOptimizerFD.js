@@ -1,6 +1,6 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 
-export function useOptimizerFD(activeRostersUpdatedCallback, maxExposurePercentage) {
+export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) {
   let topRosters = []
 
   const isGeneratingRosters = ref(false)
@@ -130,7 +130,76 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxExposurePercenta
     })
   }
 
+  const appendNewLineups2 = (newLineups, shouldSort = true) => {
+    if(!topRosters.length) {
+      topRosters = newLineups.filter((roster) => isRosterValid(roster[0]))
+    }
+
+    const currentRosterKeys = topRosters.map((roster) => l(roster, "key"))
+
+    const topNFiltered_dups = newLineups.filter((roster) => !currentRosterKeys.includes(l(roster, "key")))
+
+    const topNFiltered = dedupLineups(topNFiltered_dups)
+              .filter((roster) => isRosterValid(roster[0]))
+
+    topRosters = [...topRosters, ...topNFiltered]
+
+    if(shouldSort) {
+      const allRosters = topRosters.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
+      // console.log("all rosters",allRosters.length)
+      topRosters = allRosters
+
+      const takenRosters = []
+      const playerCounts = {}
+      const criticalThreshold = rosterCount * parseFloat(maxPlayerExposure.value)
+      for(let i = 0; i < topRosters.length; i += 1) {
+        const roster = topRosters[i]
+        const players = roster[0]
+        let isAcceptable = true
+        players.forEach((player) => {
+          const name = player.name
+          if(!(name in playerCounts)) {
+            playerCounts[name] = 1
+          } else {
+            playerCounts[name] += 1
+          }
+
+          if(playerCounts[name] > criticalThreshold) {
+            isAcceptable = false
+          }
+        })
+
+        if(isAcceptable) {
+          takenRosters.push(roster)
+        } else {
+          players.forEach((player) => {
+            const name = player.name
+            playerCounts[name] -= 1
+          })
+        }
+
+        if(takenRosters.length === rosterCount) {
+          break
+        }
+      }
+
+      topRosters = takenRosters
+    }
+
+    /// go through each roster
+    /// consume each roster if we're not over the limit
+    /// if we're over the limit skip
+  
+
+    updateLineupSet()
+  }
+
   const appendNewLineups = (newLineups, shouldSort = true) => {
+    if(maxPlayerExposure.value !== '1') {
+      appendNewLineups2(newLineups, shouldSort)
+      return
+    }
+
     if(!topRosters.length) {
       topRosters = newLineups.filter((roster) => isRosterValid(roster[0]))
     }
@@ -149,8 +218,13 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxExposurePercenta
     topRosters = [...topRosters, ...topNFiltered]
 
     if(shouldSort) {
-      topRosters = topRosters.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1).slice(0, 300)
+      const allRosters = topRosters.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
+      // console.log("all rosters",allRosters.length)
+      topRosters = allRosters
     }
+
+    ///check if we are violating the max player exposure constraint for each player
+    // if so, find the best rosters without that player 
 
     updateLineupSet()
   }
@@ -330,8 +404,9 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxExposurePercenta
         tryToImproveRoster(rosterCloned)
 
         const roster = playerListToRoster(rosterCloned)
+
         /// check if we collide with a known roster key
-        if(roster[1] > toImprove[1]) {
+        if(isRosterValid(roster[0]) && roster[1] > toImprove[1]) {
           ///this rosterkey is not found in existing roster keys
           const newRosterKey = roster[2]
           const newRosterValue = roster[1]

@@ -148,12 +148,7 @@ const startPingingAPI = () => {
           <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
             :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
             @selectedSiteChanged="selectedSite = $event"
-            v-if="isPlayerDataAvailable"
-            
           />
-          <div v-else class="background-message">
-            No slate data
-          </div>
         </div>
         <div></div>
         <div class="column-2">

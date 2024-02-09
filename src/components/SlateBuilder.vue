@@ -405,7 +405,7 @@ const deleteSlate = (evt) => {
 
 <template>
   <div :class="['root', isGeneratingRosters && 'is-generating-rosters']">
-    <div :class="['header', isRosterDifferenceHighlighted && 'highlight-difference']" @click="toggleCollapseState">
+    <div :class="['header']" @click="toggleCollapseState">
       <button class="button delete-button" @click="deleteSlate">
         <img :src="trashIcon" alt="delete slate" width="30">
       </button>
@@ -448,7 +448,8 @@ const deleteSlate = (evt) => {
           </div>
         </div>
     </div>
-    <div class="status-bar" @click="toggleCollapseState">
+    <div 
+      :class="['status-bar', isRosterDifferenceHighlighted && 'highlight-difference']"  @click="toggleCollapseState">
       <div v-if="rowCount > 0">
         {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
       </div>
@@ -558,6 +559,7 @@ const deleteSlate = (evt) => {
   text-align: center;
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .expand-button-state {

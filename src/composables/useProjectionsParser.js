@@ -7,8 +7,8 @@ export function useProjectionsParser() {
 
     let nameIdx = 0
     let projectionIdx = null
-    const nameColumns = ['"PLAYER NAME"']
-    const projectionColumns = ['"MY PROJ"']
+    const nameColumns = ['"PLAYER NAME"', '"Name"']
+    const projectionColumns = ['"MY PROJ"', '"Projection"']
     line1.forEach((part, index) => {
       if(nameColumns.includes(part)) {
         nameIdx = index

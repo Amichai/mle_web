@@ -3,8 +3,7 @@ import HeaderBar from '../components/HeaderBar.vue';
 import NewsFeed from '../components/NewsFeed.vue';
 import TabComponent from '../components/TabComponent.vue';
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
-import { getTodaysDate } from '../utils.js'
-import { teamNameMapper } from './../nameMapper.js'
+import { getTodaysDate, queryData, splitData, loadPlayerDataForSlate } from '../utils.js'
 
 const pingCounter = ref(0)
 let dataVersion = localStorage.getItem(`data-version`) || '0';
@@ -20,20 +19,7 @@ const selectedSite = ref('FD')
 
 let intervalId = null;
 
-const queryData = async (url, noCache=false) => {
-  // Fetch the CSV file
-  const response = await fetch(url, {
-    headers: {
-      'Cache-Control': noCache ? 'no-cache' : 'max-age=600',
-    },
-  })
-  const data = await response.text()
-  if(data.includes('<Error><Code>AccessDenied</Code><Message>Access Denied</Message>')) {
-    return null
-  }
 
-  return data
-}
 
 const pingApi = async () => {
     console.log('pinging API...')
@@ -68,28 +54,6 @@ const pingApi = async () => {
   intervalId = setTimeout(pingApi, pingPeriod.value * 1000)
 }
 
-
-const splitData = (data, teamColumn = null) => {
-  if(data === null) {
-    return []
-  }
-
-  const toReturn = data.split('\n').filter(i => i).map((row) => row.split(','))
-  if(teamColumn) {
-    toReturn.forEach((row) => {
-      if(!(row[teamColumn] in teamNameMapper)) {
-        return
-      }
-
-      row[teamColumn] = teamNameMapper[row[teamColumn]]
-    })
-  }
-
-  return toReturn
-}
-
-
-
 onMounted(async () => {
   startPingingAPI()
 
@@ -104,9 +68,6 @@ onMounted(async () => {
   const data3 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/team_data_${formattedDate}`)
 
   teamData.value = splitData(data3)
-  
-  const data4 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_player_data_${formattedDate}`)
-  slatePlayerData.value = splitData(data4, 5)
 })
 
 const isPlayerDataAvailable = computed(() => {
@@ -137,6 +98,11 @@ const startPingingAPI = () => {
   pingApi()
 }
 
+const selectedSlateChanged = async (newSlate) => {
+  console.log('selectedSlateChanged', newSlate)
+  slatePlayerData.value = loadPlayerDataForSlate(newSlate)
+}
+
 </script>
 
 <template>
@@ -148,6 +114,7 @@ const startPingingAPI = () => {
           <TabComponent @openPanel="openPanel" :isOpen="isPanelOpen"
             :playerData="playerData" :teamData="teamData" :slateData="slateData" :slatePlayerData="slatePlayerData"
             @selectedSiteChanged="selectedSite = $event"
+            @selectedSlateChanged="selectedSlateChanged"
           />
         </div>
         <div></div>

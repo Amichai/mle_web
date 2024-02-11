@@ -6,7 +6,7 @@ import ToggleButton from '../components/ToggleButton.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
 import ExposureSlider from '../components/ExposureSlider.vue';
-import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData } from '../utils.js'
 import hammerIcon from '@/assets/hammer.png'
 import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/useOptimizer.js'
@@ -32,15 +32,21 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  tableData: {
-    type: Object,
-    required: true
-  },
   selectedTab: {
     type: String,
     required: true
   },
+  teamData: {
+    type: Array,
+    required: true
+  },
+  playerData: {
+    type: Array,
+    required: true
+  }
 })
+
+const slatePlayerData = ref([])
 
 watch(() => props.selectedTab, (newVal) => {
   stopGeneratingRosters()
@@ -67,8 +73,7 @@ const selectedSlateSite = computed(() => {
 const rosterSet = ref([])
 
 const playerByPlayerId = computed(() => {
-  const players = props.tableData[selectedSlate.value]
-  const idToPlayer = players.reduce((acc, curr) => {
+  const idToPlayer = slatePlayerData.value.reduce((acc, curr) => {
     acc[curr.playerId] = curr
     return acc
   }, {})
@@ -233,7 +238,7 @@ const toggleCollapseState = () => {
 }
 
 const slateSelected = (newVal) => {
-  selectedSlate.value = newVal
+  selectedSlate.value = newVal[0]
   emits('gotFocus', newVal)
   isCollapsed.value = false
 }
@@ -246,9 +251,35 @@ watch(() => contests.value, (newVal) => {
   setItem('contests', newVal)
 })
 
-watch(() => selectedSlate.value, (newVal) => {
-  setItem('selectedSlate', newVal)
+const loadSlatePlayerData = async (slateName) => {
+  const matchedSlate = props.availableSlates.filter((a) => a[0] === slateName)[0]
+  const slateData = await loadPlayerDataForSlate(matchedSlate)
+  slatePlayerData.value = setupTableData(props.playerData, slateData, props.teamData, matchedSlate[0], {})
+}
+
+watch(() => props.availableSlates, async (newVal) => {
+  console.log('Available slates changed', newVal)
+
+  if(!selectedSlate.value) {
+    return
+  }
+
+  await loadSlatePlayerData(selectedSlate.value)
 })
+
+watch(() => selectedSlate.value, async (newVal) =>{
+  setItem('selectedSlate', newVal)
+  if(!newVal) {
+    return
+  }
+
+  if(!Object.keys(props.availableSlates).length) {
+    return
+  }
+
+  await loadSlatePlayerData(newVal)
+})
+
 
 const downloadFile = (evt) => {
   evt.stopPropagation()
@@ -295,8 +326,7 @@ const downloadFile = (evt) => {
 }
 
 const updateRosterSetPlayerProjections = () => {
-  const players = props.tableData[selectedSlate.value]
-  const idToPlayer = players.reduce((acc, curr) => {
+  const idToPlayer = slatePlayerData.value.reduce((acc, curr) => {
     acc[curr.playerId] = curr
     return acc
   }, {})
@@ -326,9 +356,9 @@ const optimizeHandler = async (evt) => {
   evt.stopPropagation()
   emits('gotFocus', selectedSlate.value)
   const currentTime = getCurrentTimeDecimal()
-  const slateData = props.tableData[selectedSlate.value]
+  const slateData = slatePlayerData.value
   updateRosterSetPlayerProjections()
-  // const lockedTeams = ["MIN"]
+  // const lockedTeams = []
   const lockedTeams = slateData.reduce((acc, curr) => {
     const startTime = convertTimeStringToDecimal(curr.startTime)
     const isLocked = startTime < currentTime

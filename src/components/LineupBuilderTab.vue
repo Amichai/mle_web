@@ -10,12 +10,16 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  tableData: {
+  playerData: {
     type: Object,
     required: true
   },
   selectedTab: {
     type: String,
+    required: true
+  },
+  teamData: {
+    type: Array,
     required: true
   }
 })
@@ -63,8 +67,9 @@ const gotFocus = (slate) => {
         :index="index"
         :id="slateId"
         :availableSlates="availableSlates"
-        :tableData="tableData"
+        :playerData="playerData"
         :selectedTab="selectedTab"
+        :teamData="teamData"
         @delete="() => removeSlate(index)"
         @gotFocus="(slate) => gotFocus(slate)"
       />

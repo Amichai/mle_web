@@ -3,12 +3,12 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import ProjectionsTable from '../components/ProjectionsTable.vue';
 import LineupBuilderTab from '../components/LineupBuilderTab.vue';
 import collapse from '@/assets/collapse.png'
-import { nameMapper, teamNameMapper } from './../nameMapper.js'
+import { nameMapper } from './../nameMapper.js'
 
 
 const currentTab = ref('Tab1')
 
-const emits = defineEmits(['openPanel', 'selectedSiteChanged'])
+const emits = defineEmits(['openPanel', 'selectedSiteChanged', 'selectedSlateChanged'])
 
 const props = defineProps({
   isOpen: {
@@ -71,7 +71,7 @@ onMounted(() => {
 
 
 watch(() => props.slateData, (newVal) => {
-  availableSlates.value = newVal.map((row) => row[0])
+  availableSlates.value = newVal
 })
 
 
@@ -93,15 +93,15 @@ const loadTableData = () => {
   }, {})
   
   const bySlate = availableSlates.value.reduce((acc, slate) => {
-    acc[slate] = props.slatePlayerData
-    .filter((row) => row[0] === slate)
+    const slateName = slate[0]
+    acc[slateName] = props.slatePlayerData
     .map((row) => {
-        let name = row[2]
+        let name = row[1]
         if(name in nameMapper) {
           name = nameMapper[name]
         } 
 
-        const team = row[5]
+        const team = row[4]
         const opponent = teamToOpponent[team]
         if(!opponent) {
           // name mapping problem?
@@ -120,13 +120,13 @@ const loadTableData = () => {
           ///Are you missing a name conversion here?
           return {
             name: name,
-            playerId: row[1],
-            position: row[3],
-            salary: row[4],
+            playerId: row[0],
+            position: row[2],
+            salary: row[3],
             team,
             projection: 0,
             override: 0,
-            status: row[7],
+            status: row[6],
             opp: opponent,
             startTime,
           }
@@ -153,13 +153,13 @@ const loadTableData = () => {
 
         const overrides = slateToIdToOverride[slate]
         return {
-          name: row[2],
-          playerId: row[1],
-          position: row[3],
-          salary: row[4],
+          name: row[1],
+          playerId: row[0],
+          position: row[2],
+          salary: row[3],
           team,
           projection: projectionRounded,
-          override: overrides ? overrides[row[1]] ?? projectionRounded : projectionRounded,
+          override: overrides ? overrides[row[0]] ?? projectionRounded : projectionRounded,
           status,
           opp: opponent,
           startTime,
@@ -189,6 +189,10 @@ const selectedSiteChanged = (newSite) => {
   emits('selectedSiteChanged', newSite)
 }
 
+const selectedSlateChanged = (newSlate) => {
+  emits('selectedSlateChanged', newSlate)
+}
+
 </script>
 
 <template>
@@ -212,13 +216,15 @@ const selectedSiteChanged = (newSite) => {
         :availableSlates="availableSlates"
         :selectedSlateGlobal="selectedSlate"
         @selectedSiteChanged="selectedSiteChanged"
+        @selectedSlateChanged="selectedSlateChanged"
       />
     </div>
     <div v-show="currentTab === 'Tab2'">
       <LineupBuilderTab 
         :availableSlates="availableSlates"
-        :tableData="tableData"
+        :playerData="playerData"
         :selectedTab="currentTab"
+        :teamData="teamData"
         @slateGotFocus="selectedSlate = $event"
       />
     </div>

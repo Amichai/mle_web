@@ -34,7 +34,8 @@ watch(() => props.selected, (newVal) => {
 })
 
 const selectedSlateChanged = () => {
-  emits('selectedSlateChanged', selectedSlate.value)
+  const selected = props.availableSlates.find(s => s[0] === selectedSlate.value)
+  emits('selectedSlateChanged', selected)
 }
 
 const emits = defineEmits(['selectedSlateChanged'])
@@ -47,8 +48,8 @@ const emits = defineEmits(['selectedSlateChanged'])
     <div v-show="!selectedSlate" style="width: 20px;"></div>
 
     <select v-model="selectedSlate" placeholder="slate" @change="selectedSlateChanged" :disabled="!props.isEnabled">
-      <option v-for="(slate, index) in availableSlates" :key="index" :value="slate">
-        {{ slate }}
+      <option v-for="(slate, index) in availableSlates" :key="index" :value="slate[0]">
+        {{ slate[0] }}
       </option>
     </select>
   </div>

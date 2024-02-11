@@ -8,7 +8,7 @@ import { useLogoProvider } from '../composables/useLogoProvider.js'
 import { useProjectionsParser } from '../composables/useProjectionsParser.js'
 import { nameMapper } from './../nameMapper.js'
 
-const emits = defineEmits(['selectedSiteChanged'])
+const emits = defineEmits(['selectedSiteChanged', 'selectedSlateChanged'])
 
 const { getLogo } = useLogoProvider()
 const { parseProjectionFile } = useProjectionsParser()
@@ -23,9 +23,13 @@ const props = defineProps({
     required: true
   },
   selectedSlateGlobal: {
-    type: String,
+    type: Array,
     required: true
   },
+})
+
+watch(() => props.availableSlates, (newVal) => {
+  console.log('availableSlates changed', newVal)
 })
 
 const isPlayerLocked = (startTime) => {
@@ -40,14 +44,15 @@ const slateData = ref([])
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
 
 watch(() => props.selectedSlateGlobal, (newVal) => {
-  selectedSlate.value = newVal
+  selectedSlate.value = newVal[0]
 })
 
-const selectedSlateChanged = (newSlate) => {
-    selectedSlate.value = newSlate
-    const newSite = newSlate.includes('FD') ? 'FD' : 'DK'
-    localStorage.setItem('selectedSlate', newSlate)
-    emits('selectedSiteChanged', newSite)
+const selectedSlateChanged = async (newSlate) => {
+  selectedSlate.value = newSlate[0]
+  const newSite = newSlate[1]
+  localStorage.setItem('selectedSlate', newSlate)
+  emits('selectedSiteChanged', newSite)
+  emits('selectedSlateChanged', newSlate)
 }
 
 const isNumeric = (value) => {

@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import SlatePicker from '../components/SlatePicker.vue';
 import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
-import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, setupTableData } from '../utils.js'
 import { useLogoProvider } from '../composables/useLogoProvider.js'
 import { useProjectionsParser } from '../composables/useProjectionsParser.js'
 import { nameMapper } from './../nameMapper.js'
@@ -18,11 +18,19 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  tableData: {
-    type: Object,
+  // selectedSlateGlobal: {
+  //   type: Array,
+  //   required: true
+  // },
+  playerData: {
+    type: Array,
     required: true
   },
-  selectedSlateGlobal: {
+  slatePlayerData: {
+    type: Array,
+    required: true
+  },
+  teamData: {
     type: Array,
     required: true
   },
@@ -45,6 +53,7 @@ const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.p
 
 watch(() => props.selectedSlateGlobal, (newVal) => {
   selectedSlate.value = newVal[0]
+  debugger
 })
 
 const selectedSlateChanged = async (newSlate) => {
@@ -106,12 +115,28 @@ watch(() => props.availableSlates, (newVal) => {
   } 
 })
 
-watch(()  => selectedSlate.value, (newVal) => {
-  slateData.value = props.tableData[selectedSlate.value]
+const isDataLoaded = computed(() => {
+  return props.playerData.length && Object.keys(props.slatePlayerData).length && props.teamData.length
 })
 
-watch(() => props.tableData, (newVal) => {
-  slateData.value = props.tableData[selectedSlate.value]
+const loadTableData = () => {
+  if(!isDataLoaded.value) {
+    return
+  }
+
+  slateData.value = setupTableData(props.playerData, props.slatePlayerData, props.teamData, selectedSlate.value, slateToIdToOverride)
+}
+
+watch(() => props.teamData, (newVal) => {
+  loadTableData()
+})
+
+watch(() => props.slatePlayerData, (newVal) => {
+  loadTableData()
+})
+
+watch(()  => selectedSlate.value, (newVal) => {
+  loadTableData()
 })
 
 const uploadProjections = () => {
@@ -153,8 +178,8 @@ const projectionFileUploaded = (evt) => {
     <SlatePicker
       @selectedSlateChanged="selectedSlateChanged"
       :availableSlates="availableSlates" 
-      :selected="selectedSlate"
       />
+      <!-- :selected="selectedSlate" -->
     <button class="button reset-button" @click="resetProjections">
       <img :src="resetIcon" alt="reset projections" width="40">
     </button>

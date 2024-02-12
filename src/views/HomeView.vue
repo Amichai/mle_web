@@ -100,7 +100,7 @@ const startPingingAPI = () => {
 
 const selectedSlateChanged = async (newSlate) => {
   console.log('selectedSlateChanged', newSlate)
-  slatePlayerData.value = loadPlayerDataForSlate(newSlate)
+  slatePlayerData.value = await loadPlayerDataForSlate(newSlate)
 }
 
 </script>

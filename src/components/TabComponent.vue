@@ -36,7 +36,6 @@ const props = defineProps({
 const isOpenLocal = ref(props.isOpen)
 
 const availableSlates = ref([])
-const tableData = ref([])
 const nameToPlayerData = ref(null)
 const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
 
@@ -60,125 +59,11 @@ watch(() => props.isOpen, (newVal) => {
 
 onMounted(() => {
   availableSlates.value = props.slateData.map((row) => row[0])
-
-  if(props.playerData.length === 0) {
-    return
-  }
-  loadNameToPlayerData()
-
-  loadTableData()
 })
 
 
 watch(() => props.slateData, (newVal) => {
   availableSlates.value = newVal
-})
-
-
-const loadTableData = () => {
-  if(!nameToPlayerData.value) {
-    return
-  }
-
-  const teamToStartTime = props.teamData.reduce((acc, row) => {
-    const team = row[0]
-    acc[team] = row[2]
-    return acc
-  }, {})
-
-  const teamToOpponent = props.teamData.reduce((acc, row) => {
-    const team = row[0]
-    acc[team] = row[1]
-    return acc
-  }, {})
-  
-  const bySlate = availableSlates.value.reduce((acc, slate) => {
-    const slateName = slate[0]
-    acc[slateName] = props.slatePlayerData
-    .map((row) => {
-        let name = row[1]
-        if(name in nameMapper) {
-          name = nameMapper[name]
-        } 
-
-        const team = row[4]
-        const opponent = teamToOpponent[team]
-        if(!opponent) {
-          // name mapping problem?
-          debugger
-        }
-
-        const startTime = teamToStartTime[team]
-
-        if(!startTime) {
-          // name mapping problem?
-          debugger
-        }
-
-        const playerData = nameToPlayerData.value[name]
-        if (!playerData) {
-          ///Are you missing a name conversion here?
-          return {
-            name: name,
-            playerId: row[0],
-            position: row[2],
-            salary: row[3],
-            team,
-            projection: 0,
-            override: 0,
-            status: row[6],
-            opp: opponent,
-            startTime,
-          }
-        } 
-
-        let projection = '0.0'
-
-        if(slate.includes('DK')) {
-          projection = playerData[3]
-        } else {
-          projection = playerData[2]
-        }
-        
-        const status = playerData[4]
-        if (status === 'O') {
-          row.push('0.0')
-          projection = '0.0'
-        } else {
-          row.push(projection)
-        }
-        row.push(status)
-
-        const projectionRounded = Math.round(parseFloat(projection) * 100) / 100;
-
-        const overrides = slateToIdToOverride[slate]
-        return {
-          name: row[1],
-          playerId: row[0],
-          position: row[2],
-          salary: row[3],
-          team,
-          projection: projectionRounded,
-          override: overrides ? overrides[row[0]] ?? projectionRounded : projectionRounded,
-          status,
-          opp: opponent,
-          startTime,
-        }
-      })
-    return acc
-  }, {})
-
-  tableData.value = bySlate
-}
-
-watch(() => props.slatePlayerData, (newVal) => {
-  loadTableData()
-})
-
-watch(() => props.playerData, (newVal) => {
-  loadNameToPlayerData()
-
-  loadTableData()
 })
 
 const selectTab = (tabName) => {
@@ -211,10 +96,12 @@ const selectedSlateChanged = (newSlate) => {
 
   <div class="tab-content">
     <div v-show="currentTab === 'Tab1'">
+      <!-- :selectedSlateGlobal="selectedSlate" -->
       <ProjectionsTable 
-        :tableData="tableData"
         :availableSlates="availableSlates"
-        :selectedSlateGlobal="selectedSlate"
+        :playerData="playerData"
+        :slatePlayerData="slatePlayerData"
+        :teamData="teamData"
         @selectedSiteChanged="selectedSiteChanged"
         @selectedSlateChanged="selectedSlateChanged"
       />

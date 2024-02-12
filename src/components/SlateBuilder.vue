@@ -251,8 +251,20 @@ watch(() => contests.value, (newVal) => {
   setItem('contests', newVal)
 })
 
+const isDataLoaded = computed(() => {
+  return props.playerData.length && props.teamData.length
+})
+
 const loadSlatePlayerData = async (slateName) => {
   const matchedSlate = props.availableSlates.filter((a) => a[0] === slateName)[0]
+  if(!matchedSlate) {
+    return
+  }
+
+  if(!isDataLoaded.value) {
+    return
+  }
+
   const slateData = await loadPlayerDataForSlate(matchedSlate)
   slatePlayerData.value = setupTableData(props.playerData, slateData, props.teamData, matchedSlate[0], {})
 }
@@ -278,6 +290,14 @@ watch(() => selectedSlate.value, async (newVal) =>{
   }
 
   await loadSlatePlayerData(newVal)
+})
+
+watch(() => props.teamData, async (newVal) => {
+  if(!isDataLoaded.value) {
+    return
+  }
+
+  await loadSlatePlayerData(selectedSlate.value)
 })
 
 

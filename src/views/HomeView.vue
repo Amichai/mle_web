@@ -19,8 +19,6 @@ const selectedSite = ref('FD')
 
 let intervalId = null;
 
-
-
 const pingApi = async () => {
     console.log('pinging API...')
 

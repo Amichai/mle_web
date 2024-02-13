@@ -201,6 +201,9 @@ const tableColumns = ref([])
 const tableRows = ref([])
 
 const site = computed(() => {
+  if(!selectedSlate.value) {
+    return ''
+  }
   if(selectedSlate.value.includes('DK')) {
     return 'dk'
   } else if(selectedSlate.value.includes('FD')) {

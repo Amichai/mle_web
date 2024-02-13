@@ -1,4 +1,5 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
+import { playerListToRoster, l, dedupLineups, cloneRoster, getRandomInt, rand } from './optimizerUtil.js'
 
 export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) {
   let topRosters = []
@@ -6,14 +7,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
   const isGeneratingRosters = ref(false)
 
   const positionsToFill = ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"]
-
-  const cloneRoster = (roster) => {
-    return JSON.parse(JSON.stringify(roster))
-  }
-
-  const getRandomInt = (max) => {
-    return Math.floor(Math.random() * max);
-  }
 
   const improveRosterOneStep = (lineup) => {
     // pick a player at random
@@ -55,12 +48,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
     return true
   }
 
-  const rand = (min, max) => {
-    min = Math.ceil(min); // Ensure min is the next largest integer
-    max = Math.floor(max); // Ensure max is the largest integer less than or equal to max
-    return Math.floor(Math.random() * (max - min + 1)) + min; // The maximum is inclusive and the minimum is inclusive
-  }
-
   const improveRosterGreedy = (roster) => {
     for(var i = 0; i < 20; i += 1) {
       if(improveRosterOneStep(roster)) {
@@ -82,17 +69,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
     removeCount > 1 && improveRosterGreedy(players)
   }
 
-  const playerListToRoster = (players) => {
-    const totalValue = players.map((row) => {
-      return row.override
-    }).reduce((a, b) => a + b, 0)
-    const lineupKey = players.map((row) => row.name).sort().join('|')
-    // console.log('total value', totalValue, lineupKey)
-
-    
-    return [players, totalValue, lineupKey]
-  }
-
   const isRosterValid = (players) => {
     const teamToCount = {}
     for (var i = 0; i < players.length; i += 1) {
@@ -109,25 +85,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
     }
 
     return true
-  }
-
-  const l = (lineup, prop) => {
-    if(prop === "value") {
-      return lineup[1]
-    }
-    if(prop === "key") {
-      return lineup[2]
-    }
-  }
-
-  const dedupLineups = (lineups) => {
-    const seenKeys = new Set()
-    return lineups.filter((lineup) => {
-      const lineupKey = l(lineup, "key")
-      const wasSeen = seenKeys.has(lineupKey)
-      !wasSeen && seenKeys.add(lineupKey)
-      return !wasSeen
-    })
   }
 
   const appendNewLineups2 = (newLineups, shouldSort = true) => {

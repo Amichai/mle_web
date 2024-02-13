@@ -124,7 +124,9 @@ const loadTableData = () => {
     return
   }
 
-  slateData.value = setupTableData(props.playerData, props.slatePlayerData, props.teamData, selectedSlate.value, slateToIdToOverride)
+  
+
+  slateData.value = setupTableData(props.playerData, props.slatePlayerData, props.teamData, selectedSlate.value, slateToIdToOverride[selectedSlate.value])
 }
 
 watch(() => props.teamData, (newVal) => {

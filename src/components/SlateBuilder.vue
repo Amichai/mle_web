@@ -265,8 +265,10 @@ const loadSlatePlayerData = async (slateName) => {
     return
   }
 
+  const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.parse(localStorage.getItem('slateToIdToOverride')) : {}
+
   const slateData = await loadPlayerDataForSlate(matchedSlate)
-  slatePlayerData.value = setupTableData(props.playerData, slateData, props.teamData, matchedSlate[0], {})
+  slatePlayerData.value = setupTableData(props.playerData, slateData, props.teamData, matchedSlate[0], slateToIdToOverride[selectedSlate.value])
 }
 
 watch(() => props.availableSlates, async (newVal) => {
@@ -374,6 +376,9 @@ const updateRosterSetPlayerProjections = () => {
 
 const optimizeHandler = async (evt) => {
   evt.stopPropagation()
+  
+  await loadSlatePlayerData(selectedSlate.value)
+
   emits('gotFocus', selectedSlate.value)
   const currentTime = getCurrentTimeDecimal()
   const slateData = slatePlayerData.value

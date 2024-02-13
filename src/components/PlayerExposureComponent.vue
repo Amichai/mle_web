@@ -11,7 +11,7 @@ const props = defineProps({
 
 const { getLogo } = useLogoProvider()
 
-const columns = ref([ 'Name', 'Salary', 'Exposure', 'Team', 'Start Time', 'Projection'])
+const columns = ref([ 'Name', 'Salary', 'Positon', 'Exposure', 'Team', 'Start Time', 'Projection'])
 
 const exposures = ref({})
 const namesSortedByExposure = computed(() => {
@@ -41,6 +41,7 @@ watch(() => props.rosters, (newVal) => {
           name: name,
           projection: player.projection,
           override: player.override,
+          position: player.position,
           team: player.team,
           cost: `$${player.cost}`,
           startTime: player.startTime,
@@ -69,6 +70,7 @@ const emits = defineEmits([])
         <td><b>{{ index + 1 }}</b></td>
         <td>{{ row['name'] }}</td>
         <td>{{ row['cost'] }}</td>
+        <td>{{ row['position'] }}</td>
         <td>{{ row['exposure'] }}</td>
         <td><component :is="getLogo(row.team)" /> </td>
         <td>{{ row['startTime'] }}</td>

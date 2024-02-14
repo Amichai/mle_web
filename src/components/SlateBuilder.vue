@@ -420,11 +420,17 @@ const uploadSlateFile = (evt) => {
           if(player.includes(' (')){
             const playerId = parseInt(player.split(' (')[1].split(')')[0])
             const matchedPlayer = playerByPlayerId.value[playerId]
+            if(matchedPlayer) {
+              matchedPlayer.cost = parseInt(matchedPlayer?.salary ?? '0')
+            }
             return matchedPlayer
           } else {
             const splitPlayer = player.split(':')
             const playerId = splitPlayer[0]
             const matchedPlayer = playerByPlayerId.value[playerId]
+            if(matchedPlayer) {
+              matchedPlayer.cost = parseInt(matchedPlayer?.salary ?? '0')
+            }
             return matchedPlayer
           }
         })

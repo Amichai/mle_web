@@ -43,3 +43,20 @@ export const rand = (min, max) => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export const generateRosters = (topRosters, lockedTeams) => {
+  if(topRosters.filter((row) => row[1]).length) {
+    lockedTeams.length === 0 
+      ? optimizeRosters()
+      : reoptimizeRosters()
+    return
+  }
+
+  const lineupBatch = generateRosterBatch(1000)
+  // const lineupBatch = generateRosterBatch(10)
+  if(!lineupBatch) {
+    return
+  }
+
+  appendNewLineups(lineupBatch)
+}

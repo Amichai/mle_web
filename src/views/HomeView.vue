@@ -98,7 +98,12 @@ const startPingingAPI = () => {
 
 const selectedSlateChanged = async (newSlate) => {
   console.log('selectedSlateChanged', newSlate)
-  slatePlayerData.value = await loadPlayerDataForSlate(newSlate)
+  const playerDataWithDuplicates = await loadPlayerDataForSlate(newSlate)
+
+  slatePlayerData.value = playerDataWithDuplicates.filter((obj, index, self) => {
+    return index === self.findIndex((t) => t[0] === obj[0])
+  }
+  )
 }
 
 </script>

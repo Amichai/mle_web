@@ -46,6 +46,7 @@ watch(() => props.rows, (newVal) => {
         v-show="props.columns[cellIndex] || cell"
         :class="[cell?.override !== cell?.projection && 'overriden']"
         >
+        {{ cellIndex }}
           <div v-if="(typeof cell === 'object')" :class="['tooltip', isPlayerLocked(cell.startTime) && 'is-locked']">
             {{ cell.name }}
             <span class="tooltiptext">{{ cell.override }}

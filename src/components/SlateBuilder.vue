@@ -47,6 +47,7 @@ const props = defineProps({
 })
 
 const slatePlayerData = ref([])
+const contestParams = ref([])
 
 watch(() => props.selectedTab, (newVal) => {
   stopGeneratingRosters()
@@ -97,15 +98,62 @@ const averageRosterValue = computed(() => {
   return 0
 })
 
+const getContestParams = (firstRow) => {
+  const fdFullRoster = ['entry_id', 'contest_id', 'contest_name', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C']
+
+  
+  const fdFullRosterMatches = firstRow.map((element, index) => {
+    return element === fdFullRoster[index] || fdFullRoster.length <= index
+  })
+
+  if(fdFullRosterMatches.every((element) => element === true)) {
+    return {
+      type: 'FD Classic',
+      tableColumns: ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value'],
+      lastColumnIndex: 11,
+      positionsToFill: ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"],
+      positionalScoreBoost: [],
+      costColumnIndex: 10
+    }
+  }
+
+  const fdSingleGame = ['entry_id', 'contest_id', 'contest_name', 'MVP - 2X Points', 'STAR - 1.5X Points', 'PRO - 1.2X Points', 'UTIL', 'UTIL']
+
+  const fdSingleGameMatches = firstRow.map((element, index) => {
+    return element === fdSingleGame[index] || fdSingleGame.length <= index
+  })
+
+  if(fdSingleGameMatches.every((element) => element === true)) {
+    return {
+      type: 'FD Single Game',
+      tableColumns: ['Contest', 'MVP 2x', 'STAR 1.5x', 'PRO 1.2x', 'UTIL', 'UTIL', 'Cost', 'Value'],
+      positionsToFill: ['UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
+      lastColumnIndex: 8,
+      positionalScoreBoost: [2, 1.5, 1.2],
+      costColumnIndex: 6
+    }
+  }
+
+
+  ///DK table columns
+  ///['Contest', "PG", "SG", "SF", "PF", "C", "G", "F", "UTIL", 'Cost', 'Value']
+  //const positionsToFill: ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL"]
+  //costColumnIndex: 9
+  debugger
+}
+
 const constructRosterTable = () => {
+  if(!filteredRows.value || !filteredRows.value.length) {
+    return
+  }
 
-  tableColumns.value = site.value === 'fd' ? ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value'] : ['Contest', "PG", "SG", "SF", "PF", "C", "G", "F", "UTIL", 'Cost', 'Value']
+  contestParams.value = getContestParams(filteredRows.value[0])
+  const { tableColumns, costColumnIndex } = contestParams.value
 
-
+  tableColumns.value = tableColumns
 
   const rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
-    // return [row[2], '', '', '', '', '', '', '', '', '', '', '']
-    return [row[2], row[3].split(':')[1], row[4].split(':')[1], row[5].split(':')[1], row[6].split(':')[1], row[7].split(':')[1], row[8].split(':')[1], row[9].split(':')[1], row[10].split(':')[1], row[11].split(':')[1]]
+    return [row[2], ...row.slice(3, contestParams.value.lastColumnIndex).map(el => el.split(':')[1])]
   }) : []
 
   if(rosterSet.value) {
@@ -118,20 +166,20 @@ const constructRosterTable = () => {
       if(!roster.players) {
         return
       }
-
+      
+      /// TODO: this 9 should be parameterized as well
       for(var i = 0; i < 9; i += 1) {
         const player = roster.players[i]
         row[i + 1] = player
       }
 
-      const offset = site.value === 'fd' ? 0 : -1
-
-      row[10 + offset] = roster.cost
-      row[11 + offset] = roster.value.toFixed(2)
+      row[costColumnIndex] = roster.cost
+      row[costColumnIndex + 1] = roster.value.toFixed(2)
     })
   }
 
   tableRows.value = rows
+  console.log(rows)
 }
 
 const filteredRows = ref([])
@@ -397,7 +445,8 @@ const optimizeHandler = async (evt) => {
     return acc
   }, [])
 
-  startStopGeneratingRosters(slateData, lockedTeams, rosterSet.value, rowCount.value, site.value)
+
+  startStopGeneratingRosters(slateData, lockedTeams, rosterSet.value, rowCount.value, site.value, contestParams)
 }
 
 const uploadSlateFile = (evt) => {

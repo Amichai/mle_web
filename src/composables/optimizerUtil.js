@@ -5,8 +5,6 @@ export const playerListToRoster = (players) => {
     return row.override
   }).reduce((a, b) => a + b, 0)
   const lineupKey = players.map((row) => row.name).sort().join('|')
-  // console.log('total value', totalValue, lineupKey)
-
   
   return [players, totalValue, lineupKey]
 }

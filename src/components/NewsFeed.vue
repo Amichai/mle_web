@@ -43,7 +43,6 @@ onMounted(() => {
   //   selectedSite.value = 'DK'
   // }
 
-  console.log("Selected site2", selectedSite.value)
 
   formatRows(props.newsRows)
 

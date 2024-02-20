@@ -26,6 +26,10 @@ const isPlayerLocked = (startTime) => {
   return toReturn
 }
 
+watch(() => props.columns, (newVal) => {
+  console.log("columns changed", newVal)
+})
+
 watch(() => props.rows, (newVal) => {
   console.log("rows changed", newVal)
 })
@@ -46,7 +50,6 @@ watch(() => props.rows, (newVal) => {
         v-show="props.columns[cellIndex] || cell"
         :class="[cell?.override !== cell?.projection && 'overriden']"
         >
-        {{ cellIndex }}
           <div v-if="(typeof cell === 'object')" :class="['tooltip', isPlayerLocked(cell.startTime) && 'is-locked']">
             {{ cell.name }}
             <span class="tooltiptext">{{ cell.override }}

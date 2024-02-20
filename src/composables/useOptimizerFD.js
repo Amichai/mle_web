@@ -256,9 +256,8 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
         setTimeout(() => {
           generateRosters()
           isGeneratingRosters.value = false
-        }, 1)
+        }, 5)
       }
-      // intervalId = setTimeout(() => generateRosters(), 1)
     } else {
       isGeneratingRosters.value = false
     }
@@ -343,8 +342,8 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
       }
 
       appendNewLineups(amassedRosters)
-    
   }
+  
   const reoptimizeRosters = () => {
     //produce all roster keys
     const allRosterKeys = topRosters.map((row) => row[2])

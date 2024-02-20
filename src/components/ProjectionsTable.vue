@@ -37,7 +37,6 @@ const props = defineProps({
 })
 
 watch(() => props.availableSlates, (newVal) => {
-  console.log('availableSlates changed', newVal)
 })
 
 const isPlayerLocked = (startTime) => {
@@ -53,7 +52,6 @@ const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.p
 
 watch(() => props.selectedSlateGlobal, (newVal) => {
   selectedSlate.value = newVal[0]
-  debugger
 })
 
 const selectedSlateChanged = async (newSlate) => {

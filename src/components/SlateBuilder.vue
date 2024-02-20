@@ -99,47 +99,60 @@ const averageRosterValue = computed(() => {
 })
 
 const getContestParams = (firstRow) => {
-  const fdFullRoster = ['entry_id', 'contest_id', 'contest_name', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C']
 
-  
-  const fdFullRosterMatches = firstRow.map((element, index) => {
-    return element === fdFullRoster[index] || fdFullRoster.length <= index
-  })
-
-  if(fdFullRosterMatches.every((element) => element === true)) {
-    return {
+  const uploadTemplates = [
+    {
       type: 'FD Classic',
-      tableColumns: ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value'],
-      lastColumnIndex: 11,
+      firstLine: ['entry_id', 'contest_id', 'contest_name', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C'],
+      columnsToSet: ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value'],
+      lastColumnIndex: 12,
       positionsToFill: ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"],
       positionalScoreBoost: [],
       costColumnIndex: 10
-    }
-  }
-
-  const fdSingleGame = ['entry_id', 'contest_id', 'contest_name', 'MVP - 2X Points', 'STAR - 1.5X Points', 'PRO - 1.2X Points', 'UTIL', 'UTIL']
-
-  const fdSingleGameMatches = firstRow.map((element, index) => {
-    return element === fdSingleGame[index] || fdSingleGame.length <= index
-  })
-
-  if(fdSingleGameMatches.every((element) => element === true)) {
-    return {
+    },
+    {
       type: 'FD Single Game',
-      tableColumns: ['Contest', 'MVP 2x', 'STAR 1.5x', 'PRO 1.2x', 'UTIL', 'UTIL', 'Cost', 'Value'],
+      firstLine: ['entry_id', 'contest_id', 'contest_name', 'MVP - 2X Points', 'STAR - 1.5X Points', 'PRO - 1.2X Points', 'UTIL', 'UTIL'],
+      columnsToSet: ['Contest', 'MVP 2x', 'STAR 1.5x', 'PRO 1.2x', 'UTIL', 'UTIL', 'Cost', 'Value'],
       positionsToFill: ['UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
       lastColumnIndex: 8,
       positionalScoreBoost: [2, 1.5, 1.2],
       costColumnIndex: 6
-    }
+    },
+    {
+      type: 'DK Classic',
+      firstLine: ['Entry ID','Contest Name', 'Contest ID', 'Entry Fee', 'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL'],
+      columnsToSet: ['Contest', 'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL', 'Cost', 'Value'],
+      lastColumnIndex: 10,
+      positionsToFill: ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL"],
+      positionalScoreBoost: [],
+      costColumnIndex: 9
+    },
+    {
+      type: 'DK Single Game',
+      firstLine: ['Entry ID', 'Contest Name', 'Contest ID', 'Entry Fee', 'CPT', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
+      columnsToSet: ['Contest', 'CPT', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'Cost', 'Value'],
+      positionsToFill: ['UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
+      lastColumnIndex: 9,
+      positionalScoreBoost: [1.5],
+      positionalCostBoost: [1.5],
+      costColumnIndex: 7
+    },
+  ]
+
+  const matchedTemplate = uploadTemplates.filter((template) => {
+    const matches = firstRow.map((element, index) => {
+      return element === template.firstLine[index] || template.firstLine.length <= index
+    })
+
+    return matches.every((element) => element === true)
+  })
+
+  if(matchedTemplate.length) {
+    return matchedTemplate[0]
   }
 
-
-  ///DK table columns
-  ///['Contest', "PG", "SG", "SF", "PF", "C", "G", "F", "UTIL", 'Cost', 'Value']
-  //const positionsToFill: ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL"]
-  //costColumnIndex: 9
-  debugger
+  throw new Error('Unable to parse upload template')
 }
 
 const constructRosterTable = () => {
@@ -148,9 +161,7 @@ const constructRosterTable = () => {
   }
 
   contestParams.value = getContestParams(filteredRows.value[0])
-  const { tableColumns, costColumnIndex } = contestParams.value
-
-  tableColumns.value = tableColumns
+  const { columnsToSet, costColumnIndex } = contestParams.value
 
   const rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
     return [row[2], ...row.slice(3, contestParams.value.lastColumnIndex).map(el => el.split(':')[1])]
@@ -179,7 +190,10 @@ const constructRosterTable = () => {
   }
 
   tableRows.value = rows
-  console.log(rows)
+  tableColumns.value = columnsToSet
+  
+
+  console.log('setting table columns', tableColumns.value)
 }
 
 const filteredRows = ref([])
@@ -272,6 +286,7 @@ const resetVals = () => {
   rosterSet.value = []
   setItem('rosterSet', rosterSet.value)
   setItem('tableRows', tableRows.value)
+  setItem('tableColumns', tableColumns.value)
 }
 
 onMounted(() => {
@@ -279,8 +294,9 @@ onMounted(() => {
   setId(props.id)
   contests.value = getItem('contests')
   selectedSlate.value = getItem('selectedSlate')
-  filteredRows.value = getItem('tableRows')
-  rosterSet.value = getItem('rosterSet') ?? []
+  filteredRows.value = getItem('tableRows', [])
+  tableColumns.value = getItem('tableColumns', [])
+  rosterSet.value = getItem('rosterSet', [])
 })
 
 const toggleCollapseState = () => {
@@ -323,8 +339,6 @@ const loadSlatePlayerData = async (slateName) => {
 }
 
 watch(() => props.availableSlates, async (newVal) => {
-  console.log('Available slates changed', newVal)
-
   if(!selectedSlate.value) {
     return
   }
@@ -460,7 +474,6 @@ const uploadSlateFile = (evt) => {
       const content = e.target.result
       const result = Papa.parse(content)
       filteredRows.value = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
-
       setItem('tableRows', filteredRows.value)
       
       const playerSets = filteredRows.value.slice(1).map((row) => {

@@ -116,9 +116,14 @@ export const loadPlayerDataForSlate = async (slate) => {
   const data4 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/slate_player_data_${formattedDate}_${slate[2]}`)
   const player_data = splitData(data4, 5)
 
-  return player_data.sort((a, b) => {
+  const toReturn = player_data.sort((a, b) => {
     return parseFloat(a[3]) < parseFloat(b[3]) ? 1 : -1
   })
+
+
+  return toReturn.filter((obj, index, self) =>
+    index === self.findIndex((t) => t[0] === obj[0])
+  )
 }
 
 export const setupTableData = (playerData, slateData, teamData, slateName, overrides) => {

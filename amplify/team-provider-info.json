@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-mleweb-dev-212115-authRole",
+      "UnauthRoleArn": "arn:aws:iam::276830396462:role/amplify-mleweb-dev-212115-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::276830396462:role/amplify-mleweb-dev-212115-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-mleweb-dev-212115-deployment",
+      "UnauthRoleName": "amplify-mleweb-dev-212115-unauthRole",
+      "StackName": "amplify-mleweb-dev-212115",
+      "StackId": "arn:aws:cloudformation:us-east-1:276830396462:stack/amplify-mleweb-dev-212115/e45acad0-d05f-11ee-9082-129d768196d1",
+      "AmplifyAppId": "d25tjhb9mmcpr"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d25tjhb9mmcpr",
+          "type": "manual"
+        }
+      }
+    }
+  }
+}

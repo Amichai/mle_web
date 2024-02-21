@@ -33,3 +33,15 @@ npm run build
 ```sh
 npm run lint
 ```
+
+### DEPLOYMENT
+
+open an x86 terminal
+`arch -x86_64 /bin/bash`
+
+check node processor version
+`node -p "process.arch"`
+
+`npm install`
+`npm run build`
+`amplify publish`

@@ -297,6 +297,11 @@ onMounted(() => {
   filteredRows.value = getItem('tableRows', [])
   tableColumns.value = getItem('tableColumns', [])
   rosterSet.value = getItem('rosterSet', [])
+  isCollapsed.value = getItem('isCollapsed', false)
+})
+
+watch(() => isCollapsed.value, (newVal) => {
+  setItem('isCollapsed', newVal)
 })
 
 const toggleCollapseState = () => {

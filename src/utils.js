@@ -56,7 +56,6 @@ export const convertTimeStringToDecimal = (timeString) => {
 }
 
 export const getTodaysDate = () => {
-  return '2024-02-14'
   const today = new Date();
   const localOffset = today.getTimezoneOffset() * 60000;
   const targetTime = new Date(today.getTime() - localOffset);

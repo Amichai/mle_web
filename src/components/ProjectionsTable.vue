@@ -177,7 +177,8 @@ const projectionFileUploaded = (evt) => {
   <div class="projections-header">
     <SlatePicker
       @selectedSlateChanged="selectedSlateChanged"
-      :availableSlates="availableSlates" 
+      :availableSlates="availableSlates"
+      :isFirstSlateAsDefault="true"
       />
       <!-- :selected="selectedSlate" -->
     <button class="button reset-button" @click="resetProjections">

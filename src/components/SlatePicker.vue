@@ -23,14 +23,34 @@ const props = defineProps({
 })
 const selectedSlate = ref(props.selected)
 
-onMounted(() => {
-  // selectedSlate.value = localStorage.getItem('selectedSlate') || ''
+/// set first as default
+/// check local storage
+/// check if a slate was passed to props
+const setSelectedSlate = () => {
+  if (props.isFirstSlateAsDefault && !selectedSlate.value && props.availableSlates.length > 0) {
+    selectedSlate.value = props.availableSlates[0][0]
+    emits('selectedSlateChanged', props.availableSlates[0])
+  }
 
+  // selectedSlate.value = localStorage.getItem('selectedSlate') || ''
+}
+
+onMounted(() => {
   console.log("Selected slate", selectedSlate.value)
+  setSelectedSlate()
 })
 
 watch(() => props.selected, (newVal) => {
   selectedSlate.value = newVal
+  setSelectedSlate()
+})
+
+watch(() => props.isFirstSlateAsDefault, (newVal) => {
+  setSelectedSlate()
+})
+
+watch(() => props.availableSlates, (newVal) => {
+  setSelectedSlate()
 })
 
 const selectedSlateChanged = () => {

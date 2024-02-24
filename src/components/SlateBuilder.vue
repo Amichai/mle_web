@@ -107,7 +107,6 @@ const getContestParams = (firstRow) => {
       columnsToSet: ['Contest', 'PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C', 'Cost', 'Value'],
       lastColumnIndex: 12,
       positionsToFill: ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"],
-      positionalScoreBoost: [],
       costColumnIndex: 10,
       firstColumnIndex: 3,
       contestNameColumnIndex: 2
@@ -129,7 +128,6 @@ const getContestParams = (firstRow) => {
       columnsToSet: ['Contest', 'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL', 'Cost', 'Value'],
       lastColumnIndex: 12,
       positionsToFill: ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL"],
-      positionalScoreBoost: [],
       costColumnIndex: 9,
       firstColumnIndex: 4,
       contestNameColumnIndex: 1,

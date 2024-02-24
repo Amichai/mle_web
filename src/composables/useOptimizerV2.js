@@ -73,7 +73,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     const rowToSwap = lineup[idx]
 
     const positionsToSwap = _positionsToFill[idx]
-    const swapCandidates = _byPosition[positionsToSwap].filter((row) => 
+    const swapCandidates = _byPositionPruned[positionsToSwap].filter((row) => 
         !currentNames.includes(row.name) 
         && row.override > rowToSwap.override
         && row.cost <= costRemaining + rowToSwap.cost)
@@ -122,10 +122,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   const tryToImproveRoster = (roster, lockedTeams) => {
     const players = roster[0]
 
-    if(_positionalScoreBoost && !_positionalCostBoost) {
-      players.sort((a, b) => a.override < b.override ? 1 : -1)
-    }
-
     var removeCount = 0
     for(var i = 0; i < 3; i += 1) {
       const idx = rand(0, players.length - 1)
@@ -137,6 +133,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     
     if(removeCount > 1) {
       improveRosterGreedy(players)
+      
+      if(_positionalScoreBoost && !_positionalCostBoost) {
+        players.sort((a, b) => a.override < b.override ? 1 : -1)
+      }
 
       return playerListToRoster(players)
     }
@@ -180,12 +180,25 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   let _maxCost = -1
   let _positionsToFill = []
-  let _byPosition = []
+  let _byPosition = null
+  let _byPositionPruned = null
   let _rosterCount = 0
   const generateRosters = (maxCost, positionsToFill, byPosition, rosterCount) => {
     _maxCost = maxCost
     _positionsToFill = positionsToFill
     _byPosition = byPosition
+    // debugger
+    _byPositionPruned = Object.keys(byPosition).reduce((acc, curr) => {
+      const players = byPosition[curr]
+      const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
+      const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
+
+      const combinedArray = Array.from(new Set([...sortedByProjection, ...sortedByValue]));
+
+      acc[curr] = combinedArray
+
+      return acc
+    }, {})
     _rosterCount = rosterCount
 
     const amassedRosters = []
@@ -196,10 +209,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       const rosterCloned = cloneRoster(toImprove)
 
       const roster = tryToImproveRoster(rosterCloned, [])
-      const hasNullOrUndefined = roster[0].some(element => element === null || element === undefined);
-      if(hasNullOrUndefined) {
-        debugger
-      }
+      // const hasNullOrUndefined = roster[0].some(element => element === null || element === undefined);
+      // if(hasNullOrUndefined) {
+      //   debugger
+      // }
 
       amassedRosters.push(roster)
     }
@@ -212,6 +225,13 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   let _positionalCostBoost = null
   const isGeneratingRosters = ref(false)
   let _isRosterValid = null
+
+  const stopGeneratingRosters = () => {
+    if(intervalId) {
+      clearInterval(intervalId)
+    }
+    isGeneratingRosters.value = false
+  }
 
   const hasNullOrUndefined = (arr) => {
     return arr.some(element => element === null || element === undefined);
@@ -262,5 +282,5 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   }
 
-  return { startStopGeneratingRosters, isGeneratingRosters }
+  return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }
 }

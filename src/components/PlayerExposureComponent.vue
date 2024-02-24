@@ -25,7 +25,6 @@ const tableRows = computed(() => {
     return { ...exposures.value[name], exposure: `${exposures.value[name].count}/${props.rosters.length}`
   }})
 
-  console.log(toReturn)
   return toReturn
 })
 
@@ -43,7 +42,7 @@ watch(() => props.rosters, (newVal) => {
           override: player.override,
           position: player.position,
           team: player.team,
-          cost: `$${player.cost}`,
+          cost: `$${player.salary}`,
           startTime: player.startTime,
           count: 0
         }

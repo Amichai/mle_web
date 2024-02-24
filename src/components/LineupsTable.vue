@@ -31,7 +31,6 @@ watch(() => props.columns, (newVal) => {
 })
 
 watch(() => props.rows, (newVal) => {
-  console.log("rows changed", newVal)
 })
 </script>
 
@@ -50,13 +49,13 @@ watch(() => props.rows, (newVal) => {
         v-show="props.columns[cellIndex] || cell"
         :class="[cell?.override !== cell?.projection && 'overriden']"
         >
-          <div v-if="(typeof cell === 'object')" :class="['tooltip', isPlayerLocked(cell.startTime) && 'is-locked']">
-            {{ cell.name }}
-            <span class="tooltiptext">{{ cell.override }}
+          <div v-if="(typeof cell === 'object')" :class="['tooltip', isPlayerLocked(cell?.startTime) && 'is-locked']">
+            {{ cell?.name }}
+            <span class="tooltiptext">{{ cell?.override }}
               <br>
-            {{ cell.team }}
+            {{ cell?.team }}
             <br>
-            {{ `$${cell.cost}` }}
+            {{ `$${cell?.cost}` }}
             </span>
           </div>
           <div v-else :class="[cellIndex === 0 && 'contest-name']">

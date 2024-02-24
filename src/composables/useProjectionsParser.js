@@ -27,7 +27,11 @@ export function useProjectionsParser() {
     const projections = {}
     lines.slice(1).map((line) => {
       const parts = line.split(',')
-      const name = parts[nameIdx].replace(/"/g, '')
+      let name = parts[nameIdx].replace(/"/g, '')
+      if(name.includes(' : UTIL')) {
+        name = name.replace(' : UTIL', '')
+      }
+
       const projection = parts[projectionIdx].replace(/"/g, '')
       projections[name] = parseFloat(projection)
     })

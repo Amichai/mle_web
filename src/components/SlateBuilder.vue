@@ -108,7 +108,9 @@ const getContestParams = (firstRow) => {
       lastColumnIndex: 12,
       positionsToFill: ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"],
       positionalScoreBoost: [],
-      costColumnIndex: 10
+      costColumnIndex: 10,
+      firstColumnIndex: 3,
+      contestNameColumnIndex: 2
     },
     {
       type: 'FD Single Game',
@@ -117,26 +119,32 @@ const getContestParams = (firstRow) => {
       positionsToFill: ['UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
       lastColumnIndex: 8,
       positionalScoreBoost: [2, 1.5, 1.2],
-      costColumnIndex: 6
+      costColumnIndex: 6,
+      firstColumnIndex: 3,
+      contestNameColumnIndex: 2,
     },
     {
       type: 'DK Classic',
       firstLine: ['Entry ID','Contest Name', 'Contest ID', 'Entry Fee', 'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL'],
       columnsToSet: ['Contest', 'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL', 'Cost', 'Value'],
-      lastColumnIndex: 10,
+      lastColumnIndex: 12,
       positionsToFill: ["PG", "SG", "SF", "PF", "C", "G", "F", "UTIL"],
       positionalScoreBoost: [],
-      costColumnIndex: 9
+      costColumnIndex: 9,
+      firstColumnIndex: 4,
+      contestNameColumnIndex: 2,
     },
     {
       type: 'DK Single Game',
       firstLine: ['Entry ID', 'Contest Name', 'Contest ID', 'Entry Fee', 'CPT', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
       columnsToSet: ['Contest', 'CPT', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'Cost', 'Value'],
       positionsToFill: ['UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL', 'UTIL'],
-      lastColumnIndex: 9,
+      lastColumnIndex: 10,
       positionalScoreBoost: [1.5],
       positionalCostBoost: [1.5],
-      costColumnIndex: 7
+      costColumnIndex: 7,
+      firstColumnIndex: 4,
+      contestNameColumnIndex: 1,
     },
   ]
 
@@ -155,39 +163,77 @@ const getContestParams = (firstRow) => {
   throw new Error('Unable to parse upload template')
 }
 
+const parsePlayerIdFromCell = (cell) => {
+  if(cell.includes(' (')){
+    return cell.split(' (')[1].split(')')[0]
+  } 
+  
+  if(cell.includes(':')){
+    return cell.split(':')[0]
+  }
+
+  return cell
+}
+
+const getPlayerFromPlayerId = (playerId) => {
+  return playerByPlayerId.value[playerId] ?? null
+}
+
+watch(() => playerByPlayerId.value, (newVal) => {
+  constructRosterTable()
+})
+
 const constructRosterTable = () => {
   if(!filteredRows.value || !filteredRows.value.length) {
     return
   }
 
-  contestParams.value = getContestParams(filteredRows.value[0])
-  const { columnsToSet, costColumnIndex } = contestParams.value
+  if(!Object.keys(playerByPlayerId.value).length) {
+    return
+  }
+  ///given filtered rows
+  /// construct tableRows
+  /// construct rosterSet
 
-  const rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
-    return [row[2], ...row.slice(3, contestParams.value.lastColumnIndex).map(el => el.split(':')[1])]
-  }) : []
+  const firstRow = filteredRows.value[0]
+  contestParams.value = getContestParams(firstRow)
+  const { columnsToSet, costColumnIndex, lastColumnIndex, firstColumnIndex, contestNameColumnIndex } = contestParams.value
 
-  if(rosterSet.value) {
-    rows.forEach((row, index) => {
-      const roster = rosterSet.value[index]
-      if(!roster) {
-        return
-      }
+  let rows = []
+  debugger
+  if(!rosterSet.value || !Object.keys(rosterSet.value).length) {
+    rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
+      return [row[contestNameColumnIndex], ...row.slice(firstColumnIndex, lastColumnIndex).map(parsePlayerIdFromCell).map(getPlayerFromPlayerId)]
+    }) : []
 
-      if(!roster.players) {
-        return
-      }
+    rosterSet.value = rows.map((row) => {
+      const playerSet = row.slice(1)
+
+      const cost = playerSet.reduce((acc, curr) => {
+        return acc + parseInt(curr?.salary ?? '0')
+      }, 0)
       
-      /// TODO: this 9 should be parameterized as well
-      for(var i = 0; i < 9; i += 1) {
-        const player = roster.players[i]
-        row[i + 1] = player
+      const roster = {
+        cost,
+        value: playerSet.reduce((acc, curr) => {
+          return acc + curr?.override ?? 0
+        }, 0),
+        players: playerSet,
       }
 
-      row[costColumnIndex] = roster.cost
-      row[costColumnIndex + 1] = roster.value.toFixed(2)
+      return roster
+    })
+  } else {
+    rows = rosterSet.value.map((roster, idx) => {
+      return [filteredRows.value.slice(1)[idx][contestNameColumnIndex], ...roster.players]
     })
   }
+
+  rosterSet.value.forEach((roster, index) => {
+    const row = rows[index]
+    row[costColumnIndex] = roster.cost
+    row[costColumnIndex + 1] = roster.value.toFixed(2)
+  })
 
   tableRows.value = rows
   tableColumns.value = columnsToSet
@@ -431,8 +477,8 @@ const updateRosterSetPlayerProjections = () => {
       player.projection = idToPlayer[player.playerId]?.projection ?? 0
       player.override = idToPlayer[player.playerId]?.override ?? 0
     })
-
-    roster.value = roster.players.reduce((acc, curr) => {
+    
+    roster.value = roster.valueComputed ? roster.valueComputed(roster.players) : roster.players.reduce((acc, curr) => {
       return acc + curr?.override ?? 0
     }, 0)
     
@@ -480,41 +526,6 @@ const uploadSlateFile = (evt) => {
       const result = Papa.parse(content)
       filteredRows.value = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
       setItem('tableRows', filteredRows.value)
-      
-      const playerSets = filteredRows.value.slice(1).map((row) => {
-        const startOffset = site.value === 'dk' ? 1 : 0
-        return row.slice(3 + startOffset, 12).map((player) => {
-          if(player.includes(' (')){
-            const playerId = parseInt(player.split(' (')[1].split(')')[0])
-            const matchedPlayer = playerByPlayerId.value[playerId]
-            if(matchedPlayer) {
-              matchedPlayer.cost = parseInt(matchedPlayer?.salary ?? '0')
-            }
-            return matchedPlayer
-          } else {
-            const splitPlayer = player.split(':')
-            const playerId = splitPlayer[0]
-            const matchedPlayer = playerByPlayerId.value[playerId]
-            if(matchedPlayer) {
-              matchedPlayer.cost = parseInt(matchedPlayer?.salary ?? '0')
-            }
-            return matchedPlayer
-          }
-        })
-      })
-      rosterSet.value = playerSets.map((playerSet) => {
-        return {
-          cost: playerSet.reduce((acc, curr) => {
-            return acc + parseInt(curr?.salary ?? '0')
-          }, 0),
-          value: playerSet.reduce((acc, curr) => {
-            return acc + curr?.override ?? 0
-          }, 0),
-          players: playerSet,
-        }
-      })
-
-      constructRosterTable()
       
       contests.value = Papa.unparse(filteredRows.value)
     };

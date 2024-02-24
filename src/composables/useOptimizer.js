@@ -14,8 +14,15 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
     stopDK()
   }
 
-  const isRosterUnderCost = (roster, maxCost) => {
-    const totalCost = roster.map((row) => row.cost).reduce((a, b) => a + b, 0) 
+  const isRosterUnderCost = (players, maxCost, _positionalCostBoost = null) => {
+    const totalCost = players.reduce((acc, curr, index) => {
+      if(!_positionalCostBoost) {
+        return acc + curr.cost
+      }
+
+      const boost = _positionalCostBoost[index] || 1
+      return acc + curr.cost * boost
+    }, 0)
     return totalCost <= maxCost
   }
 
@@ -34,8 +41,8 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
     return true
   }
 
-  const isSingleGameRosterValidDK = (roster) => {
-    const isUnderCost = isRosterUnderCost(roster, 50000)
+  const isSingleGameRosterValidDK = (roster, positionalCostBoost) => {
+    const isUnderCost = isRosterUnderCost(roster, 50000, positionalCostBoost)
     if(!isUnderCost) {
       return false
     }
@@ -97,7 +104,7 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
       }, {})
 
       if(type === 'DK Single Game') {
-        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidDK, 50000)
+        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidDK, 50000, positionalCostBoost)
       } 
       if(type === 'DK Classic') { 
         startStopDK(byPosition, lockedTeams, rosterSet, rosterCount)
@@ -106,7 +113,7 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
   }
 
   const isGeneratingRosters = computed(() => {
-    return isGeneratingDK.value || isGeneratingFD.value
+    return isGeneratingDK.value || isGeneratingFD.value || isGeneratingV2.value
   })
 
   return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }

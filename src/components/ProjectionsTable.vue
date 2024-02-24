@@ -152,7 +152,7 @@ const projectionFileUploaded = (evt) => {
     const projections = parseProjectionFile(contents)
 
     for (const playerRow of slateData.value) {
-      const name = playerRow.name
+      let name = playerRow.name
       let name2 = null
       if(name in nameMapper) {
         name2 = nameMapper[name]

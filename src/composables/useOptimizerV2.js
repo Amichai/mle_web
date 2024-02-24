@@ -26,6 +26,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   const rosterValue = (players) => {
     return players.reduce((acc, curr, index) => {
+      if(!_positionalScoreBoost) {
+        return acc + curr.override
+      }
+
       const boost = _positionalScoreBoost[index] || 1
       return acc + curr.override * boost
     }, 0)
@@ -33,6 +37,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   
   const rosterCost = (players) => {
     return players.reduce((acc, curr, index) => {
+      if(!_positionalCostBoost) {
+        return acc + curr.cost
+      }
+
       const boost = _positionalCostBoost[index] || 1
       return acc + curr.cost * boost
     }, 0)
@@ -83,9 +91,9 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   }
 
 
-  const improveRosterGreedy = (roster) => {
+  const improveRosterGreedy = (players) => {
     for(var i = 0; i < 20; i += 1) {
-      if(improveRosterOneStep(roster)) {
+      if(improveRosterOneStep(players)) {
         i = 0
       }
     }
@@ -102,6 +110,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       players: roster[0],
       value: roster[1],
       cost: rosterCost(roster[0]),
+      valueComputed: (players) => rosterValue(players),
     }))
 
     if (toReturn2.length) {
@@ -112,6 +121,11 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   
   const tryToImproveRoster = (roster, lockedTeams) => {
     const players = roster[0]
+
+    if(_positionalScoreBoost) {
+      players.sort((a, b) => a.override < b.override ? 1 : -1)
+    }
+
     var removeCount = 0
     for(var i = 0; i < 3; i += 1) {
       const idx = rand(0, players.length - 1)
@@ -123,80 +137,17 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     
     if(removeCount > 1) {
       improveRosterGreedy(players)
+
       return playerListToRoster(players)
     }
     
     return roster
   }
 
-  const appendNewLineups2 = (newLineups, shouldSort = true) => {
-    if(!rosterSet.length) {
-      rosterSet = newLineups.filter((roster) => _isRosterValid(roster[0]))
-    }
-
-    const currentRosterKeys = rosterSet.map((roster) => l(roster, "key"))
-
-    const topNFiltered_dups = newLineups.filter((roster) => !currentRosterKeys.includes(l(roster, "key")))
-
-    const topNFiltered = dedupLineups(topNFiltered_dups)
-              .filter((roster) => _isRosterValid(roster[0]))
-
-    rosterSet = [...rosterSet, ...topNFiltered]
-
-    if(shouldSort) {
-      const allRosters = rosterSet.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
-      // console.log("all rosters",allRosters.length)
-      rosterSet = allRosters
-
-      const takenRosters = []
-      const playerCounts = {}
-      const criticalThreshold = _rosterCount * parseFloat(maxPlayerExposure.value)
-      for(let i = 0; i < rosterSet.length; i += 1) {
-        const roster = rosterSet[i]
-        const players = roster[0]
-        let isAcceptable = true
-        players.forEach((player) => {
-          const name = player.name
-          if(!(name in playerCounts)) {
-            playerCounts[name] = 1
-          } else {
-            playerCounts[name] += 1
-          }
-
-          if(playerCounts[name] > criticalThreshold) {
-            isAcceptable = false
-          }
-        })
-
-        if(isAcceptable) {
-          takenRosters.push(roster)
-        } else {
-          players.forEach((player) => {
-            const name = player.name
-            playerCounts[name] -= 1
-          })
-        }
-
-        if(takenRosters.length === _rosterCount) {
-          break
-        }
-      }
-
-      rosterSet = takenRosters
-    }
-
-    /// go through each roster
-    /// consume each roster if we're not over the limit
-    /// if we're over the limit skip
-  
-
-    updateLineupSet()
-  }
-
   const appendNewLineups = (newLineups, shouldSort = true) => {
     if(maxPlayerExposure.value !== '1') {
-      appendNewLineups2(newLineups, shouldSort)
-      return
+      
+      // return
     }
 
     if(!rosterSet.length) {
@@ -254,9 +205,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       amassedRosters.push(roster)
     }
 
-    // debugger
     appendNewLineups(amassedRosters)
-    // updateLineupSet(rosterCount)
   }
 
   let intervalId = null
@@ -267,7 +216,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   const hasNullOrUndefined = (arr) => {
     return arr.some(element => element === null || element === undefined);
-
   }
 
   const startStopGeneratingRosters = (byPosition, startingRosters, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isRosterValid, maxCost) => {
@@ -292,8 +240,8 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       }
 
       if(count > toGenerate * 10) {
-        console.error("too many iterations")
-        throw new Error("too many iterations")
+        console.error("too many iterations. Failed to generate valid intial rosters")
+        throw new Error("too many iterations. Failed to generate valid intial rosters")
       }
     }
 
@@ -315,5 +263,5 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   }
 
-  return { startStopGeneratingRosters }
+  return { startStopGeneratingRosters, isGeneratingRosters }
 }

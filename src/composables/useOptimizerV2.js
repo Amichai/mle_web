@@ -48,8 +48,14 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   const playerListToRoster = (players) => {
     const totalValue = rosterValue(players)
-    const lineupKey = players.map((row) => row.name).sort().join('|')
     
+    let lineupKey = players.map((row) => row.name).sort().join('|')
+
+
+    if(_positionalScoreBoost && _positionalScoreBoost.length > 1) {
+      lineupKey += `+${players.map((row) => row.name).slice(0, _positionalScoreBoost.length).join('|')}`
+    }
+
     return [players, totalValue, lineupKey]
   }
 
@@ -122,6 +128,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   const tryToImproveRoster = (roster, lockedTeams) => {
     const players = roster[0]
 
+    if(_positionalScoreBoost && !_positionalCostBoost) {
+      players.sort((a, b) => a.override < b.override ? 1 : -1)
+    }
+
     var removeCount = 0
     for(var i = 0; i < 3; i += 1) {
       const idx = rand(0, players.length - 1)
@@ -133,10 +143,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     
     if(removeCount > 1) {
       improveRosterGreedy(players)
-      
-      if(_positionalScoreBoost && !_positionalCostBoost) {
-        players.sort((a, b) => a.override < b.override ? 1 : -1)
-      }
 
       return playerListToRoster(players)
     }
@@ -145,10 +151,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   }
 
   const appendNewLineups = (newLineups, shouldSort = true) => {
-    if(maxPlayerExposure.value !== '1') {
-      // return
-    }
-
     if(!rosterSet.length) {
       rosterSet = newLineups.filter((roster) => _isRosterValid(roster[0]))
     }

@@ -567,7 +567,7 @@ const deleteSlate = (evt) => {
           <button class="button play-button" @click="optimizeHandler" v-show="isGeneratingRosters">
             <img :src="stopIcon" alt="optimize" width="30">
           </button>
-          <!-- <ExposureSlider v-model="maxExposurePercentage" /> -->
+          <ExposureSlider v-model="maxExposurePercentage" />
         </div>
         <div class="view-selector" v-show="selectedSlate">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">

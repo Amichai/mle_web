@@ -151,6 +151,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   }
 
   const appendNewLineups = (newLineups, shouldSort = true) => {
+    if(maxPlayerExposure.value !== '1') {
+      // return
+    }
+
     if(!rosterSet.length) {
       rosterSet = newLineups.filter((roster) => _isRosterValid(roster[0]))
     }

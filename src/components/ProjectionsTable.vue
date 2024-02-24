@@ -122,9 +122,10 @@ const loadTableData = () => {
     return
   }
 
-  
-
   slateData.value = setupTableData(props.playerData, props.slatePlayerData, props.teamData, selectedSlate.value, slateToIdToOverride[selectedSlate.value])
+  .filter((playerRow) => {
+    return playerRow['position'] !== 'CPT'
+  })
 }
 
 watch(() => props.teamData, (newVal) => {

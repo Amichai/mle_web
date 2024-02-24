@@ -132,7 +132,7 @@ const getContestParams = (firstRow) => {
       positionalScoreBoost: [],
       costColumnIndex: 9,
       firstColumnIndex: 4,
-      contestNameColumnIndex: 2,
+      contestNameColumnIndex: 1,
     },
     {
       type: 'DK Single Game',
@@ -200,7 +200,6 @@ const constructRosterTable = () => {
   const { columnsToSet, costColumnIndex, lastColumnIndex, firstColumnIndex, contestNameColumnIndex } = contestParams.value
 
   let rows = []
-  debugger
   if(!rosterSet.value || !Object.keys(rosterSet.value).length) {
     rows = filteredRows.value ? filteredRows.value.slice(1).map((row) => {
       return [row[contestNameColumnIndex], ...row.slice(firstColumnIndex, lastColumnIndex).map(parsePlayerIdFromCell).map(getPlayerFromPlayerId)]

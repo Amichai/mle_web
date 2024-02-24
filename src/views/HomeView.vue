@@ -100,10 +100,7 @@ const selectedSlateChanged = async (newSlate) => {
   console.log('selectedSlateChanged', newSlate)
   const playerDataWithDuplicates = await loadPlayerDataForSlate(newSlate)
 
-  slatePlayerData.value = playerDataWithDuplicates.filter((obj, index, self) => {
-    return index === self.findIndex((t) => t[0] === obj[0])
-  }
-  )
+  slatePlayerData.value = playerDataWithDuplicates
 }
 
 </script>

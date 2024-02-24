@@ -122,7 +122,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   const tryToImproveRoster = (roster, lockedTeams) => {
     const players = roster[0]
 
-    if(_positionalScoreBoost) {
+    if(_positionalScoreBoost && !_positionalCostBoost) {
       players.sort((a, b) => a.override < b.override ? 1 : -1)
     }
 
@@ -146,7 +146,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   const appendNewLineups = (newLineups, shouldSort = true) => {
     if(maxPlayerExposure.value !== '1') {
-      
       // return
     }
 

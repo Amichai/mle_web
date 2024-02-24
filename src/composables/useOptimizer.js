@@ -84,7 +84,7 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
         startStopFD(byPosition, lockedTeams, rosterSet, rosterCount)
       }
     } else if (site === 'dk') {
-      const dkPositionsMapper = {"PG": ["PG", "G", "UTIL"], "SG": ["SG", "G", "UTIL"], "SF": ["SF", "F", "UTIL"], "PF": ["PF", "F", "UTIL"], "C": ["C", "UTIL"], "UTIL": ["UTIL"]}
+      const dkPositionsMapper = {"PG": ["PG", "G", "UTIL"], "SG": ["SG", "G", "UTIL"], "SF": ["SF", "F", "UTIL"], "PF": ["PF", "F", "UTIL"], "C": ["C", "UTIL"], "UTIL": ["UTIL"], "CPT": ["CPT"]}
 
       const byPosition = slateData.reduce((acc, curr) => {
         const positions = curr.position.split('/')
@@ -104,7 +104,9 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
       }, {})
 
       if(type === 'DK Single Game') {
-        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidDK, 50000, positionalCostBoost)
+        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, (roster) => 
+        isSingleGameRosterValidDK(roster, positionalCostBoost),
+        50000, positionalCostBoost)
       } 
       if(type === 'DK Classic') { 
         startStopDK(byPosition, lockedTeams, rosterSet, rosterCount)

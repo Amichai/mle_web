@@ -41,18 +41,6 @@ const slateToIdToOverride = localStorage.getItem('slateToIdToOverride') ? JSON.p
 
 const selectedSlate = ref('')
 
-const loadNameToPlayerData = () => {
-  nameToPlayerData.value = {}
-  for(const row of props.playerData) {
-    let name = row[0]
-    if(name in nameMapper) {
-      name = nameMapper[name]
-    }
-
-    nameToPlayerData.value[name] = row
-  }
-}
-
 watch(() => props.isOpen, (newVal) => {
   isOpenLocal.value = newVal;
 })
@@ -172,5 +160,4 @@ const selectedSlateChanged = (newSlate) => {
   transform: rotate(180deg);
   height: 1.5rem;
 }
-
 </style>

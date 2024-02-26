@@ -393,7 +393,7 @@ export function useOptimizerDK(activeRostersUpdatedCallback, maxPlayerExposure) 
     const player1StartTime = convertTimeStringToDecimal(player1.startTime) 
     const player2StartTime = convertTimeStringToDecimal(player2.startTime) 
     const isPlayer1Locked = player1StartTime < currentTime
-    const isPlayer2Locked = player1StartTime < currentTime
+    const isPlayer2Locked = player2StartTime < currentTime
 
     if (isPlayer1Locked || isPlayer2Locked) {
         return;

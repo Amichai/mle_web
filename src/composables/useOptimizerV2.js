@@ -150,9 +150,63 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     return roster
   }
 
+  const appendNewLineups2 = (newLineups, shouldSort) => {
+    const currentRosterKeys = rosterSet.map((roster) => l(roster, "key"))
+
+    const topNFiltered_dups = newLineups.filter((roster) => !currentRosterKeys.includes(l(roster, "key")))
+
+    const topNFiltered = dedupLineups(topNFiltered_dups)
+              .filter((roster) => _isRosterValid(roster[0]))
+
+    rosterSet = [...rosterSet, ...topNFiltered]
+    if(shouldSort) {
+      const allRosters = rosterSet.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
+      // console.log("all rosters",allRosters.length)
+      rosterSet = allRosters
+
+      const takenRosters = []
+      const playerCounts = {}
+      const criticalThreshold = _rosterCount * parseFloat(maxPlayerExposure.value)
+      for(let i = 0; i < rosterSet.length; i += 1) {
+        const roster = rosterSet[i]
+        const players = roster[0]
+        let isAcceptable = true
+        players.forEach((player) => {
+          const name = player.name
+          if(!(name in playerCounts)) {
+            playerCounts[name] = 1
+          } else {
+            playerCounts[name] += 1
+          }
+
+          if(playerCounts[name] > criticalThreshold) {
+            isAcceptable = false
+          }
+        })
+
+        if(isAcceptable) {
+          takenRosters.push(roster)
+        } else {
+          players.forEach((player) => {
+            const name = player.name
+            playerCounts[name] -= 1
+          })
+        }
+
+        if(takenRosters.length === _rosterCount) {
+          break
+        }
+      }
+
+      rosterSet = takenRosters
+    }
+    updateLineupSet()
+  }
+
   const appendNewLineups = (newLineups, shouldSort = true) => {
     if(maxPlayerExposure.value !== '1') {
-      // return
+      appendNewLineups2(newLineups, shouldSort)
+      return
     }
 
     if(!rosterSet.length) {

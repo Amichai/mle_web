@@ -5,6 +5,7 @@ import dklogo from '@/assets/draftkings.png'
 import fdlogo from '@/assets/fanduel.png'
 import collapse from '@/assets/collapse.png'
 import sync from '@/assets/sync.png'
+import discord from '@/assets/discord-icon.png'
   
 
 const props = defineProps({
@@ -230,8 +231,9 @@ const scrollToBottom = () => {
           {{ row.text }}
         </p>
       </div>
+      
     </div>
-
+    <div class="discord-link"><img :src="discord" alt="discord" class="discord-icon"><p>Have a question? Ask me <a href="https://discord.gg/VPjHhUr69g">here</a></p></div>
   </div>
 </template>
 
@@ -340,5 +342,23 @@ const scrollToBottom = () => {
 
 .feed::-webkit-scrollbar-thumb:hover {
   background: #555; /* Color of the scrollbar thumb when hovered */
+}
+.discord-link {
+  font-size: 1rem;
+  margin-left: 0.2rem;
+  margin-top: 0.3rem;
+  display: flex;
+  gap: 0.2rem
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.discord-icon {
+  width: 1.3rem;
+  height: 1.5rem;
 }
 </style>

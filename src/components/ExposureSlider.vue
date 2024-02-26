@@ -26,13 +26,13 @@ watch(() => maxExposure.value, (newVal) => {
   <div class="exposure-slider">
     <p class="title">max exp {{ maxExposure }}</p>
     <div class="exposure-slider-component">
-      <p class="slider-label">0.5</p>
+      <p class="slider-label">0.6</p>
       <div class="exposure-slider">
         <input
           @click="sliderClicked"
           orient="vertical"
           type="range"
-          min="0.5"
+          min="0.6"
           max="1"
           v-model="maxExposure"
           class="slider"

@@ -109,7 +109,11 @@ const getContestParams = (firstRow) => {
       positionsToFill: ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"],
       costColumnIndex: 10,
       firstColumnIndex: 3,
-      contestNameColumnIndex: 2
+      contestNameColumnIndex: 2,
+      isSlateNameConsistent: (slateName) => {
+        return slateName.includes('FD')
+          && !slateName.includes('Single game')
+      }
     },
     {
       type: 'FD Single Game',
@@ -121,6 +125,10 @@ const getContestParams = (firstRow) => {
       costColumnIndex: 6,
       firstColumnIndex: 3,
       contestNameColumnIndex: 2,
+      isSlateNameConsistent: (slateName) => {
+        return slateName.includes('FD')
+          && slateName.includes('Single game')
+      }
     },
     {
       type: 'DK Classic',
@@ -131,6 +139,10 @@ const getContestParams = (firstRow) => {
       costColumnIndex: 9,
       firstColumnIndex: 4,
       contestNameColumnIndex: 1,
+      isSlateNameConsistent: (slateName) => {
+        return slateName.includes('DK')
+          && !slateName.includes('SHOWDOWN')
+      }
     },
     {
       type: 'DK Single Game',
@@ -143,6 +155,10 @@ const getContestParams = (firstRow) => {
       costColumnIndex: 7,
       firstColumnIndex: 4,
       contestNameColumnIndex: 1,
+      isSlateNameConsistent: (slateName) => {
+        return slateName.includes('DK')
+          && slateName.includes('SHOWDOWN')
+      }
     },
   ]
 
@@ -192,7 +208,6 @@ const constructRosterTable = () => {
   ///given filtered rows
   /// construct tableRows
   /// construct rosterSet
-
   const firstRow = filteredRows.value[0]
   contestParams.value = getContestParams(firstRow)
   const { columnsToSet, costColumnIndex, lastColumnIndex, firstColumnIndex, contestNameColumnIndex } = contestParams.value
@@ -521,7 +536,18 @@ const uploadSlateFile = (evt) => {
     return function (e) {
       const content = e.target.result
       const result = Papa.parse(content)
-      filteredRows.value = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
+      const rows = result.data.filter(row => row[0] !== '').map(row => row.slice(0, 13))
+      
+      const firstRow = rows[0]
+      contestParams.value = getContestParams(firstRow)
+      if(!contestParams.value.isSlateNameConsistent(selectedSlate.value)){
+        alert('Slate name does not match the contest type')
+        return
+      }
+
+      filteredRows.value = rows
+
+
       setItem('tableRows', filteredRows.value)
       
       contests.value = Papa.unparse(filteredRows.value)

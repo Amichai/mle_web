@@ -571,8 +571,11 @@ const deleteSlate = (evt) => {
 <template>
   <div :class="['root', isGeneratingRosters && 'is-generating-rosters']">
     <div :class="['header']" @click="toggleCollapseState">
-      <button class="button delete-button" @click="deleteSlate">
+      <button class="button delete-button tooltip" @click="deleteSlate">
         <img :src="trashIcon" alt="delete slate" width="30">
+        <span class="tooltiptext">
+            Delete slate
+        </span>
       </button>
       <SlatePicker 
           v-show="!selectedSlate"
@@ -587,27 +590,32 @@ const deleteSlate = (evt) => {
             {{ myIndex }} - {{  selectedSlate }}
         </div>
         <div v-show="selectedSlate" class="play-button-parent">
-          <button class="button play-button" @click="optimizeHandler" v-show="!isGeneratingRosters">
+          <button class="button play-button tooltip" @click="optimizeHandler" v-show="!isGeneratingRosters">
+            <span class="tooltiptext">
+              Start optimizing
+            </span>
             <img :src="playIcon" alt="optimize" width="30">
           </button>
-          <button class="button play-button" @click="optimizeHandler" v-show="isGeneratingRosters">
+          <button class="button play-button tooltip" @click="optimizeHandler" v-show="isGeneratingRosters">
+            <span class="tooltiptext">
+              Stop optimizing
+            </span>
             <img :src="stopIcon" alt="optimize" width="30">
           </button>
           <ExposureSlider v-model="maxExposurePercentage" />
         </div>
         <div class="view-selector" v-show="selectedSlate">
           <img :src="hammerIcon" alt="construction view" width="26" height="26">
-          <ToggleButton v-model="isShowingPlayerExposures"></ToggleButton>
+          <ToggleButton v-model="isShowingPlayerExposures">
+          </ToggleButton>
           <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
         <div v-show="selectedSlate">
-          <div class="collapse-button" @click="toggleCollapseState">
+          <div class="collapse-button">
             <img :src="collapseIcon" alt="expand" width="26" height="26"
-            @click="toggleCollapseState"
             v-show="isCollapsed"
             >
             <img :src="collapseIcon" alt="collapse" width="26" height="26" class="expand-button-state"
-            @click="toggleCollapseState"
             v-show="!isCollapsed"
             >
           </div>
@@ -619,7 +627,10 @@ const deleteSlate = (evt) => {
         {{ rowCount }} roster{{ rowCount > 1 ? 's': '' }} average projection: {{ averageRosterValue.toFixed(2) }}
       </div>
       <div>
-        <button class="button download-button" @click="downloadFile">
+        <button class="button download-button tooltip" @click="downloadFile">
+          <span class="tooltiptext tooltiptext-left">
+            Download your lineups
+          </span>
           <img :src="downloadIcon" alt="download" width="20" height="20">
         </button>
       </div>
@@ -756,6 +767,39 @@ const deleteSlate = (evt) => {
 .highlight-difference {
   animation: fadeBackgroundColor 2s forwards;
   border-radius: 0.5rem;
+}
+
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 100;
+  top: 2rem;
+  left: -120%;
+}
+
+.tooltiptext-left {
+
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 
 </style>

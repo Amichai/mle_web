@@ -267,6 +267,7 @@ const scrollToBottom = () => {
   width: 97%;
   overflow-y: auto;
   border: 1px solid black;
+  height: 100%;
 }
 
 .site-selector {

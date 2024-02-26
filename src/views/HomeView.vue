@@ -33,7 +33,7 @@ const pingApi = async () => {
       console.log('new data version detected: ', newDataVersion)
       dataVersion = newDataVersion
       localStorage.setItem(`data-version`, newDataVersion)
-      const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/news_feed.txt')
+      const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/news_feed.txt', true)
       localStorage.setItem('breaking-news', result)
       const rows = result.split('\n');
       console.log(rows);

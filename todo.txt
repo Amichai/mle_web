@@ -1,0 +1,36 @@
+ 
+ - optimizer should respect max exposure (not lose rows)
+
+ - headless scraper for easier remote control
+  - more analytics + save downloaded rosters!
+
+
+ Exposure tab 
+ - red highlight locked players
+ - fix max exposure slider
+ - projection / cost -> value column!
+
+- Remove q tags when scraping new statuses
+
+Timezone awareness!
+
+
+-----
+**Daily**
+
+Run scrapeSlates.py
+Clear out the old player_statuses file
+uploadPlayerStatus.py - set the player list files
+uploadProjectionChanges.py
+
+
+----
+Done:
+ - scrape slate data and player statuses
+ - front-end model should update without a refresh
+ - Prune from the player pool (optimize the optimizer)
+ - migrate everything over to optimizer v2 (and compare)
+ - Put the discord link at the bottom of the news feed
+ - persist settings
+ - diff the player statuses so I can mark that update
+ - Discord for feedback etc

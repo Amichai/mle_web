@@ -351,7 +351,7 @@ export function useOptimizerDK(activeRostersUpdatedCallback, maxPlayerExposure) 
     const allRosterKeys = topRosters.map((row) => row[2])
     /// 1000 * 10 rosters = 10000
     /// x * 100 = 10
-    const outerLoopCount = (10000 / topRosters.length) + 1
+    const outerLoopCount = (20000 / topRosters.length) + 1
     console.log("Reoptimize outer loop count: ", outerLoopCount)
 
     for(var j = 0; j < outerLoopCount; j += 1) {

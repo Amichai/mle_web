@@ -12,6 +12,8 @@
 
 - Remove q tags when scraping new statuses
 
+download projection button
+
 Timezone awareness!
 
 
@@ -20,7 +22,7 @@ Timezone awareness!
 
 Run scrapeSlates.py
 Clear out the old player_statuses file
-uploadPlayerStatus.py - set the player list files
+uploadPlayerStatuses.py - set the player list files
 uploadProjectionChanges.py
 
 

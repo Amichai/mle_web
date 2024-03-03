@@ -2,13 +2,10 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import Papa from 'papaparse';
 import SlatePicker from '../components/SlatePicker.vue';
-import ToggleButton from '../components/ToggleButton.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
 import ExposureSlider from '../components/ExposureSlider.vue';
 import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData } from '../utils.js'
-import hammerIcon from '@/assets/hammer.png'
-import liveIcon from '@/assets/live.png'
 import { useOptimizer } from '../composables/useOptimizer.js'
 import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
@@ -18,6 +15,7 @@ import collapseIcon from '@/assets/arrow.png'
 import downloadIcon from '@/assets/download.png'
 import dklogo from '@/assets/draftkings.png'
 import fdlogo from '@/assets/fanduel.png'
+import PlayerSlateTabs from '../components/PlayerSlateTabs.vue';
   
 const props = defineProps({
   id: {
@@ -53,7 +51,6 @@ watch(() => props.selectedTab, (newVal) => {
   stopGeneratingRosters()
 })
 
-const isShowingPlayerExposures = ref(false)
 const isRosterDifferenceHighlighted = ref(false)
 
 const myIndex = ref(props.index + 1)
@@ -602,13 +599,6 @@ const deleteSlate = (evt) => {
             </span>
             <img :src="stopIcon" alt="optimize" width="30">
           </button>
-          <ExposureSlider v-model="maxExposurePercentage" />
-        </div>
-        <div class="view-selector" v-show="selectedSlate">
-          <img :src="hammerIcon" alt="construction view" width="26" height="26">
-          <ToggleButton v-model="isShowingPlayerExposures">
-          </ToggleButton>
-          <img :src="liveIcon" alt="live view" width="26" height="26">
         </div>
         <div v-show="selectedSlate">
           <div class="collapse-button">
@@ -629,7 +619,7 @@ const deleteSlate = (evt) => {
       <div>
         <button class="button download-button tooltip" @click="downloadFile">
           <span class="tooltiptext tooltiptext-left">
-            Download your lineups
+            Download lineups
           </span>
           <img :src="downloadIcon" alt="download" width="20" height="20">
         </button>
@@ -637,18 +627,36 @@ const deleteSlate = (evt) => {
     </div>
     <div v-show="!isCollapsed">
       <div class="input-grid" v-show="selectedSlate">
-        <LineupsTable 
-          v-show="!isShowingPlayerExposures"
+      <PlayerSlateTabs
+        v-show="filteredRows.length"
+        :tabs="[
+          {name: 'Lineups'}, 
+          {name: 'Exposure'},
+          {name: 'Settings'}]"
+      >
+        <template v-slot:Lineups>
+          <LineupsTable 
           :columns="tableColumns"
           :rows="tableRows"
           :currentTime="getCurrentTimeDecimal()"
         ></LineupsTable>
-        <PlayerExposureComponent 
-          v-show="isShowingPlayerExposures"
+        </template>
+        <template v-slot:Exposure>
+          <PlayerExposureComponent
           :rosters="rosterSet"
-        />
+        /> 
+        </template>
+        <template v-slot:Settings>
+          <div class="setting-tab">
+            <p>Max player exposure:</p>
+            <ExposureSlider v-model="maxExposurePercentage" />
+          </div>
+        </template>
+      </PlayerSlateTabs>
+        <!-- 
+       -->
       </div>
-      <div class="input-file-row" v-show="selectedSlate">
+      <div class="input-file-row" v-show="selectedSlate && !filteredRows.length">
         <input class="form-control" @change="uploadSlateFile" type="file" id="formFile">
       </div>
     </div>
@@ -687,8 +695,7 @@ const deleteSlate = (evt) => {
 }
 
 .header {
-  display: grid;
-  grid-template-columns: 1fr 2.5fr 1fr 2.5fr 1fr;
+  display: flex;
   align-items: center;
   gap: 1rem;
   justify-content: space-between;
@@ -802,4 +809,11 @@ const deleteSlate = (evt) => {
   visibility: visible;
 }
 
+.setting-tab {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  font-size: 1rem;
+  gap: 1rem;
+  padding: 1rem;
+}
 </style>

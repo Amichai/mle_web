@@ -52,7 +52,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     let lineupKey = players.map((row) => row.name).sort().join('|')
 
 
-    if(_positionalScoreBoost && _positionalScoreBoost.length > 1) {
+    if(_positionalScoreBoost && _positionalScoreBoost.length > 0) {
       lineupKey += `+${players.map((row) => row.name).slice(0, _positionalScoreBoost.length).join('|')}`
     }
 

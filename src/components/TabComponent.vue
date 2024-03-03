@@ -73,7 +73,7 @@ const selectedSlateChanged = (newSlate) => {
     <div class="top-bar">
       <div class="tabs">
         <button v-bind:class="{ active: currentTab === 'Tab1' }" @click="selectTab('Tab1')">Projections</button>
-        <button v-bind:class="{ active: currentTab === 'Tab2' }" @click="selectTab('Tab2')">Lineups</button>
+        <button v-bind:class="{ active: currentTab === 'Tab2' }" @click="selectTab('Tab2')">Slates</button>
       </div>
 
 

@@ -24,7 +24,6 @@ watch(() => maxExposure.value, (newVal) => {
 
 <template>
   <div class="exposure-slider">
-    <p class="title">max exp {{ maxExposure }}</p>
     <div class="exposure-slider-component">
       <p class="slider-label">0.6</p>
       <div class="exposure-slider">
@@ -42,6 +41,8 @@ watch(() => maxExposure.value, (newVal) => {
       </div>
       <p class="slider-label">1.0</p>
       <p class="slider-label"></p>
+      <p class="title">{{ maxExposure * 100 }}%</p>
+
     </div>
   </div>
 </template>
@@ -58,21 +59,21 @@ watch(() => maxExposure.value, (newVal) => {
 }
 
 .slider {
-  width: 4rem;
+  width: 8rem;
 }
 
 .exposure-slider {
   display: flex;
-  flex-direction: column;
 }
 
 .exposure-slider-component {
   display: flex;
+  flex-direction: row;
 }
 
 .title {
-  font-size: 0.8rem;
+  font-size: 1rem;
   text-align: left;
-  width: 8rem;
+  /* width: 8rem; */
 }
 </style>

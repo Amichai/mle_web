@@ -695,8 +695,9 @@ const deleteSlate = (evt) => {
 }
 
 .header {
-  display: flex;
-  align-items: center;
+  display: grid;
+  /* align-items: center; */
+  grid-template-columns: 10rem 1fr 10rem 10rem;
   gap: 1rem;
   justify-content: space-between;
 }

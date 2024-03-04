@@ -104,6 +104,7 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
   }
 
   const startStopGeneratingRosters = (slateData, lockedTeams, rosterSet, rosterCount, site, contestParams) => {
+    debugger
     const { type, positionsToFill, positionalScoreBoost, positionalCostBoost } = contestParams.value
 
     if (site === 'fd') {

@@ -196,9 +196,6 @@ export function useOptimizerFD(activeRostersUpdatedCallback, maxPlayerExposure) 
     const topRostersToReturn = topRosters.slice(0, rosterCount)
     const averageRosterValue = topRostersToReturn.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / rosterCount
     
-
-    console.log("Average roster value: ", averageRosterValue.toFixed(2))
-
     const toReturn = topRostersToReturn.map((roster) => ({
       players: roster[0],
       value: roster[1],

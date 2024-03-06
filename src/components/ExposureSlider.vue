@@ -36,7 +36,7 @@ watch(() => maxExposure.value, (newVal) => {
           v-model="maxExposure"
           class="slider"
           id="myRange"
-          step="0.05"
+          step="0.01"
         />
       </div>
       <p class="slider-label">1.0</p>

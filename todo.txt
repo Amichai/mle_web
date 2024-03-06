@@ -22,7 +22,7 @@ Timezone awareness!
 
 Run scrapeSlates.py
 Clear out the old player_statuses file
-Clear outy news_feed
+Clear out news_feed
 uploadPlayerStatuses.py - set the player list files
 uploadProjectionChanges.py
 

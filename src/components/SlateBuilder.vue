@@ -246,9 +246,6 @@ const constructRosterTable = () => {
 
   tableRows.value = rows
   tableColumns.value = columnsToSet
-  
-
-  console.log('setting table columns', tableColumns.value)
 }
 
 const filteredRows = ref([])
@@ -258,7 +255,6 @@ watch(() => filteredRows.value, (newFilteredRows) => {
 })
 
 watch(() => rosterSet.value, (newRosterSet) => {
-  console.log('Roster set updated', newRosterSet)
   constructRosterTable()
 })
 
@@ -279,7 +275,6 @@ const areRostersDifferent = (rosters1, rosters2) => {
 
 let timeoutId = null
 const rostersUpdatedCallback = (rosters) => { 
-  console.log('Rosters updated', rosters)
   const areDifferent = areRostersDifferent(rosters, rosterSet.value)
   isRosterDifferenceHighlighted.value = areDifferent
   if(timeoutId) {

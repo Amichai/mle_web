@@ -26,10 +26,6 @@ const isPlayerLocked = (startTime) => {
   return toReturn
 }
 
-watch(() => props.columns, (newVal) => {
-  console.log("columns changed", newVal)
-})
-
 watch(() => props.rows, (newVal) => {
 })
 </script>

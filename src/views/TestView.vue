@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useOptimizerV2 } from '../composables/useOptimizerV2.js'
+import { useOptimizerV3 } from '../composables/useOptimizerV3.js'
   
 const props = defineProps({
 })
@@ -20,11 +21,28 @@ const rostersUpdatedCallback = (rosters) => {
     firstAverageRosterValue.value = averageRosterValue
   }
   currentAverageRosterValue.value = averageRosterValue
+
+  const playerCounts = {}
+  for(let i = 0; i < rosters.length; i += 1) {
+    const roster = rosters[i]
+    const players = roster.players
+    players.forEach((player) => {
+      const name = player.name
+      if(!(name in playerCounts)) {
+        playerCounts[name] = 1
+      } else {
+        playerCounts[name] += 1
+      }
+    })
+  }
+
+  console.log(playerCounts)
 }
 
-const maxPlayerExposure = ref('')
+const maxPlayerExposure = ref('0.5')
 
 const { startStopGeneratingRosters: startStopV2, isGeneratingRosters: isGeneratingV2, stopGeneratingRosters: stopV2 } = useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure)
+const { startStopGeneratingRosters: startStopV3, isGeneratingRosters: isGeneratingV3, stopGeneratingRosters: stopV3 } = useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure)
 
 onMounted(() => {
   console.log("Mounted")
@@ -70,7 +88,7 @@ const isRosterUnderCost = (players, maxCost, _positionalCostBoost = null) => {
   }
 
 const optimizerTests = [{
-  name: "5 Second Random FD Test",
+  name: "5 Second Random FD Test Optmiizer V2",
   description: "",
   action: () => {
     const byPosition = generateByPosition(100)
@@ -92,10 +110,26 @@ const optimizerTests = [{
     }, 3000)
   }
 }, {
-  name: "Test 2",
-  description: "Test 2 description",
+  name: "5 Second Random FD Test Optmiizer V3",
+  description: "",
   action: () => {
-    // stopV2()
+    const byPosition = generateByPosition(100)
+    const rosterCount = 10
+    const rosters = []
+    const maxCost = 60000
+    
+    startStopV3(byPosition, rosters, rosterCount, positionsToFill, null, null, (players) => isRosterUnderCost(players, maxCost), maxCost)
+
+    setTimeout(() => {
+      stopV3()
+      console.log("TEST STOPPED!")
+      runningTestIdx.value = null
+      testResult.value = ""
+
+      const averageRosterValueDiff = currentAverageRosterValue.value - firstAverageRosterValue.value
+      firstAverageRosterValue.value = null
+      console.log("Average Roster Value Diff", averageRosterValueDiff)
+    }, 3000)
   }
 }]
 
@@ -112,7 +146,7 @@ const runTest = (test, idx) => {
 <template>
   <div>
     Optimizer Tests
-    <div v-for="test, idx in optimizerTests" :key="idx" @click="() => runTest(test, idx)" :class="[idx === runningTestIdx && 'running']">
+    <div v-for="test, idx in optimizerTests" :key="idx" @click="() => runTest(test, idx)" :class="[idx === runningTestIdx && 'running', 'test-list']">
       {{ test.name }}
       {{ testResult }}
     </div>
@@ -126,5 +160,10 @@ div {
 
 .running {
   background-color: lightgreen;
+}
+
+.test-list {
+  padding: 2rem;
+  border: 1px solid black;
 }
 </style>

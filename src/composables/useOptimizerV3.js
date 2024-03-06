@@ -1,9 +1,8 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { l, dedupLineups, cloneRoster, getRandomInt, rand} from './optimizerUtil.js'
 
-export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
+export function useOptimizerV3(rostersUpdatedCallback, maxPlayerExposure) {
   let rosterSet = []
-  let exposedRosters = []
 
   const generateRandomRoster = (positionsToFill, byPosition, isRosterValid) => {
     const takenNames = []
@@ -108,7 +107,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   const updateLineupSet = () => {
     const topRostersToReturn = rosterSet.slice(0, _rosterCount)
-    // const averageRosterValue = topRostersToReturn.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / _rosterCount
+    const averageRosterValue = topRostersToReturn.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / _rosterCount
     
 
     const toReturn2 = topRostersToReturn.map((roster) => ({
@@ -120,8 +119,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
     if (toReturn2.length) {
       rostersUpdatedCallback(toReturn2)
-
-      exposedRosters = topRostersToReturn
     }
   }
 
@@ -151,21 +148,66 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     return roster
   }
 
-  const rosterEnsembleValue = (evaluationSet) => {
-    if(evaluationSet.length === 0) {
-      return null
-    }
+  const appendNewLineups2 = (newLineups, shouldSort) => {
+    const currentRosterKeys = rosterSet.map((roster) => l(roster, "key"))
 
-    const averageRosterValue = evaluationSet.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / _rosterCount
-    let distanceFromCriticalThreshold = 0
-    
-    const minRosterValue = evaluationSet.length ? Math.min(...evaluationSet.map(i => i[1])) : 0
+    const topNFiltered_dups = newLineups.filter((roster) => !currentRosterKeys.includes(l(roster, "key")))
+
+    const topNFiltered = dedupLineups(topNFiltered_dups)
+              .filter((roster) => _isRosterValid(roster[0]))
+
+    rosterSet = [...rosterSet, ...topNFiltered]
+    if(shouldSort) {
+      const allRosters = rosterSet.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
+      // console.log("all rosters",allRosters.length)
+      rosterSet = allRosters
+
+      const takenRosters = []
+      const playerCounts = {}
+      const criticalThreshold = _rosterCount * parseFloat(maxPlayerExposure.value)
+      for(let i = 0; i < rosterSet.length; i += 1) {
+        const roster = rosterSet[i]
+        const players = roster[0]
+        let isAcceptable = true
+        players.forEach((player) => {
+          const name = player.name
+          if(!(name in playerCounts)) {
+            playerCounts[name] = 1
+          } else {
+            playerCounts[name] += 1
+          }
+
+          if(playerCounts[name] > criticalThreshold) {
+            isAcceptable = false
+          }
+        })
+
+        if(isAcceptable) {
+          takenRosters.push(roster)
+        } else {
+          players.forEach((player) => {
+            const name = player.name
+            playerCounts[name] -= 1
+          })
+        }
+
+        if(takenRosters.length === _rosterCount) {
+          break
+        }
+      }
+
+      rosterSet = takenRosters
+    }
+    updateLineupSet()
+  }
+
+
+  const rosterEnsembleValue = () => {
+    const averageRosterValue = rosterSet.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / _rosterCount
     const playerCounts = {}
-    const rosterKeys = new Set()
-    for(let i = 0; i < evaluationSet.length; i += 1) {
-      const roster = evaluationSet[i]
+    for(let i = 0; i < rosterSet.length; i += 1) {
+      const roster = rosterSet[i]
       const players = roster[0]
-      rosterKeys.add(roster[2])
       players.forEach((player) => {
         const name = player.name
         if(!(name in playerCounts)) {
@@ -175,103 +217,51 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
         }
       })
     }
-    
-    const playersOverCriticalThreshold = []
     const criticalThreshold = parseFloat(maxPlayerExposure.value)
-    Object.keys(playerCounts).forEach((playerName) => {
-      const exposure = playerCounts[playerName] / _rosterCount
+    const exposurePenalty = Object.keys(playerCounts).reduce((acc, curr) => {
+      const exposure = playerCounts[curr] / _rosterCount
       if(exposure > criticalThreshold) {
-        distanceFromCriticalThreshold += exposure - criticalThreshold
-        if(!(playersOverCriticalThreshold.includes(playerName))) {
-          playersOverCriticalThreshold.push(playerName)
-        }
-      }
-    })
-
-    /// GET the list of players over the critical threshold
-    ///IF the current exposure penalty is zero, we can only gain by improving the average roster value
-    /// if the current exposure penalty is high, we can try taking less than optimal roster values
-    return {
-      averageRosterValue,
-      minRosterValue,
-      rosterKeys,
-      // playerCounts,
-      // criticalThreshold,
-      playersOverCriticalThreshold,
-      distanceFromCriticalThreshold,
-    }
-  }
-
-  const countPlayersOverCriticalThreshold = (roster, playersOverCriticalThreshold) => {
-    return roster[0].reduce((acc, curr) => {
-      const name = curr.name
-      if(playersOverCriticalThreshold.includes(name)) {
-        return acc + 1
+        return acc + (exposure - criticalThreshold)
       }
 
       return acc
     }, 0)
-  }
 
-
-  const considerSwap = (roster, initialEvaluation) => {
-    const idx = getRandomInt(_rosterCount)
-    const toRemove = exposedRosters[idx]
-    const playersOverCriticalThreshold = initialEvaluation.playersOverCriticalThreshold
-    const numberOfPlayersOverCriticalThresholdRemoved = countPlayersOverCriticalThreshold(toRemove, playersOverCriticalThreshold)
-    const numberOfPlayersOverCriticalThresholdNew = countPlayersOverCriticalThreshold(roster, playersOverCriticalThreshold)
-    const criticalThresholdPlayerDiff = numberOfPlayersOverCriticalThresholdNew - numberOfPlayersOverCriticalThresholdRemoved
-    // ^ we want this to be a negative number
-    if(criticalThresholdPlayerDiff > 0
-      || criticalThresholdPlayerDiff === 0 && roster[1] < toRemove[1]
-      || criticalThresholdPlayerDiff < -1
-      ) {
-      return initialEvaluation
-    }
-
-    exposedRosters[idx] = roster
-    const toReturn = rosterEnsembleValue(exposedRosters)
-    if(toReturn.playersOverCriticalThreshold.length > initialEvaluation.playersOverCriticalThreshold.length) {
-      /// the swap isn't vald roll it back
-      exposedRosters[idx] = toRemove
-      return initialEvaluation
-    }
-
-    return toReturn
+    console.log("exposure penalty: ", exposurePenalty.toFixed(2))
+    return averageRosterValue - exposurePenalty * 10
   }
 
   const appendNewLineups = (newLineups, shouldSort = true) => {
-    if(exposedRosters.length === 0) {
-      exposedRosters = rosterSet.slice(0, _rosterCount)
+    if(maxPlayerExposure.value !== '1') {
+      appendNewLineups2(newLineups, shouldSort)
+      return
     }
 
-    let initialEnsembleValuation = rosterEnsembleValue(exposedRosters)
+    // rosterEnsembleValue()
 
-    if(initialEnsembleValuation && newLineups.length) {
-      initialEnsembleValuation.rosterKeys.size && newLineups.forEach((roster) => {
-        const val = roster[1]
-        const key = roster[2]
-        if(initialEnsembleValuation.rosterKeys.has(key)) {
-          return
-        }
-        
-        if(val > initialEnsembleValuation.minRosterValue || initialEnsembleValuation.playersOverCriticalThreshold.length > 0) {
-          /// unique roster
-          ///within range
-          /// consider a swap
-          /// if late swapping, check the validity of that late swap first
-          initialEnsembleValuation = considerSwap(roster, initialEnsembleValuation)
-        }
-      })
+    if(!rosterSet.length) {
+      rosterSet = newLineups.filter((roster) => _isRosterValid(roster[0]))
     }
+
+    const lowestTopLineupValue = rosterSet.length ? l(rosterSet[rosterSet.length - 1], "value") : 0
+
+    const topN = newLineups.filter((lineup) => l(lineup, "value") > lowestTopLineupValue)
+
+    const currentRosterKeys = rosterSet.map((roster) => l(roster, "key"))
+
+    const topNFiltered_dups = topN.filter((roster) => !currentRosterKeys.includes(l(roster, "key")))
+
+    const topNFiltered = dedupLineups(topNFiltered_dups)
+              .filter((roster) => _isRosterValid(roster[0]))
+
+    rosterSet = [...rosterSet, ...topNFiltered]
 
     if(shouldSort) {
-      const allRosters = exposedRosters.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
+      const allRosters = rosterSet.sort((a, b) => a[0] < b[0] ? 1 : -1).sort((a, b) => a[1] < b[1] ? 1 : -1)
       // console.log("all rosters",allRosters.length)
       rosterSet = allRosters
     }
 
-    rosterSet = exposedRosters
     ///check if we are violating the max player exposure constraint for each player
     // if so, find the best rosters without that player 
 
@@ -283,23 +273,22 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   let _byPosition = null
   let _byPositionPruned = null
   let _rosterCount = 0
-  const generateRosters = (maxCost, positionsToFill) => {
+  const generateRosters = (maxCost, positionsToFill, byPosition, rosterCount) => {
     _maxCost = maxCost
     _positionsToFill = positionsToFill
+    _byPosition = byPosition
+    _byPositionPruned = Object.keys(byPosition).reduce((acc, curr) => {
+      const players = byPosition[curr]
+      const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
+      const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
 
-    if(maxPlayerExposure.value !== '1' && exposedRosters.length) {
-      let ensembleValuation = rosterEnsembleValue(exposedRosters)
-      if(ensembleValuation.playersOverCriticalThreshold.length > 0) {
-        const toExclude = ensembleValuation.playersOverCriticalThreshold[getRandomInt(ensembleValuation.playersOverCriticalThreshold.length)]
-        _byPositionPruned = Object.keys(_byPositionPruned).reduce((acc, curr) => {
-          acc[curr] = _byPositionPruned[curr].filter((player) => {
-            return player.name !== toExclude
-          })
+      const combinedArray = Array.from(new Set([...sortedByProjection, ...sortedByValue]));
 
-          return acc
-        }, {})
-      }
-    }
+      acc[curr] = combinedArray
+
+      return acc
+    }, {})
+    _rosterCount = rosterCount
 
     const amassedRosters = []
 
@@ -314,9 +303,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       //   debugger
       // }
 
-      if(roster[1] > 0) {
-        amassedRosters.push(roster)
-      }
+      amassedRosters.push(roster)
     }
 
     appendNewLineups(amassedRosters)
@@ -343,22 +330,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     _positionalScoreBoost = positionalScoreBoost
     _positionalCostBoost = positionalCostBoost
     _isRosterValid = isRosterValid
-    _byPosition = byPosition
-    _byPositionPruned = Object.keys(byPosition).reduce((acc, curr) => {
-      const players = byPosition[curr]
-      const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
-      const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
-
-      const combinedArray = Array.from(new Set([...sortedByProjection, ...sortedByValue]));
-
-      acc[curr] = combinedArray
-
-      return acc
-    }, {})
-    _rosterCount = rosterCount
-
-
-    
     const startingRostersFiltered = startingRosters.filter(i => !hasNullOrUndefined(i.players))
 
     const toGenerate = rosterCount - startingRostersFiltered.length
@@ -389,7 +360,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }
 
     if(!isGeneratingRosters.value) {
-      intervalId = setInterval(() => generateRosters(maxCost, positionsToFill), 1)
+      intervalId = setInterval(() => generateRosters(maxCost, positionsToFill, byPosition, rosterCount), 1)
       isGeneratingRosters.value = true
     } else {
       isGeneratingRosters.value = false

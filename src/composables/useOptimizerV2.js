@@ -312,29 +312,49 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     updateLineupSet()
   }
 
+  watch(() => maxPlayerExposure.value, () => {
+    constructPrunedPlayerPool()
+  })
+
+  const constructPrunedPlayerPool = () => {
+    if(maxPlayerExposure.value !== '1' && exposedRosters.length) {
+      _byPositionPruned = Object.keys(_byPosition).reduce((acc, curr) => {
+        const players = _lockedTeamsRomoved[curr]
+        const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
+        const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
+  
+        const combinedArray = Array.from(new Set([...sortedByProjection, ...sortedByValue]));
+  
+        acc[curr] = combinedArray
+  
+        return acc
+      }, {})
+
+
+      let ensembleValuation = rosterEnsembleValue(exposedRosters)
+      const toExclude = ensembleValuation.playersOverCriticalThreshold[getRandomInt(ensembleValuation.playersOverCriticalThreshold.length)]
+      _byPositionPruned = Object.keys(_byPositionPruned).reduce((acc, curr) => {
+        acc[curr] = _byPositionPruned[curr].filter((player) => {
+          return player.name !== toExclude
+        })
+
+        return acc
+      }, {})
+    }
+  }
+
   let _maxCost = -1
   let _positionsToFill = []
   let _byPosition = null
   let _lockedTeams = null
   let _byPositionPruned = null
   let _rosterCount = 0
+  let _lockedTeamsRomoved = null
   const generateRosters = (maxCost, positionsToFill) => {
     _maxCost = maxCost
     _positionsToFill = positionsToFill
 
-    if(maxPlayerExposure.value !== '1' && exposedRosters.length) {
-      let ensembleValuation = rosterEnsembleValue(exposedRosters)
-      if(ensembleValuation.playersOverCriticalThreshold.length > 0) {
-        const toExclude = ensembleValuation.playersOverCriticalThreshold[getRandomInt(ensembleValuation.playersOverCriticalThreshold.length)]
-        _byPositionPruned = Object.keys(_byPositionPruned).reduce((acc, curr) => {
-          acc[curr] = _byPositionPruned[curr].filter((player) => {
-            return player.name !== toExclude
-          })
-
-          return acc
-        }, {})
-      }
-    }
+    constructPrunedPlayerPool()
 
     const amassedRosters = []
     
@@ -384,7 +404,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     _rosterCount = rosterCount
     _byPosition = byPosition
 
-    const lockedTeamsRomoved = Object.keys(_byPosition).reduce((acc, key) => {
+    _lockedTeamsRomoved = Object.keys(_byPosition).reduce((acc, key) => {
       const players = _byPosition[key]
       acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
 
@@ -392,7 +412,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }, {})
 
     _byPositionPruned = Object.keys(byPosition).reduce((acc, curr) => {
-      const players = lockedTeamsRomoved[curr]
+      const players = _lockedTeamsRomoved[curr]
       const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
       const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
 

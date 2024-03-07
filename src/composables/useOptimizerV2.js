@@ -79,6 +79,11 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
     const rowToSwap = lineup[idx]
 
+    const team = rowToSwap?.team ?? ''
+    if(_lockedTeams.includes(team)) {
+      return false
+    }
+
     const positionsToSwap = _positionsToFill[idx]
     const swapCandidates = _byPositionPruned[positionsToSwap].filter((row) => 
         !currentNames.includes(row.name) 
@@ -108,25 +113,23 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
   const updateLineupSet = () => {
     const topRostersToReturn = rosterSet.slice(0, _rosterCount)
-    // const averageRosterValue = topRostersToReturn.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / _rosterCount
-    
 
-    const toReturn2 = topRostersToReturn.map((roster) => ({
+    const toReturn = topRostersToReturn.map((roster) => ({
       players: roster[0],
       value: roster[1],
       cost: rosterCost(roster[0]),
       valueComputed: (players) => rosterValue(players),
     }))
 
-    if (toReturn2.length) {
-      rostersUpdatedCallback(toReturn2)
+    if (toReturn.length) {
+      rostersUpdatedCallback(toReturn)
 
       exposedRosters = topRostersToReturn
     }
   }
 
   
-  const tryToImproveRoster = (roster, lockedTeams) => {
+  const tryToImproveRoster = (roster) => {
     const players = roster[0]
 
     if(_positionalScoreBoost && !_positionalCostBoost) {
@@ -136,7 +139,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     var removeCount = 0
     for(var i = 0; i < 3; i += 1) {
       const idx = rand(0, players.length - 1)
-      if(!lockedTeams.includes(players[idx].team)) {
+      if(!_lockedTeams.includes(players[idx].team)) {
         players[idx] = {name: '', cost: 0, override: -1000}
         removeCount += 1
       }
@@ -148,7 +151,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       return playerListToRoster(players)
     }
     
-    return roster
+    return null
   }
 
   const rosterEnsembleValue = (evaluationSet) => {
@@ -157,7 +160,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }
 
     const averageRosterValue = evaluationSet.reduce((partialSum, roster) => partialSum + parseFloat(roster[1]), 0) / _rosterCount
-    let distanceFromCriticalThreshold = 0
     
     const minRosterValue = evaluationSet.length ? Math.min(...evaluationSet.map(i => i[1])) : 0
     const playerCounts = {}
@@ -167,6 +169,11 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       const players = roster[0]
       rosterKeys.add(roster[2])
       players.forEach((player) => {
+        if(_lockedTeams.includes(player.team)) {
+          /// don't count anyone locked players
+          return
+        }
+
         const name = player.name
         if(!(name in playerCounts)) {
           playerCounts[name] = 1
@@ -181,24 +188,17 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     Object.keys(playerCounts).forEach((playerName) => {
       const exposure = playerCounts[playerName] / _rosterCount
       if(exposure > criticalThreshold) {
-        distanceFromCriticalThreshold += exposure - criticalThreshold
         if(!(playersOverCriticalThreshold.includes(playerName))) {
           playersOverCriticalThreshold.push(playerName)
         }
       }
     })
 
-    /// GET the list of players over the critical threshold
-    ///IF the current exposure penalty is zero, we can only gain by improving the average roster value
-    /// if the current exposure penalty is high, we can try taking less than optimal roster values
     return {
       averageRosterValue,
       minRosterValue,
       rosterKeys,
-      // playerCounts,
-      // criticalThreshold,
       playersOverCriticalThreshold,
-      distanceFromCriticalThreshold,
     }
   }
 
@@ -213,10 +213,42 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }, 0)
   }
 
+  const areRostersLockTeamCompatible = (roster1, roster2) => {
+    const set1 = roster1[0]
+    const set2 = roster2[0]
+    for(var i = 0; i < set1.length; i += 1) {
+      const player1Locked = _lockedTeams.includes(set1[i].team)
+      const player2Locked = _lockedTeams.includes(set2[i].team)
+      if(player1Locked !== player2Locked) {
+        return false
+      }
+    }
+
+    return true
+  }
 
   const considerSwap = (roster, initialEvaluation) => {
     const idx = getRandomInt(_rosterCount)
-    const toRemove = exposedRosters[idx]
+    let toRemove = exposedRosters[idx]
+
+    if(_lockedTeams.length > 0) {
+      const n = _rosterCount;
+      const randomArray = [...Array(n)].map((_, i) => i).sort(() => Math.random() - 0.5);
+
+      for(var i = 0; i < _rosterCount; i += 1) {
+        const idx = randomArray[i]
+        const toRemove = exposedRosters[idx]
+        if(areRostersLockTeamCompatible(roster, toRemove)) {
+          break 
+        }
+      }
+    }
+
+    if(_lockedTeams.length > 0 && !areRostersLockTeamCompatible(roster, toRemove)) {
+      
+      return initialEvaluation
+    }
+    
     const playersOverCriticalThreshold = initialEvaluation.playersOverCriticalThreshold
     const numberOfPlayersOverCriticalThresholdRemoved = countPlayersOverCriticalThreshold(toRemove, playersOverCriticalThreshold)
     const numberOfPlayersOverCriticalThresholdNew = countPlayersOverCriticalThreshold(roster, playersOverCriticalThreshold)
@@ -228,6 +260,8 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       ) {
       return initialEvaluation
     }
+
+    /// consider if we violate a locked team consraint
 
     exposedRosters[idx] = roster
     const toReturn = rosterEnsembleValue(exposedRosters)
@@ -281,6 +315,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   let _maxCost = -1
   let _positionsToFill = []
   let _byPosition = null
+  let _lockedTeams = null
   let _byPositionPruned = null
   let _rosterCount = 0
   const generateRosters = (maxCost, positionsToFill) => {
@@ -302,24 +337,26 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }
 
     const amassedRosters = []
+    
+    const sampleSet = exposedRosters.length > 0 ? exposedRosters : rosterSet
 
     for(var i = 0; i < 1000; i += 1) {
-      const idx = i % rosterSet.length
-      const toImprove = rosterSet[idx]
+      const idx = i % sampleSet.length
+      const toImprove = sampleSet[idx]
       const rosterCloned = cloneRoster(toImprove)
 
-      const roster = tryToImproveRoster(rosterCloned, [])
+      const roster = tryToImproveRoster(rosterCloned)
       // const hasNullOrUndefined = roster[0].some(element => element === null || element === undefined);
       // if(hasNullOrUndefined) {
       //   debugger
       // }
 
-      if(roster[1] > 0) {
+      if(roster) {
         amassedRosters.push(roster)
       }
     }
 
-    appendNewLineups(amassedRosters)
+    appendNewLineups(amassedRosters, _lockedTeams.length === 0)
   }
 
   let intervalId = null
@@ -339,13 +376,23 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     return arr.some(element => element === null || element === undefined);
   }
 
-  const startStopGeneratingRosters = (byPosition, startingRosters, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isRosterValid, maxCost) => {
+  const startStopGeneratingRosters = (byPosition, startingRosters, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isRosterValid, maxCost, lockedTeams) => {
     _positionalScoreBoost = positionalScoreBoost
     _positionalCostBoost = positionalCostBoost
     _isRosterValid = isRosterValid
+    _lockedTeams = lockedTeams
+    _rosterCount = rosterCount
     _byPosition = byPosition
+
+    const lockedTeamsRomoved = Object.keys(_byPosition).reduce((acc, key) => {
+      const players = _byPosition[key]
+      acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
+
+      return acc
+    }, {})
+
     _byPositionPruned = Object.keys(byPosition).reduce((acc, curr) => {
-      const players = byPosition[curr]
+      const players = lockedTeamsRomoved[curr]
       const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
       const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
 
@@ -355,9 +402,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
       return acc
     }, {})
-    _rosterCount = rosterCount
-
-
     
     const startingRostersFiltered = startingRosters.filter(i => !hasNullOrUndefined(i.players))
 

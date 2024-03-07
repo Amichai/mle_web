@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useLogoProvider } from '../composables/useLogoProvider.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
   
 const props = defineProps({
   rosters: {
@@ -54,6 +55,17 @@ watch(() => props.rosters, (newVal) => {
 })
 
 const emits = defineEmits([])
+const currentTime = ref(null)
+
+onMounted(() => {
+  currentTime.value = getCurrentTimeDecimal()
+})
+
+const isPlayerLocked = (startTime) => {
+  const decimalStartTime = convertTimeStringToDecimal(startTime)
+  const toReturn = decimalStartTime < currentTime.value
+  return toReturn
+}
 </script>
 
 <template>
@@ -67,12 +79,12 @@ const emits = defineEmits([])
     <tbody>
       <tr v-for="(row, index) in tableRows" :key="index"  :class="[row['override'] !== row['projection'] && 'overriden']">
         <td><b>{{ index + 1 }}</b></td>
-        <td>{{ row['name'] }}</td>
+        <td :class="[isPlayerLocked(row?.startTime) && 'player-locked']">{{ row['name'] }}</td>
         <td>{{ row['cost'] }}</td>
         <td>{{ row['position'] }}</td>
         <td>{{ row['exposure'] }}</td>
         <td><component :is="getLogo(row.team)" /> </td>
-        <td>{{ row['startTime'] }}</td>
+        <td :class="[isPlayerLocked(row?.startTime) && 'player-locked']">{{ row['startTime'] }}</td>
         <td>{{ row['override'] }}</td>
       </tr>
     </tbody>
@@ -113,5 +125,9 @@ table tr.overriden:nth-child(odd)
 table tr.overriden:nth-child(even)
 {
   background-color: #FFFF33 !important;
+}
+
+.player-locked {
+  color: darkred;
 }
 </style>

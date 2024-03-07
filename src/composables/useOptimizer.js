@@ -127,9 +127,10 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
       }
       if(type === 'FD Classic') {
         if(lockedTeams.length > 0) {
-          startStopFD(byPosition, lockedTeams, rosterSet, rosterCount)
+          // startStopFD(byPosition, lockedTeams, rosterSet, rosterCount)
+          startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)
         } else {
-          startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost)
+          startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)
         }
       }
     } else if (site === 'dk') {

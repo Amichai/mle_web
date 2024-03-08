@@ -306,7 +306,7 @@ const reader = new FileReader();
 const contests = ref('')
 
 watch(() => maxExposurePercentage.value, (newVal) => {
-  console.log('Max exposure changed', newVal)
+  setItem('maxExposurePercentage', newVal)
 })
 
 const tableColumns = ref([])
@@ -348,6 +348,7 @@ onMounted(() => {
   tableColumns.value = getItem('tableColumns', [])
   rosterSet.value = getItem('rosterSet', [])
   isCollapsed.value = getItem('isCollapsed', false)
+  maxExposurePercentage.value = getItem('maxExposurePercentage', '1')
 })
 
 watch(() => isCollapsed.value, (newVal) => {

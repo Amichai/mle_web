@@ -16,6 +16,10 @@ const sliderClicked = (evt) => {
     evt.stopPropagation()
 }
 
+watch(() => props.modelValue, (newVal) => {
+  maxExposure.value = newVal
+})
+
 watch(() => maxExposure.value, (newVal) => {
   emits('update:modelValue', newVal)
 })

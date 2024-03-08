@@ -357,8 +357,12 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     constructPrunedPlayerPool()
 
     const amassedRosters = []
+    exposedRosters = exposedRosters.map((roster) => {
+      return playerListToRoster(roster[0])
+    })
     
     const sampleSet = exposedRosters.length > 0 ? exposedRosters : rosterSet
+
 
     for(var i = 0; i < 1000; i += 1) {
       const idx = i % sampleSet.length

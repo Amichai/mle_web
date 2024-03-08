@@ -1,5 +1,6 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useOptimizerV2 } from './useOptimizerV2.js'
+import { useOptimizerV3 } from './useOptimizerV3.js'
 import { useOptimizerFD } from '../composables/useOptimizerFD.js'
 import { useOptimizerDK } from '../composables/useOptimizerDK.js'
 
@@ -7,11 +8,13 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
   const { startStopGeneratingRosters: startStopFD, isGeneratingRosters: isGeneratingFD, stopGeneratingRosters: stopFD } = useOptimizerFD(rostersUpdatedCallback, maxExposurePercentage)
   const { startStopGeneratingRosters: startStopDK, isGeneratingRosters: isGeneratingDK, stopGeneratingRosters: stopDK } = useOptimizerDK(rostersUpdatedCallback, maxExposurePercentage)
   const { startStopGeneratingRosters: startStopV2, isGeneratingRosters: isGeneratingV2, stopGeneratingRosters: stopV2 } = useOptimizerV2(rostersUpdatedCallback, maxExposurePercentage)
+  const { startStopGeneratingRosters: startStopV3, isGeneratingRosters: isGeneratingV3, stopGeneratingRosters: stopV3 } = useOptimizerV3(rostersUpdatedCallback, maxExposurePercentage)
 
   const stopGeneratingRosters = () => {
     stopFD()
     stopDK()
     stopV2()
+    stopV3()
   }
 
   const isRosterUnderCost = (players, maxCost, _positionalCostBoost = null) => {
@@ -126,12 +129,7 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
         startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost)
       }
       if(type === 'FD Classic') {
-        if(lockedTeams.length > 0) {
-          // startStopFD(byPosition, lockedTeams, rosterSet, rosterCount)
-          startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)
-        } else {
-          startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)
-        }
+        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)
       }
     } else if (site === 'dk') {
       const dkPositionsMapper = {"PG": ["PG", "G", "UTIL"], "SG": ["SG", "G", "UTIL"], "SF": ["SF", "F", "UTIL"], "PF": ["PF", "F", "UTIL"], "C": ["C", "UTIL"], "UTIL": ["UTIL"], "CPT": ["CPT"]}
@@ -155,22 +153,23 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
 
       const maxCost = 50000 
       if(type === 'DK Single Game') {
-        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, (roster) => 
+        startStopV3(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, (roster) => 
           isSingleGameRosterValidDK(roster, positionalCostBoost),
           maxCost, positionalCostBoost)
       } 
       if(type === 'DK Classic') { 
-        if(lockedTeams.length > 0) {
-          startStopDK(byPosition, lockedTeams, rosterSet, rosterCount)
-        } else {
-          startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidDK, maxCost)
-        }
+        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidDK, maxCost, lockedTeams)
+        // if(lockedTeams.length > 0) {
+        //   startStopDK(byPosition, lockedTeams, rosterSet, rosterCount)
+        // } else {
+        //   startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidDK, maxCost, lockedTeams)
+        // }
       }
     }
   }
 
   const isGeneratingRosters = computed(() => {
-    return isGeneratingDK.value || isGeneratingFD.value || isGeneratingV2.value
+    return isGeneratingDK.value || isGeneratingFD.value || isGeneratingV2.value || isGeneratingV3.value
   })
 
   return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }

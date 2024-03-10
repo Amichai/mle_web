@@ -89,11 +89,6 @@ table tr:nth-child(odd)
   background-color: lightgray;
 }
 
-.tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
 
 /* Tooltip text */
 .tooltip .tooltiptext {
@@ -108,11 +103,6 @@ table tr:nth-child(odd)
   /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
 }
 
 table tr:nth-child(odd) .overriden

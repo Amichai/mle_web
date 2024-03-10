@@ -773,39 +773,6 @@ const deleteSlate = (evt) => {
   border-radius: 0.5rem;
 }
 
-
-.tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
- 
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 100;
-  top: 2rem;
-  left: -120%;
-}
-
-.tooltiptext-left {
-
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
-
 .setting-tab {
   display: grid;
   grid-template-columns: 10rem 1fr;

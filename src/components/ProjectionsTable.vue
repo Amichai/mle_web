@@ -182,12 +182,18 @@ const projectionFileUploaded = (evt) => {
       :isFirstSlateAsDefault="true"
       />
       <!-- :selected="selectedSlate" -->
-    <button class="button reset-button" @click="resetProjections">
+    <button class="button reset-button tooltip" @click="resetProjections">
       <img :src="resetIcon" alt="reset projections" width="40">
+      <span class="tooltiptext">
+        Reset projections
+      </span>
     </button>
     <div class="file-upload-wrapper">
-      <button class="button upload-button" @click="uploadProjections">
+      <button class="button upload-button tooltip" @click="uploadProjections">
         <img :src="uploadIcon" alt="upload projections" width="40">
+        <span class="tooltiptext">
+          Upload projections
+        </span>
       </button>
       <input class="form-control-projections" type="file" 
       @change="projectionFileUploaded"

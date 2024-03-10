@@ -231,6 +231,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     const idx = getRandomInt(_rosterCount)
     let toRemove = exposedRosters[idx]
 
+    const _isThisAnOngoingLockedSlate = _lockedTeams.length > 0
     if(_isThisAnOngoingLockedSlate) {
       const randomArray = [...Array(_rosterCount)].map((_, i) => i).sort(() => Math.random() - 0.5);
 
@@ -243,8 +244,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       }
     }
 
-    if(_lockedTeams.length > 0 && !areRostersLockTeamCompatible(roster, toRemove)) {
-      
+    if(_isThisAnOngoingLockedSlate && !areRostersLockTeamCompatible(roster, toRemove)) {
       return initialEvaluation
     }
     
@@ -359,7 +359,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     exposedRosters = exposedRosters.map((roster) => {
       return playerListToRoster(roster[0])
     })
-    
+
     const sampleSet = exposedRosters.length > 0 ? exposedRosters : rosterSet
 
 
@@ -410,7 +410,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     _lockedTeamsRomoved = Object.keys(_byPosition).reduce((acc, key) => {
       const players = _byPosition[key]
       acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
-
       return acc
     }, {})
 

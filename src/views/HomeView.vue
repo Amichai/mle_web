@@ -19,30 +19,34 @@ const selectedSite = ref('FD')
 
 let intervalId = null;
 
+const queryProjectionsAPI = async () => {
+  const url = 'https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/data?key=v'
+  const response = await fetch(url)
+  const data = await response.json()
+  const newDataVersion = data.Items[0].ct.S
+  pingPeriod.value = data.Items[0].period.S
+  if(newDataVersion !== dataVersion) {
+    console.log('new data version detected: ', newDataVersion)
+    dataVersion = newDataVersion
+    localStorage.setItem(`data-version`, newDataVersion)
+    const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/news_feed.txt', true)
+    localStorage.setItem('breaking-news', result)
+    const rows = result.split('\n');
+    console.log(rows);
+    breakingNewsRows.value = rows
+
+    const formattedDate = getTodaysDate()
+    const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`, true)
+    playerData.value = splitData(data1, 1)
+  }
+}
+
 const pingApi = async () => {
     console.log('pinging API...')
 
   try {
     // TODO: this should return n version numbers, one for each of the file downloads (one base file, and one dynamic override file)
-    const url = 'https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/data?key=v'
-    const response = await fetch(url)
-    const data = await response.json()
-    const newDataVersion = data.Items[0].ct.S
-    pingPeriod.value = data.Items[0].period.S
-    if(newDataVersion !== dataVersion) {
-      console.log('new data version detected: ', newDataVersion)
-      dataVersion = newDataVersion
-      localStorage.setItem(`data-version`, newDataVersion)
-      const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/news_feed.txt', true)
-      localStorage.setItem('breaking-news', result)
-      const rows = result.split('\n');
-      console.log(rows);
-      breakingNewsRows.value = rows
-
-      const formattedDate = getTodaysDate()
-      const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`, true)
-      playerData.value = splitData(data1, 1)
-    }
+    await queryProjectionsAPI()
 
     pingCounter.value += 1
   } catch (error) {
@@ -103,6 +107,9 @@ const selectedSlateChanged = async (newSlate) => {
   slatePlayerData.value = playerDataWithDuplicates
 }
 
+const queryProjections = () => {
+  queryProjectionsAPI()
+}
 </script>
 
 <template>
@@ -119,7 +126,8 @@ const selectedSlateChanged = async (newSlate) => {
         </div>
         <div></div>
         <div class="column-2">
-          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen" :pingCounter="pingCounter" :newsRows="breakingNewsRows"
+          <NewsFeed @close-panel="closePanel" :isOpen="isPanelOpen"
+          @queryProjections="queryProjections" :pingCounter="pingCounter" :newsRows="breakingNewsRows"
           :selectedSiteInitial="selectedSite"
           />
         </div>

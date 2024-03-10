@@ -231,13 +231,12 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     const idx = getRandomInt(_rosterCount)
     let toRemove = exposedRosters[idx]
 
-    if(_lockedTeams.length > 0) {
-      const n = _rosterCount;
-      const randomArray = [...Array(n)].map((_, i) => i).sort(() => Math.random() - 0.5);
+    if(_isThisAnOngoingLockedSlate) {
+      const randomArray = [...Array(_rosterCount)].map((_, i) => i).sort(() => Math.random() - 0.5);
 
       for(var i = 0; i < _rosterCount; i += 1) {
-        const idx = randomArray[i]
-        const toRemove = exposedRosters[idx]
+        const arrIdx = randomArray[i]
+        toRemove = exposedRosters[arrIdx]
         if(areRostersLockTeamCompatible(roster, toRemove)) {
           break 
         }
@@ -375,7 +374,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       //   debugger
       // }
 
-      if(roster) {
+      if(roster && _isRosterValid(roster[0])) {
         amassedRosters.push(roster)
       }
     }

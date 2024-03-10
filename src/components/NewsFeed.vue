@@ -5,8 +5,7 @@ import dklogo from '@/assets/draftkings.png'
 import fdlogo from '@/assets/fanduel.png'
 import collapse from '@/assets/collapse.png'
 import sync from '@/assets/sync.png'
-import discord from '@/assets/discord-icon.png'
-  
+import discord from '@/assets/discord-icon.png'  
 
 const props = defineProps({
   isOpen: {
@@ -52,7 +51,7 @@ onMounted(() => {
   })
 })
 
-const emits = defineEmits(['closePanel'])
+const emits = defineEmits(['closePanel', 'queryProjections'])
 const isOpenLocal = ref(props.isOpen)
 const newsRowsLocal = ref(props.newsRows)
 
@@ -62,16 +61,6 @@ watch(() => props.isOpen, (newVal) => {
 
 watch(() => props.pingCounter, (newVal) => {
   console.log('ping counter changed to: ', newVal, new Date().toLocaleString())
-
-  let cube = document.querySelector(".ping-dot");
-  if (cube) {
-      cube.classList.add("animate-cube");
-
-      // Optional: Remove the class after the animation ends
-      cube.addEventListener('animationend', function() {
-          cube.classList.remove("animate-cube");
-      });
-    }
 })
 
 const formatTime = (date) => {
@@ -198,6 +187,18 @@ const scrollToBottom = () => {
   let div = document.getElementById("feed");
   div.scrollTop = div.scrollHeight;
 }
+
+const refreshProjections = () => {
+  let cube = document.querySelector(".refresh-icon");
+  cube.classList.add("animate-cube");
+
+  // Optional: Remove the class after the animation ends
+  cube.addEventListener('animationend', function() {
+      cube.classList.remove("animate-cube");
+  });
+
+  emits('queryProjections');
+}
 </script>
 
 <template>
@@ -207,14 +208,19 @@ const scrollToBottom = () => {
     <!-- Poll the API every 10 seconds -->
     
     <div class="title">
-      <button class="collapse-button" @click="closePanel">
+      <button class="collapse-button tooltip" @click="closePanel">
         <img :src="collapse" alt="collapse" height="20">
+        <span class="tooltiptext">
+          Close Panel
+        </span>
       </button>
       <div class="dot-and-title">
-        <div class="ping-dot">
-          <img :src="sync" alt="sync">
-
-        </div>
+        <button class="button refresh-button tooltip" @click="refreshProjections">
+          <img :src="sync" alt="refresh projections" class="refresh-icon">
+          <span class="tooltiptext">
+            Check for updates
+          </span>
+        </button>
         <p>Breaking News</p>
       </div>
       <div class="site-selector">
@@ -285,32 +291,9 @@ const scrollToBottom = () => {
   border-radius: 0.5rem;
 }
 
-.ping-dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 0.2rem;
-  margin-right: 0.1rem;
-  visibility: hidden;
-
-}
-
 .dot-and-title {
   display: flex;
   align-items: center;
-}
-
-@keyframes rotateCube {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(180deg);
-    }
-}
-
-.animate-cube {
-    animation: rotateCube 2s ease-in-out;
-    visibility: visible !important;
 }
 
 .highlight-1 {
@@ -361,5 +344,68 @@ a {
 .discord-icon {
   width: 1.3rem;
   height: 1.5rem;
+}
+
+.refresh-button {
+  cursor: pointer;
+  width: 1.6rem;
+  margin: 0 1rem;
+  padding: 0.3rem;
+  border-radius: 1rem;
+  border: black 1px solid;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.button {
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.button:active {
+  background-color: gray;
+  box-shadow: none;
+}
+
+@keyframes rotateCube {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(180deg);
+    }
+}
+
+.animate-cube {
+    animation: rotateCube 1s ease-in-out;
+    visibility: visible !important;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 100;
+  top: 2rem;
+  left: -120%;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 </style>

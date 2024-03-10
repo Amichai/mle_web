@@ -126,7 +126,8 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
 
       const maxCost = 60000 
       if(type === 'FD Single Game') {
-        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost)
+        // startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost, lockedTeams)
+        startStopV3(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost, lockedTeams)
       }
       if(type === 'FD Classic') {
         startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)

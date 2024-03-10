@@ -186,7 +186,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     const playersOverCriticalThreshold = []
     const criticalThreshold = parseFloat(maxPlayerExposure.value)
     Object.keys(playerCounts).forEach((playerName) => {
-      const exposure = playerCounts[playerName] / _rosterCount
+      const exposure = playerCounts[playerName] / (_rosterCount + 1)
       if(exposure > criticalThreshold) {
         if(!(playersOverCriticalThreshold.includes(playerName))) {
           playersOverCriticalThreshold.push(playerName)

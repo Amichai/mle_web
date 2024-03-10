@@ -570,13 +570,15 @@ const deleteSlate = (evt) => {
             Delete slate
         </span>
       </button>
-      <SlatePicker 
-          v-show="!selectedSlate"
-          @selectedSlateChanged="slateSelected"
-          :availableSlates="availableSlates" 
-          :isFirstSlateAsDefault="false"
-          :selected="selectedSlate"
+      <div class="slate-picker" v-show="!selectedSlate">
+        <p>Pick a slate:</p>
+        <SlatePicker 
+            @selectedSlateChanged="slateSelected"
+            :availableSlates="availableSlates" 
+            :isFirstSlateAsDefault="false"
+            :selected="selectedSlate"
         />
+      </div>
         <div class="slate-name">
           <img :src="fdlogo" alt="fanduel" height="20" v-if="selectedSlateSite === 'fd'">
           <img :src="dklogo" alt="draftkings" height="20" v-if="selectedSlateSite === 'dk'">
@@ -779,5 +781,12 @@ const deleteSlate = (evt) => {
   font-size: 1rem;
   gap: 1rem;
   padding: 1rem;
+}
+
+.slate-picker {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-style: italic;
 }
 </style>

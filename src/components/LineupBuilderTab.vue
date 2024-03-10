@@ -74,9 +74,10 @@ const gotFocus = (slate) => {
         @gotFocus="(slate) => gotFocus(slate)"
       />
     </div>
-  <button class="add-button" @click="addSlate">
-    <img :src="addIcon" alt="add slate" width="30">
-  </button>
+    <button class="add-button" @click="addSlate">
+      <img :src="addIcon" alt="add slate" width="30">
+    </button>
+    Add slate
 </template>
 
 <style scoped>

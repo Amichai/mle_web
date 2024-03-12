@@ -62,6 +62,7 @@ export const getTodaysDate = () => {
   const formattedDate = targetTime.toISOString();
 
   return formattedDate.split('T')[0]
+  // return '2024-03-07'
 }
 
 export const getCurrentTimeDecimal = () => {

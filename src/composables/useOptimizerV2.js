@@ -121,6 +121,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       valueComputed: (players) => rosterValue(players),
     }))
 
+    if(toReturn.length !== _rosterCount) {
+      debugger
+    }
+
     if (toReturn.length) {
       rostersUpdatedCallback(toReturn)
 
@@ -184,12 +188,19 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }
     
     const playersOverCriticalThreshold = []
+    const playersApproachingCriticalThreshold = []
     const criticalThreshold = parseFloat(maxPlayerExposure.value)
     Object.keys(playerCounts).forEach((playerName) => {
       const exposure = playerCounts[playerName] / (_rosterCount + 1)
       if(exposure > criticalThreshold) {
         if(!(playersOverCriticalThreshold.includes(playerName))) {
           playersOverCriticalThreshold.push(playerName)
+        }
+      }
+      const exposure2 = (playerCounts[playerName] + 1) / (_rosterCount + 1)
+      if(exposure2 > criticalThreshold) {
+        if(!(playersApproachingCriticalThreshold.includes(playerName))) {
+          playersApproachingCriticalThreshold.push(playerName)
         }
       }
     })
@@ -199,6 +210,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       minRosterValue,
       rosterKeys,
       playersOverCriticalThreshold,
+      playersApproachingCriticalThreshold,
     }
   }
 
@@ -222,13 +234,19 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       if(player1Locked !== player2Locked) {
         return false
       }
+      
+      if(player1Locked && player2Locked) {
+        if(set1[i].name !== set2[i].name) {
+          return false
+        }
+      }
     }
 
     return true
   }
 
   const considerSwap = (roster, initialEvaluation) => {
-    const idx = getRandomInt(_rosterCount)
+    let idx = getRandomInt(_rosterCount)
     let toRemove = exposedRosters[idx]
 
     const _isThisAnOngoingLockedSlate = _lockedTeams.length > 0
@@ -236,8 +254,8 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       const randomArray = [...Array(_rosterCount)].map((_, i) => i).sort(() => Math.random() - 0.5);
 
       for(var i = 0; i < _rosterCount; i += 1) {
-        const arrIdx = randomArray[i]
-        toRemove = exposedRosters[arrIdx]
+        idx = randomArray[i]
+        toRemove = exposedRosters[idx]
         if(areRostersLockTeamCompatible(roster, toRemove)) {
           break 
         }
@@ -265,7 +283,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     exposedRosters[idx] = roster
     const toReturn = rosterEnsembleValue(exposedRosters)
     if(toReturn.playersOverCriticalThreshold.length > initialEvaluation.playersOverCriticalThreshold.length) {
-      /// the swap isn't vald roll it back
+      /// the swap isn't valid roll it back
       exposedRosters[idx] = toRemove
       return initialEvaluation
     }
@@ -331,10 +349,10 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
 
       let ensembleValuation = rosterEnsembleValue(exposedRosters)
-      const toExclude = ensembleValuation.playersOverCriticalThreshold[getRandomInt(ensembleValuation.playersOverCriticalThreshold.length)]
+      const toExclude = ensembleValuation.playersApproachingCriticalThreshold
       _byPositionPruned = Object.keys(_byPositionPruned).reduce((acc, curr) => {
         acc[curr] = _byPositionPruned[curr].filter((player) => {
-          return player.name !== toExclude
+          return !toExclude.includes(player.name)
         })
 
         return acc
@@ -417,10 +435,9 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       const players = _lockedTeamsRomoved[curr]
       const sortedByProjection = [...players].sort((a, b) => a.override < b.override ? 1 : -1).slice(0, 12)
       const sortedByValue = [...players].sort((a, b) => a.override / a.cost < b.override / b.cost ? 1 : -1).slice(0, 15)
-
       const combinedArray = Array.from(new Set([...sortedByProjection, ...sortedByValue]));
-
       acc[curr] = combinedArray
+      // acc[curr] = players
 
       return acc
     }, {})

@@ -127,7 +127,7 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
       const maxCost = 60000 
       if(type === 'FD Single Game') {
         // startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost, lockedTeams)
-        startStopV3(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost, lockedTeams)
+        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isSingleGameRosterValidFD, maxCost, lockedTeams)
       }
       if(type === 'FD Classic') {
         startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidFD, maxCost, lockedTeams)
@@ -154,9 +154,9 @@ export function useOptimizer(rostersUpdatedCallback, maxExposurePercentage) {
 
       const maxCost = 50000 
       if(type === 'DK Single Game') {
-        startStopV3(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, (roster) => 
+        startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, (roster) => 
           isSingleGameRosterValidDK(roster, positionalCostBoost),
-          maxCost, positionalCostBoost)
+          maxCost, lockedTeams)
       } 
       if(type === 'DK Classic') { 
         startStopV2(byPosition, rosterSet, rosterCount, positionsToFill, positionalScoreBoost, positionalCostBoost, isClassicRosterValidDK, maxCost, lockedTeams)

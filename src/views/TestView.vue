@@ -51,6 +51,7 @@ onMounted(() => {
 const positions = ['PG', 'SG', 'SF', 'PF', 'C']
 const teams = ['LAL', 'LAC', 'GSW', 'BOS', 'MIA', 'NYK', 'BKN', 'PHI']
 const positionsToFill = ["PG", "PG", "SG", "SG", "SF", "SF", "PF", "PF", "C"]
+const lockedTeams = teams.slice(0, 4)
 
 const generateByPosition = (ct) => {
   //array of player objects
@@ -96,7 +97,7 @@ const optimizerTests = [{
     const rosters = []
     const maxCost = 60000
     
-    startStopV2(byPosition, rosters, rosterCount, positionsToFill, null, null, (players) => isRosterUnderCost(players, maxCost), maxCost)
+    startStopV2(byPosition, rosters, rosterCount, positionsToFill, null, null, (players) => isRosterUnderCost(players, maxCost), maxCost, lockedTeams)
 
     setTimeout(() => {
       stopV2()
@@ -109,29 +110,31 @@ const optimizerTests = [{
       console.log("Average Roster Value Diff", averageRosterValueDiff)
     }, 3000)
   }
-}, {
-  name: "5 Second Random FD Test Optmiizer V3",
-  description: "",
-  action: () => {
-    const byPosition = generateByPosition(100)
-    const rosterCount = 10
-    const rosters = []
-    const maxCost = 60000
+}, 
+// {
+//   name: "5 Second Random FD Test Optmiizer V3",
+//   description: "",
+//   action: () => {
+//     const byPosition = generateByPosition(100)
+//     const rosterCount = 10
+//     const rosters = []
+//     const maxCost = 60000
     
-    startStopV3(byPosition, rosters, rosterCount, positionsToFill, null, null, (players) => isRosterUnderCost(players, maxCost), maxCost)
+//     startStopV3(byPosition, rosters, rosterCount, positionsToFill, null, null, (players) => isRosterUnderCost(players, maxCost), maxCost)
 
-    setTimeout(() => {
-      stopV3()
-      console.log("TEST STOPPED!")
-      runningTestIdx.value = null
-      testResult.value = ""
+//     setTimeout(() => {
+//       stopV3()
+//       console.log("TEST STOPPED!")
+//       runningTestIdx.value = null
+//       testResult.value = ""
 
-      const averageRosterValueDiff = currentAverageRosterValue.value - firstAverageRosterValue.value
-      firstAverageRosterValue.value = null
-      console.log("Average Roster Value Diff", averageRosterValueDiff)
-    }, 3000)
-  }
-}]
+//       const averageRosterValueDiff = currentAverageRosterValue.value - firstAverageRosterValue.value
+//       firstAverageRosterValue.value = null
+//       console.log("Average Roster Value Diff", averageRosterValueDiff)
+//     }, 3000)
+//   }
+// }
+]
 
 const runningTestIdx = ref(null)
 

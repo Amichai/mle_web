@@ -23,7 +23,8 @@ const namesSortedByExposure = computed(() => {
 
 const tableRows = computed(() => {
   const toReturn = namesSortedByExposure.value.map((name) => {
-    return { ...exposures.value[name], exposure: `${exposures.value[name].count}/${props.rosters.length}`
+    const percentage = exposures.value[name].count / props.rosters.length
+    return { ...exposures.value[name], exposure: `${exposures.value[name].count}/${props.rosters.length} (${(percentage * 100).toFixed(2)}%)`
   }})
 
   return toReturn

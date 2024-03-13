@@ -57,7 +57,7 @@ const selectTab = (tabName) => {
   align-items: flex-start;
   flex-direction: column;
   padding: 0.5rem;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .tab-content {

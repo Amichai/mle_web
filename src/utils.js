@@ -67,9 +67,18 @@ export const getTodaysDate = () => {
 
 export const getCurrentTimeDecimal = () => {
   let now = new Date();
-  let current_time = (now.getHours() - 12) + (now.getMinutes() / 60);
-  current_time = Math.round(current_time * 100) / 100; // rounding to 2 decimal places
-  return current_time;
+  
+  // Convert the time to Eastern Time Zone
+  let easternTime = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false }).split(':');
+  
+  let hours = parseInt(easternTime[0], 10);
+  let minutes = parseInt(easternTime[1], 10);
+  
+  let current_time_decimal = hours + (minutes / 60);
+  
+  current_time_decimal = Math.round(current_time_decimal * 100) / 100;
+  
+  return current_time_decimal;
 }
 
 export const isPlayerLocked = (startTime) => {

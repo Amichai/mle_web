@@ -2,11 +2,11 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import ProjectionsTable from '../components/ProjectionsTable.vue';
 import LineupBuilderTab from '../components/LineupBuilderTab.vue';
+import OptimizerTab from '../components/OptimizerTab.vue';
 import collapse from '@/assets/collapse.png'
-import { nameMapper } from './../nameMapper.js'
 
 
-const currentTab = ref('Tab1')
+const currentTab = ref('Tab3')
 
 const emits = defineEmits(['openPanel', 'selectedSiteChanged', 'selectedSlateChanged'])
 
@@ -74,6 +74,7 @@ const selectedSlateChanged = (newSlate) => {
       <div class="tabs">
         <button v-bind:class="{ active: currentTab === 'Tab1' }" @click="selectTab('Tab1')">Projections</button>
         <button v-bind:class="{ active: currentTab === 'Tab2' }" @click="selectTab('Tab2')">Slates</button>
+        <button v-bind:class="{ active: currentTab === 'Tab3' }" @click="selectTab('Tab3')">Optimizer</button>
       </div>
 
 
@@ -101,6 +102,16 @@ const selectedSlateChanged = (newSlate) => {
         :selectedTab="currentTab"
         :teamData="teamData"
         @slateGotFocus="selectedSlate = $event"
+      />
+    </div>
+    <div v-show="currentTab === 'Tab3'">
+      <OptimizerTab 
+        :id="-1"
+        :index="-1"
+        :availableSlates="availableSlates"
+        :playerData="playerData"
+        :selectedTab="currentTab"
+        :teamData="teamData"
       />
     </div>
   </div>

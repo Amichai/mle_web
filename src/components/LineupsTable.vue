@@ -54,7 +54,7 @@ watch(() => props.rows, (newVal) => {
             {{ `$${cell?.cost}` }}
             </span>
           </div>
-          <div v-else :class="[cellIndex === 0 && 'contest-name']">
+          <div v-else :class="[cellIndex === 0 && columns[0] === 'Contest' && 'contest-name']">
             {{ cell }}
           </div>
         </td>

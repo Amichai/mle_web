@@ -234,7 +234,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
       if(player1Locked !== player2Locked) {
         return false
       }
-      
+
       if(player1Locked && player2Locked) {
         if(set1[i].name !== set2[i].name) {
           return false
@@ -292,7 +292,7 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   }
 
   const appendNewLineups = (newLineups, shouldSort = true) => {
-    if(exposedRosters.length === 0) {
+    if(exposedRosters.length !== _rosterCount) {
       exposedRosters = rosterSet.slice(0, _rosterCount)
     }
 
@@ -380,7 +380,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
 
     const sampleSet = exposedRosters.length > 0 ? exposedRosters : rosterSet
 
-
     for(var i = 0; i < 1000; i += 1) {
       const idx = i % sampleSet.length
       const toImprove = sampleSet[idx]
@@ -425,6 +424,8 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     _rosterCount = rosterCount
     _byPosition = byPosition
 
+    exposedRosters = []
+
     _lockedTeamsRomoved = Object.keys(_byPosition).reduce((acc, key) => {
       const players = _byPosition[key]
       acc[key] = players.filter((row) => !_lockedTeams.includes(row.team))
@@ -447,7 +448,6 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     const toGenerate = rosterCount - startingRostersFiltered.length
     if(toGenerate < 0) {
       console.error("too many rosters found")
-      debugger
       startingRosters = startingRostersFiltered.slice(0, rosterCount)
     }
 

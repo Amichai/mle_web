@@ -48,7 +48,6 @@ const isRosterDifferenceHighlighted = ref(false)
 const rosterCount = ref(10)
 
 watch(() => rosterCount.value, (newVal) => {
-  setItem('rosterCount', newVal)
   constructRosterTable()
 })
 
@@ -196,7 +195,7 @@ const constructRosterTable = () => {
   rosterSet.value.slice(0, rosterCount.value).forEach((roster, index) => {
     const row = rows[index]
     roster.players.forEach((player, playerIndex) => {
-      row[playerIndex] = `${player.name}`
+      row[playerIndex] = player
     })
 
     row[costColumnIndex - 1] = roster.cost
@@ -281,9 +280,8 @@ onMounted(() => {
   contests.value = getItem('contests')
   selectedSlate.value = getItem('selectedSlate')
   tableColumns.value = getItem('tableColumns', [])
-  rosterSet.value = getItem('rosterSet', [])
+  rosterSet.value = ('rosterSet', [])
   maxExposurePercentage.value = getItem('maxExposurePercentage', '1')
-  rosterCount.value = getItem('rosterCount', 10)
 })
 
 const slateSelected = (newVal) => {
@@ -401,6 +399,34 @@ const optimizeHandler = async (evt) => {
   startStopGeneratingRosters(slateData, lockedTeams, rosterSet.value, rosterCount.value, site.value, contestParams)
 }
 
+const copyToClipboardLegacy = (text) => {
+    var textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+    console.log('Text copied to clipboard successfully: ' + text);
+}
+
+const copyRosters = () => {
+  let toWrite = ''
+  for(var i = 0; i < rosterSet.value.length; i += 1) {
+    const roster = rosterSet.value[i]
+    const players = roster.players
+    players.forEach((element) => {
+      const playerId = element.playerId
+      toWrite += site.value === 'fd' ? `"${playerId}:${element.name}",`
+      : `"${playerId}",`
+    });
+    toWrite += `${roster.value.toFixed(2)},`
+    toWrite += `${roster.cost}\n`
+  }
+  toWrite = toWrite.replace(/\r\n/g, '\n');
+  console.log(toWrite)
+  copyToClipboardLegacy(toWrite)
+}
+
 </script>
 
 <template>
@@ -430,6 +456,15 @@ const optimizeHandler = async (evt) => {
             Stop optimizing
           </span>
           <img :src="stopIcon" alt="optimize" width="30">
+        </button>
+      </div>
+
+      <div class="copy-button">
+        <button class="button play-button tooltip" @click="copyRosters">
+          <span class="tooltiptext">
+            Copy rosters
+          </span>
+          <img :src="copyIcon" alt="optimize" width="30">
         </button>
       </div>
     </div>
@@ -480,9 +515,9 @@ const optimizeHandler = async (evt) => {
 }
 
 .header {
-  display: grid;
+  display: flex;
   /* align-items: center; */
-  grid-template-columns: 1fr 1fr 1fr;
+  /* grid-template-columns: 1fr 1fr 1fr; */
   gap: 1rem;
   justify-content: space-between;
 }
@@ -585,5 +620,9 @@ const optimizeHandler = async (evt) => {
 .roster-count-field {
   width: 3rem;
   text-align: center;
+}
+
+.copy-button {
+  align-self: center;
 }
 </style>

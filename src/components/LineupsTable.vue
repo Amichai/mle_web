@@ -107,7 +107,7 @@ table tr:nth-child(odd)
  
   /* Position the tooltip text - see examples below! */
   position: absolute;
-  z-index: 1;
+  z-index: 1000;
 
   top: 1rem;
   left: 0rem;

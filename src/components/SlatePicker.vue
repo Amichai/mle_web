@@ -67,7 +67,8 @@ const emits = defineEmits(['selectedSlateChanged'])
     <img :src="fdlogo" alt="dk logo" height="20" v-show="selectedSlate?.includes('FD')">
     <div v-show="!selectedSlate" style="width: 20px;"></div>
 
-    <select v-model="selectedSlate" placeholder="slate" @change="selectedSlateChanged" :disabled="!props.isEnabled">
+    <select v-model="selectedSlate" placeholder="slate" 
+    @change="selectedSlateChanged" :disabled="!props.isEnabled">
       <option v-for="(slate, index) in availableSlates" :key="index" :value="slate[0]">
         {{ slate[0] }}
       </option>
@@ -98,4 +99,7 @@ option {
   margin-left: 1rem;
 }
 
+select {
+  width: 19.5rem;
+}
 </style>

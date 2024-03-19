@@ -6,7 +6,7 @@ import OptimizerTab from '../components/OptimizerTab.vue';
 import collapse from '@/assets/collapse.png'
 
 
-const currentTab = ref('Tab3')
+const currentTab = ref('Tab1')
 
 const emits = defineEmits(['openPanel', 'selectedSiteChanged', 'selectedSlateChanged'])
 

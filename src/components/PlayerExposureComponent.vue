@@ -12,7 +12,7 @@ const props = defineProps({
 
 const { getLogo } = useLogoProvider()
 
-const columns = ref([ 'Name', 'Salary', 'Positon', 'Exposure', 'Team', 'Start Time', 'Projection'])
+const columns = ref([ 'Name', 'Salary', 'Positon', 'Exposure', 'Team', 'Start Time', 'Projection', 'Value'])
 
 const exposures = ref({})
 const namesSortedByExposure = computed(() => {
@@ -41,6 +41,7 @@ watch(() => props.rosters, (newVal) => {
         acc[name] = {
           name: name,
           projection: player.projection,
+          value: (player.override / player.salary * 100).toFixed(2),
           override: player.override,
           position: player.position,
           team: player.team,
@@ -87,6 +88,7 @@ const isPlayerLocked = (startTime) => {
         <td><component :is="getLogo(row.team)" /> </td>
         <td :class="[isPlayerLocked(row?.startTime) && 'player-locked']">{{ row['startTime'] }}</td>
         <td>{{ row['override'] }}</td>
+        <td>{{ row.value }}</td>
       </tr>
     </tbody>
   </table>

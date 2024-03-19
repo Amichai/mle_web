@@ -39,6 +39,7 @@ const props = defineProps({
 
 const slatePlayerData = ref([])
 const contestParams = ref([])
+const tableRows = ref([])
 
 watch(() => props.selectedTab, (newVal) => {
   stopGeneratingRosters()
@@ -48,6 +49,7 @@ const isRosterDifferenceHighlighted = ref(false)
 const rosterCount = ref(10)
 
 watch(() => rosterCount.value, (newVal) => {
+  setItem('rosterCount', newVal)
   constructRosterTable()
 })
 
@@ -206,6 +208,7 @@ const constructRosterTable = () => {
   tableColumns.value = columnsToSet
 }
 
+
 const areRostersDifferent = (rosters1, rosters2) => {
   if(rosters1.length !== rosters2.length) {
     return true
@@ -252,14 +255,11 @@ watch(() => props.index, (newVal) => {
 
 const emits = defineEmits(['delete', 'gotFocus'])
 
-const contests = ref('')
-
 watch(() => maxExposurePercentage.value, (newVal) => {
   setItem('maxExposurePercentage', newVal)
 })
 
 const tableColumns = ref([])
-const tableRows = ref([])
 
 const site = computed(() => {
   if(!selectedSlate.value) {
@@ -277,11 +277,12 @@ const site = computed(() => {
 onMounted(() => {
   console.log('Mounted', props.id)
   setId(props.id)
-  contests.value = getItem('contests')
   selectedSlate.value = getItem('selectedSlate')
   tableColumns.value = getItem('tableColumns', [])
-  rosterSet.value = ('rosterSet', [])
+  rosterSet.value = getItem('rosterSet', [])
   maxExposurePercentage.value = getItem('maxExposurePercentage', '1')
+  rosterCount.value = getItem('rosterCount', 10)
+  constructRosterTable()
 })
 
 const slateSelected = (newVal) => {
@@ -291,10 +292,6 @@ const slateSelected = (newVal) => {
 
 watch(() => props.id, (newVal) => {
   setId(newVal)
-})
-
-watch(() => contests.value, (newVal) => {
-  setItem('contests', newVal)
 })
 
 const isDataLoaded = computed(() => {
@@ -326,9 +323,11 @@ watch(() => props.availableSlates, async (newVal) => {
 })
 
 watch(() => selectedSlate.value, async (newVal) =>{
-  setItem('selectedSlate', newVal)
-  rosterSet.value = []
-
+  const oldVal = getItem('selectedSlate')
+  if(newVal !== oldVal) {
+    setItem('selectedSlate', newVal)
+    rosterSet.value = []
+  }
 
   if(!newVal) {
     return

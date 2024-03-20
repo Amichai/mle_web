@@ -159,9 +159,6 @@ const formatRows = (rows) => {
       team: row[3],
     }))]
   })
-
-
-
 }
 
 watch(() => props.newsRows, (newVal) => {

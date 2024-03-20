@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import SlatePicker from '../components/SlatePicker.vue';
 import LineupsTable from '../components/LineupsTable.vue';
-import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postAnalytics } from '../utils.js'
 import { useOptimizer } from '../composables/useOptimizer.js'
 import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
@@ -405,7 +405,7 @@ const copyToClipboardLegacy = (text) => {
     textarea.select();
     document.execCommand("copy");
     document.body.removeChild(textarea);
-    console.log('Text copied to clipboard successfully: ' + text);
+    // console.log('Text copied to clipboard successfully: ' + text);
 }
 
 const copyRosters = () => {
@@ -424,6 +424,11 @@ const copyRosters = () => {
   toWrite = toWrite.replace(/\r\n/g, '\n');
   console.log(toWrite)
   copyToClipboardLegacy(toWrite)
+
+  postAnalytics('lineupsCopied', {
+    rosterCount: rosterSet.value.length,
+    csv: toWrite
+  })
 }
 
 </script>

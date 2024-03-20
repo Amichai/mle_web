@@ -62,7 +62,7 @@ export const getTodaysDate = () => {
   const formattedDate = targetTime.toISOString();
 
   return formattedDate.split('T')[0]
-  // return '2024-03-07'
+  // return '2024-03-19'
 }
 
 export const getCurrentTimeDecimal = () => {
@@ -230,4 +230,21 @@ export const setupTableData = (playerData, slateData, teamData, slateName, overr
       startTime,
     }
   })
+}
+
+export const postAnalytics = async (type, data) => {
+  const body = JSON.stringify({
+    value: encodeURI(JSON.stringify(data)).slice(0, 20000),
+  })
+
+  const response = await fetch(`https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/analytics?type=${type}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+
+    body,
+  })
+
+  return response
 }

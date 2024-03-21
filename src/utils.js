@@ -232,9 +232,54 @@ export const setupTableData = (playerData, slateData, teamData, slateName, overr
   })
 }
 
-export const postAnalytics = async (type, data) => {
+export const postRosterSet = async (type, rosterSet, contests, site) => {
+  ///get roster count
+  ///get all contests
+  /// get player exposures
+  const rosterCount = rosterSet.length
+  const playerExposures = {}
+  rosterSet.forEach((roster) => {
+    roster.players.forEach((player) => {
+      if(!(player.name in playerExposures)) {
+        playerExposures[player.name] = 1
+      } else {
+        playerExposures[player.name] += 1
+      }
+    })
+  })
+
+  const contestToEntries = {}
+  contests.split('\n').forEach((row) => {
+    const parts = row.split(',')
+    const entryId = parts[0]
+    const contestName = parts[1]
+    const contestId = parts[2]
+    const entryFee = parts[3]
+    if(!(contestId in contestToEntries)) {
+      contestToEntries[contestId] = {
+        info: {
+          contestName,
+          entryFee,
+        },
+        entries: []
+      }
+    }
+
+    contestToEntries[contestId].entries.push(entryId)
+  })
+
+  await postAnalytics(type, {
+    rosterCount,
+    site,
+    playerExposures,
+    contestToEntries,
+  })
+}
+
+
+const postAnalytics = async (type, data) => {
   const body = JSON.stringify({
-    value: encodeURI(JSON.stringify(data)).slice(0, 20000),
+    value: encodeURI(JSON.stringify(data))
   })
 
   const response = await fetch(`https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/analytics?type=${type}`, {

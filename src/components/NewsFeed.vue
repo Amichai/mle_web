@@ -78,17 +78,6 @@ const formatTime = (date) => {
     return strTime;
 }
 
-const isToday = (timeInSeconds) => {
-  const today = new Date();
-    // Create a date object for the given time
-    const dateToCheck = new Date(timeInSeconds * 1000); // Convert seconds to milliseconds
-
-    // Check if the year, month, and day are the same
-    return today.getFullYear() === dateToCheck.getFullYear() &&
-           today.getMonth() === dateToCheck.getMonth() &&
-           today.getDate() === dateToCheck.getDate();
-}
-
 const formatRows = (rows) => {
   newsRowsLocal.value = []
   rows.forEach((row) => {
@@ -118,10 +107,6 @@ const formatRows = (rows) => {
     const projections = JSON.parse(row.substring(startIdx + 2, row.length))
 
     const timeString = new Date(parseFloat(time) * 1000)
-
-    if(!isToday(time)) {
-      return
-    }
 
     newsRowsLocal.value.push({
       text: `${formatTime(timeString)}`

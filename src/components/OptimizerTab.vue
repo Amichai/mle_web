@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import SlatePicker from '../components/SlatePicker.vue';
 import LineupsTable from '../components/LineupsTable.vue';
-import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postAnalytics } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postRosterSet } from '../utils.js'
 import { useOptimizer } from '../composables/useOptimizer.js'
 import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
@@ -425,10 +425,7 @@ const copyRosters = () => {
   console.log(toWrite)
   copyToClipboardLegacy(toWrite)
 
-  postAnalytics('lineupsCopied', {
-    rosterCount: rosterSet.value.length,
-    csv: toWrite
-  })
+  postRosterSet('lineupsCopied', rosterSet.value, '', site.value)
 }
 
 </script>

@@ -29,13 +29,14 @@ const queryProjectionsAPI = async () => {
     console.log('new data version detected: ', newDataVersion)
     dataVersion = newDataVersion
     localStorage.setItem(`data-version`, newDataVersion)
-    const result = await queryData('https://amichai-dfs-data.s3.amazonaws.com/news_feed.txt', true)
+    const formattedDate = getTodaysDate()
+
+    const result = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/news_feed_${formattedDate}`, true)
     localStorage.setItem('breaking-news', result)
     const rows = result.split('\n');
     console.log(rows);
     breakingNewsRows.value = rows
 
-    const formattedDate = getTodaysDate()
     const data1 = await queryData(`https://amichai-dfs-data.s3.amazonaws.com/player_data_${formattedDate}`, true)
     playerData.value = splitData(data1, 1)
   }

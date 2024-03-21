@@ -5,7 +5,7 @@ import SlatePicker from '../components/SlatePicker.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
 import ExposureSlider from '../components/ExposureSlider.vue';
-import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postAnalytics, postRosterSet } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postRosterSet } from '../utils.js'
 import { useOptimizer } from '../composables/useOptimizer.js'
 import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
@@ -469,11 +469,6 @@ const downloadFile = (evt) => {
   window.URL.revokeObjectURL(url);
 
   postRosterSet('lineupsDownloaded', rosterSet.value, contests.value, site.value)
-
-  // postAnalytics('lineupsDownloaded', {
-  //   rosterCount: rosterSet.value.length,
-  //   csv: toWrite
-  // })
 }
 
 const updateRosterSetPlayerProjections = () => {
@@ -703,7 +698,7 @@ const deleteSlate = (evt) => {
 .header {
   display: grid;
   /* align-items: center; */
-  grid-template-columns: 10rem 1fr 10rem 10rem;
+  grid-template-columns: 3rem 1fr 10rem 10rem;
   gap: 1rem;
   justify-content: space-between;
 }

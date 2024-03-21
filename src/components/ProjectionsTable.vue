@@ -3,7 +3,8 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import SlatePicker from '../components/SlatePicker.vue';
 import resetIcon from '@/assets/reset.png'
 import uploadIcon from '@/assets/upload.png'
-import { convertTimeStringToDecimal, getCurrentTimeDecimal, setupTableData } from '../utils.js'
+import downloadFileIcon from '@/assets/downloadFile.png'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, setupTableData, postAnalytics } from '../utils.js'
 import { useLogoProvider } from '../composables/useLogoProvider.js'
 import { useProjectionsParser } from '../composables/useProjectionsParser.js'
 import { nameMapper } from './../nameMapper.js'
@@ -170,7 +171,26 @@ const projectionFileUploaded = (evt) => {
     }
   }
   reader.readAsText(file)
+}
 
+const downloadProjections = () => {
+  const toWrite = 'Name,Projection,Override\n' + slateData.value.map((playerRow) => {
+    return `${playerRow.name},${playerRow.projection},${playerRow.override}`
+  }).join('\n')
+
+  const blob = new Blob([toWrite], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.setAttribute('download', `MLE Projections ${selectedSlate.value}.csv`);
+  a.setAttribute('href', url);
+
+  a.click();
+  window.URL.revokeObjectURL(url);
+
+  postAnalytics('download-projections', {
+    slate: selectedSlate.value,
+  })
 }
 </script>
 
@@ -199,6 +219,13 @@ const projectionFileUploaded = (evt) => {
       @change="projectionFileUploaded"
       id="formFileProjections">
     </div>
+
+    <button class="button upload-button tooltip" @click="downloadProjections">
+        <img :src="downloadFileIcon" alt="download projections" width="40">
+        <span class="tooltiptext">
+          Download projections
+        </span>
+      </button>
   </div>
   <table>
     <thead>
@@ -347,5 +374,9 @@ table tr.override-row:nth-child(even)
 .reset-row {
   border: none;
   border-radius: 1rem;
+}
+
+div {
+  line-height: 1rem;
 }
 </style>

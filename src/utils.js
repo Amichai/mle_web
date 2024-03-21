@@ -277,9 +277,15 @@ export const postRosterSet = async (type, rosterSet, contests, site) => {
 }
 
 
-const postAnalytics = async (type, data) => {
+export const postAnalytics = async (type, data) => {
+  const date = getTodaysDate()
+  const time = getCurrentTimeDecimal()
   const body = JSON.stringify({
-    value: encodeURI(JSON.stringify(data))
+    value: encodeURI(JSON.stringify({
+      ...data,
+      date,
+      time,
+    }))
   })
 
   const response = await fetch(`https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/analytics?type=${type}`, {

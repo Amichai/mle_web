@@ -37,3 +37,9 @@ Done:
  - persist settings
  - diff the player statuses so I can mark that update
  - Discord for feedback etc
+
+ -----
+ 
+ `amplify env add`
+ `amplify publish`
+ `amplify env checkout dev`

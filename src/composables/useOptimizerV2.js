@@ -1,5 +1,6 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { l, dedupLineups, cloneRoster, getRandomInt, rand} from './optimizerUtil.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal } from '../utils.js'
 
 export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
   let rosterSet = []
@@ -126,6 +127,19 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     }
 
     if (toReturn.length) {
+      
+      toReturn.forEach((roster) => {
+        if(roster.players.length !== 8) {
+          return
+        }
+
+        try {
+          optimizeRosterForLateSwapDK(roster.players)
+        } catch (e) {
+          debugger
+        }
+      })
+
       rostersUpdatedCallback(toReturn)
 
       exposedRosters = topRostersToReturn
@@ -481,6 +495,61 @@ export function useOptimizerV2(rostersUpdatedCallback, maxPlayerExposure) {
     ///Fill up our roster set with know rosters + random rosters
     /// generate new rosters and consider swaps into the roster set that increases the roster set value
 
+  }
+
+  const positionsMapper = {"PG": ["PG", "G", "UTIL"], "SG": ["SG", "G", "UTIL"], "SF": ["SF", "F", "UTIL"], "PF": ["PF", "F", "UTIL"], "C": ["C", "UTIL"]}
+
+  const considerLateSwap = (idx1, idx2, players, currentTime) => {
+    const player1 = players[idx1]
+    const player2 = players[idx2]
+    const player1StartTime = convertTimeStringToDecimal(player1.startTime) 
+    const player2StartTime = convertTimeStringToDecimal(player2.startTime) 
+    const isPlayer1Locked = player1StartTime < currentTime
+    const isPlayer2Locked = player2StartTime < currentTime
+
+    if (isPlayer1Locked || isPlayer2Locked) {
+        return;
+    }
+    
+    if (player1StartTime > player2StartTime) {
+        // make sure the swap is valid!
+        const player2Positions = player2.position.split('/');
+        const allPositions = []
+        player2Positions.forEach((position) => {
+          const mappedPositions = positionsMapper[position]
+          mappedPositions.forEach((mappedPosition) => {
+            if(!allPositions.includes(mappedPosition)) {
+              allPositions.push(mappedPosition)
+            }
+          })
+        })
+        
+        if (allPositions.some(p => p === _positionsToFill[idx1])) {
+            // execute swap
+            players[idx2] = player1;
+            players[idx1] = player2;
+        }
+    }
+  }
+
+  const optimizeRosterForLateSwapDK = (players) => {
+    const currentTime = getCurrentTimeDecimal()
+    considerLateSwap(0, 5, players, currentTime)
+    considerLateSwap(1, 5, players, currentTime)
+    considerLateSwap(2, 6, players, currentTime)
+    considerLateSwap(3, 6, players, currentTime)
+    considerLateSwap(0, 7, players, currentTime)
+    considerLateSwap(1, 7, players, currentTime)
+    considerLateSwap(2, 7, players, currentTime)
+    considerLateSwap(3, 7, players, currentTime)
+    considerLateSwap(4, 7, players, currentTime)
+    considerLateSwap(5, 7, players, currentTime)
+    considerLateSwap(6, 7, players, currentTime)
+    considerLateSwap(0, 5, players, currentTime)
+    considerLateSwap(1, 5, players, currentTime)
+    considerLateSwap(2, 6, players, currentTime)
+    considerLateSwap(3, 6, players, currentTime)
+    considerLateSwap(0, 7, players, currentTime)
   }
 
   return { startStopGeneratingRosters, isGeneratingRosters, stopGeneratingRosters }

@@ -169,6 +169,10 @@ const projectionFileUploaded = (evt) => {
         overrideChanged(playerRow)
       }
     }
+
+    postAnalytics('upload-projections', {
+      slate: selectedSlate.value,
+    })
   }
   reader.readAsText(file)
 }

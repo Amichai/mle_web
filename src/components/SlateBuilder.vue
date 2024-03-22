@@ -5,7 +5,7 @@ import SlatePicker from '../components/SlatePicker.vue';
 import LineupsTable from '../components/LineupsTable.vue';
 import PlayerExposureComponent from '../components/PlayerExposureComponent.vue';
 import ExposureSlider from '../components/ExposureSlider.vue';
-import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postRosterSet } from '../utils.js'
+import { convertTimeStringToDecimal, getCurrentTimeDecimal, loadPlayerDataForSlate, setupTableData, postRosterSet, postAnalytics } from '../utils.js'
 import { useOptimizer } from '../composables/useOptimizer.js'
 import { useLocalStorage } from '../composables/useLocalStorage.js'
 import playIcon from '@/assets/play.png'
@@ -468,7 +468,7 @@ const downloadFile = (evt) => {
   a.click();
   window.URL.revokeObjectURL(url);
 
-  postRosterSet('lineupsDownloaded', rosterSet.value, contests.value, site.value)
+  postRosterSet('lineupsDownloaded', rosterSet.value, contests.value, site.value, selectedSlate.value)
 }
 
 const updateRosterSetPlayerProjections = () => {
@@ -547,6 +547,11 @@ const uploadSlateFile = (evt) => {
       setItem('tableRows', filteredRows.value)
       
       contests.value = Papa.unparse(filteredRows.value)
+
+      postAnalytics('upload-slate-file', {
+        slate: selectedSlate.value,
+        contestCount: filteredRows.value.length - 1
+      })
     };
   })();
 

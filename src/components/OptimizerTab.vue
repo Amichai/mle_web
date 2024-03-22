@@ -425,7 +425,7 @@ const copyRosters = () => {
   console.log(toWrite)
   copyToClipboardLegacy(toWrite)
 
-  postRosterSet('lineupsCopied', rosterSet.value, '', site.value)
+  postRosterSet('lineupsCopied', rosterSet.value, '', site.value, selectedSlate.value)
 }
 
 </script>

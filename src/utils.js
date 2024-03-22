@@ -232,7 +232,7 @@ export const setupTableData = (playerData, slateData, teamData, slateName, overr
   })
 }
 
-export const postRosterSet = async (type, rosterSet, contests, site) => {
+export const postRosterSet = async (type, rosterSet, contests, site, slate) => {
   ///get roster count
   ///get all contests
   /// get player exposures
@@ -273,6 +273,7 @@ export const postRosterSet = async (type, rosterSet, contests, site) => {
     site,
     playerExposures,
     contestToEntries,
+    slate: slate ?? '',
   })
 }
 
@@ -288,7 +289,7 @@ export const postAnalytics = async (type, data) => {
     }))
   })
 
-  const response = await fetch(`https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/analytics?type=${type}`, {
+  const response = await fetch(`https://icw7yaef4f.execute-api.us-east-1.amazonaws.com/dev/analytics_v2?type=${type}&date=${date}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

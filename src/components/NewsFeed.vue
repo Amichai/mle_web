@@ -109,7 +109,8 @@ const formatRows = (rows) => {
     const timeString = new Date(parseFloat(time) * 1000)
 
     newsRowsLocal.value.push({
-      text: `${formatTime(timeString)}`
+      text: `${formatTime(timeString)}`,
+      isTimeString: true
     })
     projections.forEach((projection) => {
       const name = projection[0]
@@ -215,7 +216,7 @@ const refreshProjections = () => {
     </div>
     <div class="feed" id="feed">
       <div v-for="(row, idx) in newsRowsFiltered" :key="idx">
-        <p :class="[row.diff > 1 && 'highlight-1', row.diff < -1 && 'highlight-2', !row.diff && 'bold-text']">
+        <p :class="[row.diff > 1 && 'highlight-1', row.diff < -1 && 'highlight-2', !row.diff && 'bold-text', row.isTimeString && 'underline-text']">
           {{ row.text }}
         </p>
       </div>
@@ -290,6 +291,9 @@ const refreshProjections = () => {
 
 .bold-text {
   font-weight: bold;
+}
+
+.underline-text {
   text-decoration: underline;
 }
 
